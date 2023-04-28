@@ -37,20 +37,3 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
      unittest.main()
-
-'''
-domain-file 
-Shodan API
-domain-data-file
-
-from unittest.mock import patch, mock_open
-with patch("builtins.open", mock_open(read_data="data")) as mock_file:
-    assert open("path/to/open").read() == "data"
-mock_file.assert_called_with("path/to/open")
-
-shdn.Shodan.assert_called_once_with()
-
-
-api = Shodan('77sVOGfVkNmZuvO6ZtoIFlgWJI1eEhDV')
-print(api.dns.domain_info(domain='google.com', history=False, type=None, page=1))
-'''
