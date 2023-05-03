@@ -1,6 +1,7 @@
 import unittest
 import domain_lookup
 import shodan
+
 from unittest.mock import (
     patch,
     MagicMock,
@@ -32,6 +33,14 @@ class Test(unittest.TestCase):
             page=1
         )
         
+    @patch("builtins.open", new_callable=mock_open, read_data="dominio1")
+    def test_read_file(self, mockFile):
+        
+        domainList = domain_lookup.getDomainsFromFile()
+
+        self.assertEqual(domainList, ["dominio1"])
+        mockFile.assert_called_once_with("./data/domain_list","r")
+
 
 if __name__ == "__main__":
      unittest.main()

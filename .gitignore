@@ -3,3 +3,5 @@ shodan_api_key
 data/
 
 __pycache__/
+
+*.swp

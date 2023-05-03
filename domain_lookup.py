@@ -1,4 +1,10 @@
 import shodan
+import os
+
+def getDomainsFromFile():
+    with open("./data/domain_list",'r') as domains_file:
+        domain_list = domains_file.read()
+        return domain_list.split(",")
 
 def getShodanInfoOf(domain: str):
     with open("shodan_api_key") as f:
