@@ -31,8 +31,6 @@ class Test(unittest.TestCase):
             type=None,
             page=1
         )
-
-    # continue with: def test_saver(self):
         
 
 if __name__ == "__main__":
