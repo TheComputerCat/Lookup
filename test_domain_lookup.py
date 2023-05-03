@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
         shodan.Shodan = MagicMock()
         shodan.Shodan().dns.domain_info = MagicMock()
         
-        _ = domain_lookup.getShodanInfoFrom("example.com")
+        _ = domain_lookup.getShodanInfoOf("example.com")
 
         mockFile.assert_called_once_with("shodan_api_key")
         shodan.Shodan.assert_called_with("798djfhj2208FFFEEDC4")
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         shodan.Shodan = MagicMock()
         shodan.Shodan().dns.domain_info = MagicMock()
         
-        _ = domain_lookup.getShodanInfoFrom("example.com")
+        _ = domain_lookup.getShodanInfoOf("example.com")
         
         shodan.Shodan().dns.domain_info.assert_called_once_with(
             domain="example.com",

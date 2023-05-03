@@ -1,5 +1,4 @@
 import shodan
-import os
 
 def getDomainsFromFile():
     with open("./data/domain_list",'r') as domains_file:
