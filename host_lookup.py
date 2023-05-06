@@ -28,10 +28,22 @@ def getShodanApi(keyFilePath:str):
     shodan_key = open(keyFilePath, 'r').read()
     return shodan.Shodan(shodan_key, 'r')
 
+def getIPList(IPListFilePath):
+    return open(IPListFilePath, 'r').read().splitlines()
+
+def getDirectoryPathOf(filePath: str):
+    return '/'.join(filePath.split("/")[0:-1])
+
+def getIPFilePath(IP: str, IPListFilePath: str):
+    path = getDirectoryPathOf(IPListFilePath)
+    return path+'/ip_raw_data/'+IP
+
 def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
-    IPList = open(IPListFilePath, 'r').read().splitlines()
+    IPList = getIPList(IPListFilePath)
     for IP in IPList:
-        api.host(IP)
+        IPFile = open(getIPFilePath(IP, IPListFilePath))
+        IPFile.write(api.host(IP))
+
     
 

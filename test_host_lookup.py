@@ -108,7 +108,7 @@ class TestShodan(unittest.TestCase):
         ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    def test_saveShodanInfoOf_reads_the_ip_list(self, mockFile):
+    def test_saveShodanInfoOf_queries_the_ip_list(self, mockFile):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
@@ -117,5 +117,30 @@ class TestShodan(unittest.TestCase):
             call().host('8.8.8.8'),
             call().host('0.0.0.0'),
         ])
+
+    @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
+    def test_saveShodanInfoOf_opens_ip_file_for_each_ip(self, mockFile):
+        shodan.Shodan = Mock()
+
+        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+
+        mockFile.assert_has_calls([
+            call("data/test_data/ip_raw_data/0.0.0.0"),
+        ])
+        mockFile.assert_has_calls([
+            call("data/test_data/ip_raw_data/8.8.8.8"),
+        ])
+
+    @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
+    def test_saveShodanInfoOf_opens_ip_files_depending_on_IP_list_path(self, mockFile):
+        shodan.Shodan = Mock()
+
+        path = "hello/bye/"
+        _ = host_lookup.saveShodanInfoOf(path+"ip_list", "data/test_data/shodan_api_key")
+
+        mockFile.assert_has_calls([
+            call(path+"ip_raw_data/0.0.0.0"),
+        ])
+
 if __name__ == "__main__":
     unittest.main()
