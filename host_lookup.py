@@ -6,11 +6,19 @@ import subprocess
 def getAddressList():
     with open("./data/ip_list", "r") as f:
         addresses = f.read()
-    return list(set([address for address in addresses.split("\n") if address != ""]))
+    
+    
+    
+    allAddresses = [address for address in addresses.split("\n") if address != ""]
+    return list(dict.fromkeys(allAddresses))
 
 
 def getNmapInfoOf(address: str, isIPv6: bool):
-    command = ["nmap", "-sT", "-sU", "-verbose", address]
+    if isIPv6:
+        command = ["nmap", "-sT", "-sU", "-verbose", "-6", address]
+    else:
+        command = ["nmap", "-sT", "-sU", "-verbose", address]
+    
     result = subprocess.run(command, capture_output=True, text=True)
 
     return result
