@@ -1,3 +1,5 @@
+import builtins
+
 import host_lookup
 import unittest
 import shodan
@@ -5,6 +7,8 @@ from unittest.mock import (
     patch,
     MagicMock,
     mock_open,
+    Mock,
+    call,
 )
 
 class Test(unittest.TestCase):
@@ -82,6 +86,29 @@ class Test(unittest.TestCase):
 
         self.assertEqual(addresses, ["8.8.8.8"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
+
+class TestShodan(unittest.TestCase):
+    @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
+    def test_saveShodanInfoOf_creates_an_api_instance(self, mockFile):
+        shodan.Shodan = MagicMock()
+
+        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+
+        shodan.Shodan.assert_has_calls([call("798djfhj2208FFFEEDC4", "r")])
+
+    @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
+    def test_saveShodanInfoOf_reads_the_ip_list(self, mockFile):
+        shodan.Shodan = MagicMock()
+
+        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+
+        self.assertEqual(mockFile.call_count, 2)
+        shodan.Shodan.assert_has_calls([
+            call("798djfhj2208FFFEEDC4", "r"),
+        ])
+        mockFile.assert_has_calls([
+            call("data/test_data/ip_list", "r"),
+        ])
 
 
 if __name__ == "__main__":
