@@ -30,5 +30,8 @@ def getShodanApi(keyFilePath:str):
 
 def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
-    IPList = open(IPListFilePath, 'r').read()
+    IPList = open(IPListFilePath, 'r').read().splitlines()
+    for IP in IPList:
+        api.host(IP)
+    
 
