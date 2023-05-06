@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
 class TestShodan(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
     def test_saveShodanInfoOf_creates_an_api_instance(self, mockFile):
-        shodan.Shodan = MagicMock()
+        shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
 
@@ -98,7 +98,7 @@ class TestShodan(unittest.TestCase):
 
     @patch("builtins.open", new_callable=mock_open)
     def test_saveShodanInfoOf_reads_the_ip_list(self, mockFile):
-        shodan.Shodan = MagicMock()
+        shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
 
@@ -106,7 +106,6 @@ class TestShodan(unittest.TestCase):
         mockFile.assert_has_calls([
             call("data/test_data/ip_list", "r"),
         ])
-
 
 if __name__ == "__main__":
     unittest.main()
