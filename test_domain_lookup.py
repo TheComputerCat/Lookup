@@ -1,6 +1,7 @@
 import unittest
 import domain_lookup
 import shodan
+import os
 
 from unittest.mock import (
     patch,
@@ -34,13 +35,39 @@ class Test(unittest.TestCase):
         )
         
     @patch("builtins.open", new_callable=mock_open, read_data="dominio1")
-    def test_read_file(self, mockFile):
+    def test_read_file_single(self, mockFile):
         
         domainList = domain_lookup.getDomainsFromFile()
 
         self.assertEqual(domainList, ["dominio1"])
         mockFile.assert_called_once_with("./data/domain_list","r")
 
+    @patch("builtins.open", new_callable=mock_open, read_data="dominio1,dominio2,dominio3")
+    def test_read_file_many(self, mockFile):
+        
+        domainList = domain_lookup.getDomainsFromFile()
+
+        self.assertEqual(domainList, ["dominio1","dominio2","dominio3"])
+        mockFile.assert_called_once_with("./data/domain_list","r")
+
+    @patch("domain_lookup.getShodanInfoOf", return_value="\{ip : 123456\}")
+    def test_save_domain_info(self, mockGetInfo):
+
+        domainName = "dominio1"
+        targetDirectory = "./data/domain_raw_data/"
+        relativePathOfNewFile = targetDirectory+domainName+".txt"
+        domain_lookup.saveDomainInfo(domainName)
+
+        numberOfFilesCreated = len(os.listdir(targetDirectory))
+
+        self.assertGreater(numberOfFilesCreated,0)
+
+        os.remove(relativePathOfNewFile)
+    
+            
+        mockGetInfo.assert_called_once_with(
+            domainName
+        )
 
 if __name__ == "__main__":
      unittest.main()
