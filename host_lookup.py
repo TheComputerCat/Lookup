@@ -25,11 +25,16 @@ def getNmapInfoOf(address: str, isIPv6: bool):
     return result
 
 def getShodanApi(keyFilePath:str):
-    shodan_key = open(keyFilePath, 'r').read()
-    return shodan.Shodan(shodan_key, 'r')
+    shodan_key = open(keyFilePath, 'r')
+    api = shodan.Shodan(shodan_key.read())
+    shodan_key.close()
+    return api
 
 def getIPList(IPListFilePath):
-    return open(IPListFilePath, 'r').read().splitlines()
+    ipListFile = open(IPListFilePath, 'r')
+    ipList = ipListFile.read().splitlines()
+    ipListFile.close()
+    return ipList
 
 def getDirectoryPathOf(filePath: str):
     return '/'.join(filePath.split("/")[0:-1])
@@ -42,8 +47,12 @@ def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
     IPList = getIPList(IPListFilePath)
     for IP in IPList:
-        IPFile = open(getIPFilePath(IP, IPListFilePath))
-        IPFile.write(api.host(IP))
+        IPFile = open(getIPFilePath(IP, IPListFilePath), 'w')
+        try:
+            result = str(api.host(IP))
+        except Exception as e:
+            result = str(e)
+        IPFile.write(result)
 
     
 
