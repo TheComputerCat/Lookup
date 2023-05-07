@@ -1,5 +1,3 @@
-import builtins
-
 import host_lookup
 import unittest
 import shodan
@@ -11,7 +9,7 @@ from unittest.mock import (
     call,
 )
 
-class Test(unittest.TestCase):
+class TestNmap(unittest.TestCase):
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv4(self, runMock):
         host_lookup.getNmapInfoOf("8.8.8.8", False)
@@ -45,6 +43,7 @@ class Test(unittest.TestCase):
             text=True
         )
 
+class TestReadAddressList(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="")
     def test_read_empty_ip_list_file(self, mockFile):
         addresses = host_lookup.getAddressList()
