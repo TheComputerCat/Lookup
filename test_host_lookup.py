@@ -44,6 +44,37 @@ class TestNmap(unittest.TestCase):
             ),
         ])
 
+    @patch("builtins.open", new_callable=mock_open, read_data="")
+    def test_call_saveNmapInfo(self, mockFile):
+        with patch("host_lookup.getAddressList", MagicMock(return_value=["8.8.8.8"])):
+            res = {
+                "tcp": {
+                    "stdout": "",
+                    "stderr": "",
+                },
+                "udp": {
+                    "stdout": "",
+                    "stderr": "",
+                },
+            }
+            with patch("host_lookup.getNmapInfoOf", new=MagicMock(return_value=res)) as getNmapInfoMock:
+                host_lookup.saveNmapInfo()
+
+                getNmapInfoMock.assert_has_calls([
+                    call(
+                        "8.8.8.8",
+                        False
+                    )
+                ])
+                mockFile.assert_has_calls([
+                    call(
+                        "./data/raw_nmap_data/8.8.8.8", "w"
+                    ).write(str(res)),
+                    call(
+                        "./data/raw_nmap_data/8.8.8.8", "w"
+                    ).close(),
+                ])
+
 class TestReadAddressList(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="")
     def test_read_empty_ip_list_file(self, mockFile):

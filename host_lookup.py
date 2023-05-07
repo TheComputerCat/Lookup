@@ -38,6 +38,18 @@ def getNmapInfoOf(address: str, isIPv6: bool):
         },
     }
 
+def saveNmapInfo():
+    IPList = getAddressList()
+    for address in IPList:
+        IPFile = open("./data/raw_nmap_data/{}".format(address), "w")
+        try:
+            result = str(getNmapInfoOf(address, ":" in address))
+        except Exception as e:
+            result = str(e)
+
+        IPFile.write(result)
+        IPFile.close()
+
 def getShodanApi(keyFilePath:str):
     shodan_key = open(keyFilePath, 'r')
     api = shodan.Shodan(shodan_key.read())
@@ -67,3 +79,19 @@ def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
         except Exception as e:
             result = str(e)
         IPFile.write(result)
+        IPFile.close()
+
+if __name__ == "__main__":
+    import sys
+    
+    try:
+        args = sys.argv[1:]
+
+        if args[0] == "shodan":
+            saveShodanInfoOf("./data/ip_list", "./shodan_api_key")
+        elif args[0] == "nmap":
+            pass
+    except:
+        print("Elige una opción entre 'nmap' y 'shodan'.")
+        print("Ejemplo: python host_lookup.py shodan")
+        print("Para usar la opción 'nmap' se requieren privilegios de superusuario.")
