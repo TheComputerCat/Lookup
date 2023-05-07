@@ -14,34 +14,35 @@ class TestNmap(unittest.TestCase):
     def test_call_nmap_command_with_ipv4(self, runMock):
         host_lookup.getNmapInfoOf("8.8.8.8", False)
 
-        command = ["nmap", "-sT", "-sU", "-verbose", "8.8.8.8"]
-        runMock.assert_called_once_with(
-            command,
-            capture_output=True,
-            text=True
-        )
+        runMock.assert_has_calls([
+            call(
+                ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "8.8.8.8"],
+                capture_output=True,
+                text=True
+            ),
+            call(
+                ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "8.8.8.8"],
+                capture_output=True,
+                text=True
+            ),
+        ])
     
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv6(self, runMock):
         host_lookup.getNmapInfoOf("2001:0db8:85a3:0000:0000:8a2e:0370:7334", True)
 
-        command = ["nmap", "-sT", "-sU", "-verbose", "-6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"]
-        runMock.assert_called_once_with(
-            command,
-            capture_output=True,
-            text=True
-        )
-    
-    @patch("subprocess.run")
-    def test_call_nmap_command_with_ipv6(self, runMock):
-        host_lookup.getNmapInfoOf("2345:0425:2CA1:0000:0000:0567:5673:23b5", True)
-
-        command = ["nmap", "-sT", "-sU", "-verbose", "-6", "2345:0425:2CA1:0000:0000:0567:5673:23b5"]
-        runMock.assert_called_once_with(
-            command,
-            capture_output=True,
-            text=True
-        )
+        runMock.assert_has_calls([
+            call(
+                ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "-6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"],
+                capture_output=True,
+                text=True
+            ),
+            call(
+                ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "-6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"],
+                capture_output=True,
+                text=True
+            ),
+        ])
 
 class TestReadAddressList(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="")

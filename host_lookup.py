@@ -9,15 +9,37 @@ def getAddressList():
     return list(dict.fromkeys(allAddresses))
 
 
-def getNmapInfoOf(address: str, isIPv6: bool):
+def getNmapCommand(address: str, isIPv6: bool, tcp=True):
+    TCPCommand = ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
+    UDPCommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX"]
     if isIPv6:
-        command = ["nmap", "-sT", "-sU", "-verbose", "-6", address]
+        TCPCommand += ["-6", address]
+        UDPCommand += ["-6", address]
     else:
-        command = ["nmap", "-sT", "-sU", "-verbose", address]
+        TCPCommand += [address]
+        UDPCommand += [address]
     
-    result = subprocess.run(command, capture_output=True, text=True)
+    if tcp:
+        return TCPCommand
+    return UDPCommand
 
-    return result
+def getNmapInfoOf(address: str, isIPv6: bool):
+    TCPCommand = getNmapCommand(address, isIPv6, tcp=True)
+    UDPCommand = getNmapCommand(address, isIPv6, tcp=False)
+    
+    TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
+    UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
+
+    return {
+        "tcp": {
+            "stdout": TCPResult.stdout,
+            "stderr": TCPResult.stderr,
+        },
+        "udp": {
+            "stdout": UDPResult.stdout,
+            "stderr": UDPResult.stderr,
+        },
+    }
 
 def getShodanApi(keyFilePath:str):
     shodan_key = open(keyFilePath, 'r')
@@ -48,6 +70,3 @@ def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
         except Exception as e:
             result = str(e)
         IPFile.write(result)
-
-    
-
