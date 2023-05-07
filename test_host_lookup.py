@@ -1,6 +1,7 @@
 import host_lookup
 import unittest
 import shodan
+import time
 from unittest.mock import (
     patch,
     MagicMock,
@@ -10,6 +11,8 @@ from unittest.mock import (
 )
 
 class TestNmap(unittest.TestCase):
+    time.sleep = MagicMock()
+
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv4(self, runMock):
         host_lookup.getNmapInfoOf("8.8.8.8", False)
@@ -76,6 +79,8 @@ class TestNmap(unittest.TestCase):
                 ])
 
 class TestReadAddressList(unittest.TestCase):
+    time.sleep = MagicMock()
+
     @patch("builtins.open", new_callable=mock_open, read_data="")
     def test_read_empty_ip_list_file(self, mockFile):
         addresses = host_lookup.getAddressList()
@@ -119,6 +124,8 @@ class TestReadAddressList(unittest.TestCase):
         mockFile.assert_called_once_with("./data/ip_list", "r")
 
 class TestShodan(unittest.TestCase):
+    time.sleep = MagicMock()
+
     @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
     def test_saveShodanInfoOf_creates_an_api_instance(self, mockFile):
         shodan.Shodan = Mock()

@@ -1,5 +1,5 @@
 import shodan
-from random import randint
+import random
 import time
 from json import loads
 
@@ -35,4 +35,4 @@ def getAllRawData():
     allDomains = getDomainsList()
     for domain in allDomains:
         saveDomainInfo(domain)
-        time.sleep(randint(5,10))
+        time.sleep(random.uniform(5,10))

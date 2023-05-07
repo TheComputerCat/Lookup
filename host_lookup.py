@@ -1,5 +1,7 @@
+import random
 import subprocess
 import shodan
+import time
 
 def getAddressList():
     with open("./data/ip_list", "r") as f:
@@ -49,6 +51,7 @@ def saveNmapInfo():
 
         IPFile.write(result)
         IPFile.close()
+        random.uniform(5,10)
 
 def getShodanApi(keyFilePath:str):
     shodan_key = open(keyFilePath, 'r')
@@ -80,6 +83,7 @@ def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
             result = str(e)
         IPFile.write(result)
         IPFile.close()
+        time.sleep(random.uniform(5, 10))
 
 if __name__ == "__main__":
     import sys
@@ -90,7 +94,7 @@ if __name__ == "__main__":
         if args[0] == "shodan":
             saveShodanInfoOf("./data/ip_list", "./shodan_api_key")
         elif args[0] == "nmap":
-            pass
+            saveNmapInfo
     except:
         print("Elige una opción entre 'nmap' y 'shodan'.")
         print("Ejemplo: python host_lookup.py shodan")
