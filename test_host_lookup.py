@@ -87,11 +87,11 @@ class Test(unittest.TestCase):
         self.assertEqual(addresses, ["8.8.8.8"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
 
-class saveShodanInfoTest(unittest.TestCase):
+class saveShodanInfoOfTest(unittest.TestCase):
     time.sleep = MagicMock()
 
     @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
-    def test_saveShodanInfoOf_creates_an_api_instance(self, mockFile):
+    def test_create_an_api_instance(self, mockFile):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
@@ -99,7 +99,7 @@ class saveShodanInfoTest(unittest.TestCase):
         shodan.Shodan.assert_has_calls([call("798djfhj2208FFFEEDC4")])
 
     @patch("builtins.open", new_callable=mock_open)
-    def test_saveShodanInfoOf_reads_the_ip_list(self, mockFile):
+    def test_read_the_ip_list(self, mockFile):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
@@ -110,7 +110,7 @@ class saveShodanInfoTest(unittest.TestCase):
         ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    def test_saveShodanInfoOf_queries_the_ip_list(self, mockFile):
+    def test_query_each_ip(self, mockFile):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
@@ -121,7 +121,7 @@ class saveShodanInfoTest(unittest.TestCase):
         ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    def test_saveShodanInfoOf_opens_ip_file_for_each_ip(self, mockFile):
+    def test_open_ip_file_for_each_ip(self, mockFile):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
@@ -134,7 +134,7 @@ class saveShodanInfoTest(unittest.TestCase):
         ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    def test_saveShodanInfoOf_opens_ip_files_depending_on_IP_list_path(self, mockFile):
+    def test_open_ip_files_in_the_same_directory_as_ip_list_file(self, mockFile):
         shodan.Shodan = Mock()
 
         path = "hello/bye/"
