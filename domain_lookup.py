@@ -29,7 +29,7 @@ def saveDomainInfo(domainName):
     relativePathToNewFile =f'./data/domain_raw_data/{domainName}'
     with open(relativePathToNewFile, "w") as domanInfoFile:
         domanInfoFile.write(getShodanInfoOf(domainName))
-        domanInfoFile.close
+        domanInfoFile.close()
 
 def getAllRawData():
     allDomains = getDomainsList()
