@@ -9,9 +9,9 @@ def getAddressList():
     return list(dict.fromkeys(allAddresses))
 
 
-def getNmapCommand(address: str, isIPv6: bool, tcp=True):
+def getNmapCommands(address: str, isIPv6: bool):
     TCPCommand = ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
-    UDPCommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX"]
+    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX"]
     if isIPv6:
         TCPCommand += ["-6", address]
         UDPCommand += ["-6", address]
@@ -19,13 +19,10 @@ def getNmapCommand(address: str, isIPv6: bool, tcp=True):
         TCPCommand += [address]
         UDPCommand += [address]
     
-    if tcp:
-        return TCPCommand
-    return UDPCommand
+    return TCPCommand, UDPCommand
 
 def getNmapInfoOf(address: str, isIPv6: bool):
-    TCPCommand = getNmapCommand(address, isIPv6, tcp=True)
-    UDPCommand = getNmapCommand(address, isIPv6, tcp=False)
+    TCPCommand, UDPCommand = getNmapCommands(address, isIPv6)
     
     TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
     UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
