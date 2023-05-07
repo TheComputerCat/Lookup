@@ -31,7 +31,7 @@ def saveDomainInfo(domainName):
         domainInfoFile.write(getShodanInfoOf(domainName))
         domainInfoFile.close
 
-def getAllRawData():
+def saveAllDomainsInfo():
     allDomains = getDomainsList()
     for domain in allDomains:
         saveDomainInfo(domain)
@@ -49,8 +49,12 @@ def getDomainIp(domainName):
                     domainIp.append(dataObject['value'])
         return ','.join(domainIp)
     
-def createIpList():
+def saveIpList():
     allDomains = getDomainsList()
-    with open('./data/ip_list', 'w') as ipList:
-        for domain in allDomains:
-            ipList.write(getDomainIp(domain))
+    allDomainsIp = []
+    for domain in allDomains:
+        allDomainsIp.append(getDomainIp(domain))
+    with open("./data/ip_list", 'w') as ipList:
+            ipList.write(','.join(allDomainsIp))
+            ipList.close()
+

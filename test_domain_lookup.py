@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
 
         
     @patch("builtins.open", new_callable=mock_open, read_data="dominio1")
-    def test_get_domain_single(self, mockFile):
+    def test_get_domainList_single(self, mockFile):
         
         domainList = domain_lookup.getDomainsList()
 
@@ -91,7 +91,7 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getShodanInfoOf", return_value= 'domain.data')
     @patch("domain_lookup.getDomainsList",return_value = ["dominio1"])
     def test_get_all_data_single(self, mockGetDomains,mockGetInfo,sleep):
-        domain_lookup.getAllRawData()
+        domain_lookup.saveAllDomainsInfo()
 
         targetDirectory = "./data/domain_raw_data/"
         numberOfFilesCreated = len(os.listdir(targetDirectory))
@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getShodanInfoOf", side_effect= ['domain1.data','domain2.data','domain3.data'])
     @patch("domain_lookup.getDomainsList",return_value = ["dominio1","dominio2","dominio3"])
     def test_get_all_data_many(self, mockGetDomains,mockGetInfo,sleep):
-        domain_lookup.getAllRawData()
+        domain_lookup.saveAllDomainsInfo()
 
         targetDirectory = "./data/domain_raw_data/"
         numberOfFilesCreated = len(os.listdir(targetDirectory))
@@ -115,32 +115,77 @@ class Test(unittest.TestCase):
         self.assertEqual(mockGetInfo.call_count,3)
         self.assertEqual(sleep.call_count,3)
 
+        for domainName in domain_lookup.getDomainsList():
+            os.remove(targetDirectory+domainName)
     
     @patch("builtins.open", new_callable=mock_open, 
         read_data=json.dumps([
             {'more':False, 
              'data': [
                 {
-                    "subdomain": "*.auth.corp",
                     "type": "CNAME",
-                    "value": "uberproxy.l.google.com",
-                    "last_seen": "2021-01-26T13:04:34.018114+00:00"
+                    "value": "uberproxy.l.google.com"
                 },
                 {
-                    "subdomain": "*.cloud.sandbox",
                     "type": "A",
                     "value": "74.125.142.81",
-                    "last_seen": "2021-01-15T12:57:18.133727+00:00"
                 }
                 ]
             }
         ])
     )
-    def test_get_domain_single_ip(self, domainInfo):
+    def test_get_domain_single_ip(self, _):
         
         domainIp = domain_lookup.getDomainIp('dominio1')
 
         self.assertEqual(domainIp, "74.125.142.81")
+    
+    @patch("builtins.open", new_callable=mock_open, 
+        read_data=json.dumps([
+            {'more':True, 
+             'data': [
+                {
+                    "type": "A",
+                    "value": "74.125.142.81",
+                }
+                ]
+            },
+            {'more':False, 
+             'data': [
+                {
+                    "type": "AAAA",
+                    "value": "74.125.142.82",
+                },
+                 {
+                    "type": "A",
+                    "value": "74.125.142.83",
+                }
+                ]
+            }
+        ])
+    )
+    def test_get_domain_many_pages_ip(self, _):
+        
+        domainIp = domain_lookup.getDomainIp('dominio1')
 
+        self.assertEqual(domainIp, "74.125.142.81,74.125.142.82,74.125.142.83")
+
+    @patch("domain_lookup.getDomainsList",return_value = ["dominio1","dominio2","dominio3"])
+    @patch("domain_lookup.getDomainIp",side_effect = ["74.125.142.80,74.125.142.81","74.125.142.82","74.125.142.83"])
+    def test_create_ipList(self,mockGetDomainIp,mockGetDomains):
+
+        domain_lookup.saveIpList()
+        
+        self.assertTrue(os.path.isfile('./data/ip_list'))
+        with open("./data/ip_list", 'r') as ipListFile:
+            ipList = ipListFile.read()
+            ipListFile.close()
+            self.assertEqual(ipList,'74.125.142.80,74.125.142.81,74.125.142.82,74.125.142.83')
+        
+        os.remove('./data/ip_list')
+
+        mockGetDomains.assert_called_once()
+        self.assertEqual(mockGetDomainIp.call_count,3)
+        mockGetDomainIp.assert_called()
 if __name__ == "__main__":
      unittest.main()
