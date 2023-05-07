@@ -1,6 +1,3 @@
-# Get an IP address in string format and return
-# the stdout of nmap with the default specification and scan order, on TCP and UDP.
-import functools
 import subprocess
 import shodan
 
@@ -8,21 +5,50 @@ def getAddressList():
     with open("./data/ip_list", "r") as f:
         addresses = f.read()
     
-    
-    
     allAddresses = [address for address in addresses.split("\n") if address != ""]
     return list(dict.fromkeys(allAddresses))
 
 
-def getNmapInfoOf(address: str, isIPv6: bool):
+def getNmapCommands(address: str, isIPv6: bool):
+    TCPCommand = ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
+    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX"]
     if isIPv6:
-        command = ["nmap", "-sT", "-sU", "-verbose", "-6", address]
+        TCPCommand += ["-6", address]
+        UDPCommand += ["-6", address]
     else:
-        command = ["nmap", "-sT", "-sU", "-verbose", address]
+        TCPCommand += [address]
+        UDPCommand += [address]
     
-    result = subprocess.run(command, capture_output=True, text=True)
+    return TCPCommand, UDPCommand
 
-    return result
+def getNmapInfoOf(address: str, isIPv6: bool):
+    TCPCommand, UDPCommand = getNmapCommands(address, isIPv6)
+    
+    TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
+    UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
+
+    return {
+        "tcp": {
+            "stdout": TCPResult.stdout,
+            "stderr": TCPResult.stderr,
+        },
+        "udp": {
+            "stdout": UDPResult.stdout,
+            "stderr": UDPResult.stderr,
+        },
+    }
+
+def saveNmapInfo():
+    IPList = getAddressList()
+    for address in IPList:
+        IPFile = open("./data/raw_nmap_data/{}".format(address), "w")
+        try:
+            result = str(getNmapInfoOf(address, ":" in address))
+        except Exception as e:
+            result = str(e)
+
+        IPFile.write(result)
+        IPFile.close()
 
 def getShodanApi(keyFilePath:str):
     shodan_key = open(keyFilePath, 'r')
@@ -53,6 +79,19 @@ def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
         except Exception as e:
             result = str(e)
         IPFile.write(result)
+        IPFile.close()
 
+if __name__ == "__main__":
+    import sys
     
+    try:
+        args = sys.argv[1:]
 
+        if args[0] == "shodan":
+            saveShodanInfoOf("./data/ip_list", "./shodan_api_key")
+        elif args[0] == "nmap":
+            pass
+    except:
+        print("Elige una opción entre 'nmap' y 'shodan'.")
+        print("Ejemplo: python host_lookup.py shodan")
+        print("Para usar la opción 'nmap' se requieren privilegios de superusuario.")
