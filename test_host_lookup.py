@@ -3,6 +3,7 @@ import builtins
 import host_lookup
 import unittest
 import shodan
+import time
 from unittest.mock import (
     patch,
     MagicMock,
@@ -142,6 +143,9 @@ class saveShodanInfoOfTest(unittest.TestCase):
 
         mockFile.assert_has_calls([
             call(path+"ip_raw_data/0.0.0.0", 'w'),
+        ])
+        mockFile.assert_has_calls([
+            call(path+"ip_raw_data/8.8.8.8", 'w'),
         ])
 
 if __name__ == "__main__":

@@ -59,30 +59,30 @@ def getShodanApi(keyFilePath:str):
     shodan_key.close()
     return api
 
-def getIPList(IPListFilePath):
-    ipListFile = open(IPListFilePath, 'r')
-    ipList = ipListFile.read().splitlines()
-    ipListFile.close()
-    return ipList
+def getIPAddressesList(IPAddressesListFilePath):
+    ipAddressesListFile = open(IPAddressesListFilePath, 'r')
+    ipAddressesList = ipAddressesListFile.read().splitlines()
+    ipAddressesListFile.close()
+    return ipAddressesList
 
 def getDirectoryPathOf(filePath: str):
     return '/'.join(filePath.split("/")[0:-1])
 
-def getIPFilePath(IP: str, IPListFilePath: str):
-    path = getDirectoryPathOf(IPListFilePath)
+def getIPAddressFilePath(IP: str, IPAddressesListFilePath: str):
+    path = getDirectoryPathOf(IPAddressesListFilePath)
     return path+'/ip_raw_data/'+IP
 
-def saveShodanInfoOf(IPListFilePath: str, keyFilePath: str):
+def saveShodanInfoOf(IPAddressListFilePath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
-    IPList = getIPList(IPListFilePath)
-    for IP in IPList:
-        IPFile = open(getIPFilePath(IP, IPListFilePath), 'w')
+    IPAddressesList = getIPAddressesList(IPAddressListFilePath)
+    for IPAddress in IPAddressesList:
+        IPAddressFile = open(getIPAddressFilePath(IPAddress, IPAddressListFilePath), 'w')
         try:
-            result = str(api.host(IP))
+            result = str(api.host(IPAddress))
         except Exception as e:
             result = str(e)
-        IPFile.write(result)
-        IPFile.close()
+        IPAddressFile.write(result)
+        IPAddressFile.close()
         time.sleep(random.uniform(5, 10))
 
 if __name__ == "__main__":
