@@ -94,7 +94,7 @@ if __name__ == "__main__":
         if args[0] == "shodan":
             saveShodanInfoOf("./data/ip_list", "./shodan_api_key")
         elif args[0] == "nmap":
-            saveNmapInfo
+            saveNmapInfo()
     except:
         print("Elige una opción entre 'nmap' y 'shodan'.")
         print("Ejemplo: python host_lookup.py shodan")
