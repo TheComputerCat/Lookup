@@ -165,7 +165,7 @@ class Test(unittest.TestCase):
 
     def test_get_domain_single_ip(self, _):
         
-        domainIp = domain_lookup.getDomainIp('dominio1')
+        domainIp = domain_lookup.getDomainIp('dominio1', './data/domain_raw_data/')
 
         self.assertEqual(domainIp, "74.125.142.81")
     
@@ -196,7 +196,7 @@ class Test(unittest.TestCase):
 
     def test_get_domain_many_pages_ip(self, _):
         
-        domainIp = domain_lookup.getDomainIp('dominio1')
+        domainIp = domain_lookup.getDomainIp('dominio1', './data/domain_raw_data/')
 
         self.assertEqual(domainIp, "74.125.142.81,74.125.142.82,74.125.142.83")
 
