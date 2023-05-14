@@ -1,5 +1,5 @@
 import datetime
-def log(message, logPath="./data/log", debug=False):
+def log(message, logPath="./data/log", debug=True):
     if debug:
         return
     try:
