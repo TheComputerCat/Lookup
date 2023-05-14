@@ -29,15 +29,17 @@ def getIteratorFromCSV(path: str, delimiter: str=","):
 
 def getDomainListFromPath(path: str):
     CSVIterator, f = getIteratorFromCSV(path)
+
     try:
         domainColumnIndex = CSVIterator.__next__().index("domain")
-        domainList = [row[domainColumnIndex] for row in CSVIterator]
-        f.close()
-        return domainList
     except Exception as e:
         common.log(e)
+        return []
     
-    return []
+    domainList = [row[domainColumnIndex] for row in CSVIterator]
+    f.close()
+    
+    return domainList
     
 def getShodanInfoOf(domain: str):
     with open("shodan_api_key") as f:
@@ -78,14 +80,14 @@ def getDomainIp(domainName: str, domainDataDirPath: str):
             for dataObject in page['data']:
                 if dataObject['type'] == 'A' or dataObject['type'] == 'AAAA':
                     domainIp.append(dataObject['value'])
-        return ','.join(domainIp)
+        return '{}\n'.format('\n'.join(domainIp))
     
-def saveIpList(path='./data/domain_raw_data'):
+def saveIpList(path: str, IPListFilePath: str):
     allDomains = getDomainListFromPath(path)
     allDomainsIp = []
     for domain in allDomains:
         allDomainsIp.append(getDomainIp(domain))
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open("./data/ip_list", 'w') as ipList:
-            ipList.write(','.join(allDomainsIp))
-            ipList.close()
+    with open(IPListFilePath, 'w') as ipList:
+        ipList.write('{}\n'.format('\n'.join(allDomainsIp)))
+        ipList.close()

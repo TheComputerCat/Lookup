@@ -134,7 +134,6 @@ class Test(unittest.TestCase):
         domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory)
         
         numberOfFilesCreated = len(os.listdir(targetDirectory))
-        print(os.listdir(targetDirectory))
         self.assertEqual(numberOfFilesCreated, 3)
 
         mockGetDomains.assert_called_once()
@@ -167,7 +166,7 @@ class Test(unittest.TestCase):
         
         domainIp = domain_lookup.getDomainIp('dominio1', './data/domain_raw_data/')
 
-        self.assertEqual(domainIp, "74.125.142.81")
+        self.assertEqual(domainIp, "74.125.142.81\n")
     
     @patch("builtins.open", new_callable=mock_open, 
         read_data=json.dumps([
@@ -198,19 +197,19 @@ class Test(unittest.TestCase):
         
         domainIp = domain_lookup.getDomainIp('dominio1', './data/domain_raw_data/')
 
-        self.assertEqual(domainIp, "74.125.142.81,74.125.142.82,74.125.142.83")
+        self.assertEqual(domainIp, "74.125.142.81\n74.125.142.82\n74.125.142.83\n")
 
     @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1","dominio2","dominio3"])
-    @patch("domain_lookup.getDomainIp",side_effect = ["74.125.142.80,74.125.142.81","74.125.142.82","74.125.142.83"])
+    @patch("domain_lookup.getDomainIp",side_effect = ["74.125.142.80\n74.125.142.81","74.125.142.82","74.125.142.83"])
     def test_create_ipList(self,mockGetDomainIp,mockGetDomains):
 
-        domain_lookup.saveIpList()
+        domain_lookup.saveIpList('./data/domain_list', './data/ip_list')
         
         self.assertTrue(os.path.isfile('./data/ip_list'))
         with open("./data/ip_list", 'r') as ipListFile:
             ipList = ipListFile.read()
             ipListFile.close()
-            self.assertEqual(ipList,'74.125.142.80,74.125.142.81,74.125.142.82,74.125.142.83')
+            self.assertEqual(ipList,'74.125.142.80\n74.125.142.81\n74.125.142.82\n74.125.142.83\n')
         
         os.remove('./data/ip_list')
 
