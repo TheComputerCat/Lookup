@@ -1,13 +1,41 @@
-import shodan
+import common
+import csv
+import json
 from random import randint
+import shodan
 import time
-import json 
 
-def getDomainsList():
-    with open("./data/domain_list",'r') as domains_file:
-        domain_list = domains_file.read()
-        domains_file.close()
-        return domain_list.split(",")
+
+def getStringFromFile(path: str):
+    try:
+        f = open(path, "r")
+        string = f.read()
+        f.close()
+    except Exception as e:
+        common.log(e)
+        return ""
+    
+    return string
+
+def getIteratorFromCSV(path: str, delimiter=","):
+    try:
+        f = open(path, "r", newline="")
+        CSVRowsIterator = csv.reader(f, delimiter=delimiter)
+    except Exception as e:
+        common.log(e)
+        return iter(()), None
+    return CSVRowsIterator, f
+
+def getDomainListFromCSVIterator(CSVITerator, f):
+    try:
+        domainColumnIndex = CSVITerator.__next__().index("domain")
+        domainList = [row[domainColumnIndex] for row in CSVITerator]
+        f.close()
+        return domainList
+    except Exception as e:
+        common.log(e)
+    
+    return []
     
 def getShodanInfoOf(domain: str):
     with open("shodan_api_key") as f:
@@ -29,10 +57,11 @@ def saveDomainInfo(domainName):
     relativePathToNewFile =f'./data/domain_raw_data/{domainName}'
     with open(relativePathToNewFile, "w") as domainInfoFile:
         domainInfoFile.write(getShodanInfoOf(domainName))
-        domainInfoFile.close
+        domainInfoFile.close()
 
 def saveAllDomainsInfo():
-    allDomains = getDomainsList()
+    CSVIterator, f = getIteratorFromCSV("./path/to/nothing")
+    allDomains = getDomainListFromCSVIterator(CSVIterator, f)
     for domain in allDomains:
         saveDomainInfo(domain)
         time.sleep(randint(5,10))
@@ -50,11 +79,11 @@ def getDomainIp(domainName):
         return ','.join(domainIp)
     
 def saveIpList():
-    allDomains = getDomainsList()
+    CSVIterator, f = getIteratorFromCSV("./path/to/nothing")
+    allDomains = getDomainListFromCSVIterator(CSVIterator, f)
     allDomainsIp = []
     for domain in allDomains:
         allDomainsIp.append(getDomainIp(domain))
     with open("./data/ip_list", 'w') as ipList:
             ipList.write(','.join(allDomainsIp))
             ipList.close()
-
