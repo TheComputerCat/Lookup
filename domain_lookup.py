@@ -18,7 +18,7 @@ def getStringFromFile(path: str):
     
     return string
 
-def getIteratorFromCSV(path: str, delimiter=","):
+def getIteratorFromCSV(path: str, delimiter: str=","):
     try:
         f = open(path, "r", newline="")
         CSVRowsIterator = csv.reader(f, delimiter=delimiter)
@@ -27,7 +27,7 @@ def getIteratorFromCSV(path: str, delimiter=","):
         return iter(()), None
     return CSVRowsIterator, f
 
-def getDomainListFromPath(path):
+def getDomainListFromPath(path: str):
     CSVIterator, f = getIteratorFromCSV(path)
     try:
         domainColumnIndex = CSVIterator.__next__().index("domain")
@@ -55,8 +55,9 @@ def getShodanInfoOf(domain: str):
 
     return json.dumps(info)
 
-def saveDomainInfo(domainName):
-    relativePathToNewFile = f'./data/domain_raw_data/{domainName}'
+def saveDomainInfo(domainName: str, domainInfoDirPath: str):
+#     relativePathToNewFile = f'./data/domain_raw_data/{domainName}'
+    relativePathToNewFile = domainInfoDirPath+domainName
     os.makedirs(os.path.dirname(relativePathToNewFile), exist_ok=True)
     with open(relativePathToNewFile, "w") as domainInfoFile:
         domainInfoFile.write(getShodanInfoOf(domainName))
@@ -65,7 +66,7 @@ def saveDomainInfo(domainName):
 def saveAllDomainsInfo():
     allDomains = getDomainListFromPath('./data/domain_list')
     for domain in allDomains:
-        saveDomainInfo(domain)
+        saveDomainInfo(domain, './data/domain_raw_data/')
         time.sleep(randint(5,10))
 
 def getDomainIp(domainName):

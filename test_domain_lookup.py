@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         targetDirectory = "./data/domain_raw_data/"
         relativePathOfNewFile = targetDirectory+domainName
 
-        domain_lookup.saveDomainInfo(domainName)
+        domain_lookup.saveDomainInfo(domainName, targetDirectory)
 
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertGreater(numberOfFilesCreated,0)
