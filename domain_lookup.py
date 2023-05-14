@@ -18,6 +18,18 @@ def getStringFromFile(path: str):
     
     return string
 
+def writeStringToFile(path: str, content: str, overwrite: bool=False):
+    writeType = { False: "a", True: "w" }[overwrite]
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        f = open(path, writeType)
+        f.write(content)
+        f.close()
+        return True
+    except Exception as e:
+        common.log(e)
+        return False
+
 def getIteratorFromCSV(path: str, delimiter: str=","):
     try:
         f = open(path, "r", newline="")
@@ -41,9 +53,8 @@ def getDomainListFromPath(path: str):
     
     return domainList
     
-def getShodanInfoOf(domain: str):
-    with open("shodan_api_key") as f:
-        key = f.read()
+def getShodanInfoOf(domain: str, APIkeyFilePath: str):
+    key = getStringFromFile(APIkeyFilePath)
 
     api = shodan.Shodan(key)
     areMorePages = True
@@ -57,37 +68,30 @@ def getShodanInfoOf(domain: str):
 
     return json.dumps(info)
 
-def saveDomainInfo(domainName: str, domainInfoDirPath: str):
+def saveDomainInfo(domainName: str, domainInfoDirPath: str, APIkeyFilePath: str):
     relativePathToNewFile = domainInfoDirPath+domainName
-    os.makedirs(os.path.dirname(relativePathToNewFile), exist_ok=True)
-    with open(relativePathToNewFile, "w") as domainInfoFile:
-        domainInfoFile.write(getShodanInfoOf(domainName))
-        domainInfoFile.close()
+    writeStringToFile(relativePathToNewFile, getShodanInfoOf(domainName, APIkeyFilePath ), overwrite=True)
 
-def saveAllDomainsInfo(domainListFilePath: str, domainDataDirPath: str):
+def saveAllDomainsInfo(domainListFilePath: str, domainDataDirPath: str, APIkeyFilePath: str):
     allDomains = getDomainListFromPath(domainListFilePath)
     for domain in allDomains:
-        saveDomainInfo(domain, domainDataDirPath)
+        saveDomainInfo(domain, domainDataDirPath, APIkeyFilePath)
         time.sleep(randint(5,10))
 
 def getDomainIp(domainName: str, domainDataDirPath: str):
     domainIp = []
     relativePathToNewFile = f'{domainDataDirPath}{domainName}'
-    with open(relativePathToNewFile, "r") as domainInfoFile:
-        domainInfo = json.loads(domainInfoFile.read())
-        domainInfoFile.close()
-        for page in domainInfo:
-            for dataObject in page['data']:
-                if dataObject['type'] == 'A' or dataObject['type'] == 'AAAA':
-                    domainIp.append(dataObject['value'])
-        return '{}\n'.format('\n'.join(domainIp))
+    jsonString = getStringFromFile(relativePathToNewFile)
+    domainInfo = json.loads(jsonString)
+    for page in domainInfo:
+        for dataObject in page['data']:
+            if dataObject['type'] == 'A' or dataObject['type'] == 'AAAA':
+                domainIp.append(dataObject['value'])
+    return '{}\n'.format('\n'.join(domainIp))
     
 def saveIpList(path: str, IPListFilePath: str):
     allDomains = getDomainListFromPath(path)
     allDomainsIp = []
     for domain in allDomains:
         allDomainsIp.append(getDomainIp(domain))
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(IPListFilePath, 'w') as ipList:
-        ipList.write('{}\n'.format('\n'.join(allDomainsIp)))
-        ipList.close()
+    writeStringToFile(IPListFilePath, '{}\n'.format('\n'.join(allDomainsIp)), overwrite=True)

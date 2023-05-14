@@ -43,9 +43,9 @@ class Test(unittest.TestCase):
         shodan.Shodan = MagicMock()
         shodan.Shodan().dns.domain_info = MagicMock(return_value={'more':False, 'ip': 12345})
         
-        _ = domain_lookup.getShodanInfoOf("example.com")
+        _ = domain_lookup.getShodanInfoOf("example.com", 'shodan_api_key')
 
-        mockFile.assert_called_once_with("shodan_api_key")
+        mockFile.assert_called_once_with('shodan_api_key', 'r')
         shodan.Shodan.assert_called_with("798djfhj2208FFFEEDC4")
 
     @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
         shodan.Shodan = MagicMock()
         shodan.Shodan().dns.domain_info = MagicMock(return_value={'more':False, 'ip': 12345})
         
-        infoOptained = domain_lookup.getShodanInfoOf("example.com")
+        infoOptained = domain_lookup.getShodanInfoOf("example.com", 'shodan_api_key')
         self.assertEqual(infoOptained,json.dumps([{'more':False, 'ip': 12345}]))
 
         shodan.Shodan().dns.domain_info.assert_called_once_with(
@@ -68,7 +68,7 @@ class Test(unittest.TestCase):
         shodan.Shodan = MagicMock()
         shodan.Shodan().dns.domain_info = MagicMock(side_effect=[{'more':True, 'ip': 12345},{'more':False, 'ip': 12345}])
         
-        infoOptained = domain_lookup.getShodanInfoOf("example.com")
+        infoOptained = domain_lookup.getShodanInfoOf("example.com", 'shodan_api_key')
         self.assertEqual(infoOptained,json.dumps([{'more':True, 'ip': 12345},{'more':False, 'ip': 12345}]))
 
         
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         targetDirectory = "./data/domain_raw_data/"
         relativePathOfNewFile = targetDirectory+domainName
 
-        domain_lookup.saveDomainInfo(domainName, targetDirectory)
+        domain_lookup.saveDomainInfo(domainName, targetDirectory, 'shodan_api_key')
 
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertGreater(numberOfFilesCreated,0)
@@ -107,7 +107,8 @@ class Test(unittest.TestCase):
         os.remove(relativePathOfNewFile)
     
         mockGetInfo.assert_called_once_with(
-            domainName
+            domainName,
+            'shodan_api_key'
         )
 
     @patch('time.sleep', return_value=None)
@@ -115,13 +116,13 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1"])
     def test_get_all_data_single(self, mockGetDomains,mockGetInfo,sleep):
         targetDirectory = "./data/domain_raw_data/"
-        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory)
+        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory, 'shodan_api_key')
         
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertGreater(numberOfFilesCreated,0)
 
         mockGetDomains.assert_called_once()
-        mockGetInfo.assert_called_once_with("dominio1")
+        mockGetInfo.assert_called_once_with("dominio1", 'shodan_api_key')
         sleep.assert_called_once()
 
     domains = ["dominio1","dominio2","dominio3"]
@@ -131,7 +132,7 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getDomainListFromPath",return_value = domains)
     def test_get_all_data_many(self, mockGetDomains,mockGetInfo,sleep):
         targetDirectory = "./data/domain_raw_data/"
-        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory)
+        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory,'shodan_api_key')
         
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertEqual(numberOfFilesCreated, 3)
