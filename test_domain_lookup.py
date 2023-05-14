@@ -114,9 +114,9 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getShodanInfoOf", return_value= 'domain.data')
     @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1"])
     def test_get_all_data_single(self, mockGetDomains,mockGetInfo,sleep):
-        domain_lookup.saveAllDomainsInfo()
-
         targetDirectory = "./data/domain_raw_data/"
+        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory)
+        
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertGreater(numberOfFilesCreated,0)
 
@@ -130,9 +130,9 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getShodanInfoOf", side_effect=domainInfo)
     @patch("domain_lookup.getDomainListFromPath",return_value = domains)
     def test_get_all_data_many(self, mockGetDomains,mockGetInfo,sleep):
-        domain_lookup.saveAllDomainsInfo()
-
         targetDirectory = "./data/domain_raw_data/"
+        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory)
+        
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         print(os.listdir(targetDirectory))
         self.assertEqual(numberOfFilesCreated, 3)

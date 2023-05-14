@@ -56,17 +56,16 @@ def getShodanInfoOf(domain: str):
     return json.dumps(info)
 
 def saveDomainInfo(domainName: str, domainInfoDirPath: str):
-#     relativePathToNewFile = f'./data/domain_raw_data/{domainName}'
     relativePathToNewFile = domainInfoDirPath+domainName
     os.makedirs(os.path.dirname(relativePathToNewFile), exist_ok=True)
     with open(relativePathToNewFile, "w") as domainInfoFile:
         domainInfoFile.write(getShodanInfoOf(domainName))
         domainInfoFile.close()
 
-def saveAllDomainsInfo():
-    allDomains = getDomainListFromPath('./data/domain_list')
+def saveAllDomainsInfo(domainListFilePath, domainDataDirPath):
+    allDomains = getDomainListFromPath(domainListFilePath)
     for domain in allDomains:
-        saveDomainInfo(domain, './data/domain_raw_data/')
+        saveDomainInfo(domain, domainDataDirPath)
         time.sleep(randint(5,10))
 
 def getDomainIp(domainName):
