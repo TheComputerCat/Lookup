@@ -1,41 +1,21 @@
-import common
+from common import (
+    log,
+    getStringFromFile,
+    writeStringToFile,
+)
 import csv
 import json
 from random import randint
 import shodan
 import time
-import os
 
-
-def getStringFromFile(path: str):
-    try:
-        f = open(path, "r")
-        string = f.read()
-        f.close()
-    except Exception as e:
-        common.log(e)
-        return ""
-
-    return string
-
-def writeStringToFile(path: str, content: str, overwrite: bool=False):
-    writeType = { False: "a", True: "w" }[overwrite]
-    try:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        f = open(path, writeType)
-        f.write(content)
-        f.close()
-        return True
-    except Exception as e:
-        common.log(e)
-        return False
 
 def getIteratorFromCSV(path: str, delimiter: str=","):
     try:
         f = open(path, "r", newline="")
         CSVRowsIterator = csv.reader(f, delimiter=delimiter)
     except Exception as e:
-        common.log(e)
+        log(e)
         return iter(()), None
     return CSVRowsIterator, f
 
@@ -45,7 +25,7 @@ def getDomainListFromPath(path: str):
     try:
         domainColumnIndex = CSVIterator.__next__().index("domain")
     except Exception as e:
-        common.log(e)
+        log(e)
         return []
     
     domainList = [row[domainColumnIndex] for row in CSVIterator]

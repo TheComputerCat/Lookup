@@ -1,4 +1,6 @@
 import datetime
+import os
+
 def log(message, logPath="./data/log", debug=True):
     if debug:
         return
@@ -10,3 +12,26 @@ def log(message, logPath="./data/log", debug=True):
         print(logMessage)
     except Exception as e:
         print(e)
+
+def getStringFromFile(path: str):
+    try:
+        f = open(path, "r")
+        string = f.read()
+        f.close()
+    except Exception as e:
+        log(e)
+        return ""
+
+    return string
+
+def writeStringToFile(path: str, content: str, overwrite: bool=False):
+    writeType = { False: "a", True: "w" }[overwrite]
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        f = open(path, writeType)
+        f.write(content)
+        f.close()
+        return True
+    except Exception as e:
+        log(e)
+        return False
