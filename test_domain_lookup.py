@@ -116,7 +116,7 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1"])
     def test_get_all_data_single(self, mockGetDomains,mockGetInfo,sleep):
         targetDirectory = "./data/domain_raw_data/"
-        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory, 'shodan_api_key')
+        domain_lookup.saveShodanInfoFromDomainFile('./data/domain_list', targetDirectory, 'shodan_api_key')
         
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertGreater(numberOfFilesCreated,0)
@@ -132,7 +132,7 @@ class Test(unittest.TestCase):
     @patch("domain_lookup.getDomainListFromPath",return_value = domains)
     def test_get_all_data_many(self, mockGetDomains,mockGetInfo,sleep):
         targetDirectory = "./data/domain_raw_data/"
-        domain_lookup.saveAllDomainsInfo('./data/domain_list', targetDirectory,'shodan_api_key')
+        domain_lookup.saveShodanInfoFromDomainFile('./data/domain_list', targetDirectory,'shodan_api_key')
         
         numberOfFilesCreated = len(os.listdir(targetDirectory))
         self.assertEqual(numberOfFilesCreated, 3)
@@ -165,7 +165,7 @@ class Test(unittest.TestCase):
 
     def test_get_domain_single_ip(self, _):
         
-        domainIp = domain_lookup.getDomainIp('dominio1', './data/domain_raw_data/')
+        domainIp = domain_lookup.getIPAddressesFromShodanInfo('dominio1', './data/domain_raw_data/')
 
         self.assertEqual(domainIp, "74.125.142.81\n")
     
@@ -196,13 +196,13 @@ class Test(unittest.TestCase):
 
     def test_get_domain_many_pages_ip(self, _):
         
-        domainIp = domain_lookup.getDomainIp('dominio1', './data/domain_raw_data/')
+        domainIp = domain_lookup.getIPAddressesFromShodanInfo('dominio1', './data/domain_raw_data/')
 
         self.assertEqual(domainIp, "74.125.142.81\n74.125.142.82\n74.125.142.83\n")
 
     @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1","dominio2","dominio3"])
-    @patch("domain_lookup.getDomainIp",side_effect = ["74.125.142.80\n74.125.142.81","74.125.142.82","74.125.142.83"])
-    def test_create_ipList(self,mockGetDomainIp,mockGetDomains):
+    @patch("domain_lookup.getIPAddressesFromShodanInfo",side_effect = ["74.125.142.80\n74.125.142.81","74.125.142.82","74.125.142.83"])
+    def test_create_ipList(self,mockgetIPAddressesFromShodanInfo,mockGetDomains):
 
         domain_lookup.saveIpList('./data/domain_list', './data/ip_list')
         
@@ -215,8 +215,8 @@ class Test(unittest.TestCase):
         os.remove('./data/ip_list')
 
         mockGetDomains.assert_called_once()
-        self.assertEqual(mockGetDomainIp.call_count,3)
-        mockGetDomainIp.assert_called()
+        self.assertEqual(mockgetIPAddressesFromShodanInfo.call_count,3)
+        mockgetIPAddressesFromShodanInfo.assert_called()
 
 if __name__ == "__main__":
      unittest.main()

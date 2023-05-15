@@ -15,7 +15,7 @@ def getStringFromFile(path: str):
     except Exception as e:
         common.log(e)
         return ""
-    
+
     return string
 
 def writeStringToFile(path: str, content: str, overwrite: bool=False):
@@ -69,29 +69,36 @@ def getShodanInfoOf(domain: str, APIkeyFilePath: str):
     return json.dumps(info)
 
 def saveDomainInfo(domainName: str, domainInfoDirPath: str, APIkeyFilePath: str):
-    relativePathToNewFile = domainInfoDirPath+domainName
-    writeStringToFile(relativePathToNewFile, getShodanInfoOf(domainName, APIkeyFilePath ), overwrite=True)
+    relativePathToNewFile = f'{domainInfoDirPath}{domainName}'
+    shodanInfo = getShodanInfoOf(domainName, APIkeyFilePath)
+    writeStringToFile(relativePathToNewFile, shodanInfo, overwrite=True)
 
-def saveAllDomainsInfo(domainListFilePath: str, domainDataDirPath: str, APIkeyFilePath: str):
+def saveShodanInfoFromDomainFile(domainListFilePath: str, domainDataDirPath: str, APIkeyFilePath: str):
     allDomains = getDomainListFromPath(domainListFilePath)
     for domain in allDomains:
         saveDomainInfo(domain, domainDataDirPath, APIkeyFilePath)
         time.sleep(randint(5,10))
 
-def getDomainIp(domainName: str, domainDataDirPath: str):
-    domainIp = []
+def getIPAddressesFromDict(JSONdict: dict):
+    return [item['value'] for item in JSONdict if item['type'] in ['A', 'AAAA']]
+
+def getIPAddressesFromShodanInfo(domainName: str, domainDataDirPath: str):
     relativePathToNewFile = f'{domainDataDirPath}{domainName}'
     jsonString = getStringFromFile(relativePathToNewFile)
     domainInfo = json.loads(jsonString)
-    for page in domainInfo:
-        for dataObject in page['data']:
-            if dataObject['type'] == 'A' or dataObject['type'] == 'AAAA':
-                domainIp.append(dataObject['value'])
-    return '{}\n'.format('\n'.join(domainIp))
     
-def saveIpList(path: str, IPListFilePath: str):
-    allDomains = getDomainListFromPath(path)
-    allDomainsIp = []
+    domainIPAddresses = []
+    for page in domainInfo:
+        domainIPAddresses += getIPAddressesFromDict(page['data'])
+
+    return '{}\n'.format('\n'.join(domainIPAddresses))
+    
+def saveIpList(domainListPath: str, IPListFilePath: str):
+    allDomains = getDomainListFromPath(domainListPath)
+
+    allDomainsIPAddresses = []
     for domain in allDomains:
-        allDomainsIp.append(getDomainIp(domain))
-    writeStringToFile(IPListFilePath, '{}\n'.format('\n'.join(allDomainsIp)), overwrite=True)
+        allDomainsIPAddresses.append(getIPAddressesFromShodanInfo(domain))
+
+    result = '{}\n'.format('\n'.join(allDomainsIPAddresses))
+    writeStringToFile(IPListFilePath, result, overwrite=True)
