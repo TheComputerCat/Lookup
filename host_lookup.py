@@ -12,7 +12,7 @@ def getAddressList():
 
 
 def getNmapCommands(address: str, isIPv6: bool):
-    TCPCommand = ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
+    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
     UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX"]
     if isIPv6:
         TCPCommand += ["-6", address]
