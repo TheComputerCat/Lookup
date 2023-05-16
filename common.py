@@ -1,9 +1,9 @@
 import datetime
 import os
 
-def log(message, logPath="./data/log", debug=True):
+def log(message, logPath="./data/log", debug=False):
     if debug:
-        return
+        raise message
     try:
         f = open(logPath, "a")
         logMessage = "{} : {}\n\n".format(datetime.datetime.now(), message)
