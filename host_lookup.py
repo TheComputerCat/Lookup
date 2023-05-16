@@ -75,7 +75,7 @@ def getIPAddressFilePath(IP: str, addressDataDirPath: str):
 
 def saveShodanInfoOf(IPAddressListFilePath: str, addressDataDirPath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
-    IPAddressesList = getIPAddressesList(IPAddressListFilePath)
+    IPAddressesList = getAddressListFromFile(IPAddressListFilePath)
     for IPAddress in IPAddressesList:
         try:
             result = str(api.host(IPAddress))
