@@ -57,7 +57,6 @@ def saveShodanInfoFromDomainFile(domainListFilePath: str, domainDataDirPath: str
     allDomains = getDomainListFromPath(domainListFilePath)
     for domain in allDomains:
         saveDomainInfo(domain, domainDataDirPath, APIkeyFilePath)
-        time.sleep(randint(5,10))
 
 def getIPAddressesFromDict(JSONdict: dict):
     return [item['value'] for item in JSONdict if item['type'] in ['A', 'AAAA']]
@@ -71,7 +70,7 @@ def getIPAddressesFromShodanInfo(domainName: str, domainDataDirPath: str):
     for page in domainInfo:
         domainIPAddresses += getIPAddressesFromDict(page['data'])
 
-    return '{}\n'.format('\n'.join(domainIPAddresses))
+    return '\n'.join(domainIPAddresses) + '\n'
     
 def saveIpList(domainListPath: str, IPListFilePath: str):
     allDomains = getDomainListFromPath(domainListPath)
@@ -80,5 +79,5 @@ def saveIpList(domainListPath: str, IPListFilePath: str):
     for domain in allDomains:
         allDomainsIPAddresses.append(getIPAddressesFromShodanInfo(domain))
 
-    result = '{}\n'.format('\n'.join(allDomainsIPAddresses))
+    result = '\n'.join(allDomainsIPAddresses) + '\n'
     writeStringToFile(IPListFilePath, result, overwrite=True)

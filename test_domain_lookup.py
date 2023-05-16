@@ -123,7 +123,6 @@ class Test(unittest.TestCase):
 
         mockGetDomains.assert_called_once()
         mockGetInfo.assert_called_once_with("dominio1", 'shodan_api_key')
-        sleep.assert_called_once()
 
     domains = ["dominio1","dominio2","dominio3"]
     domainInfo = ['domain1.data','domain2.data','domain3.data']
@@ -139,7 +138,6 @@ class Test(unittest.TestCase):
 
         mockGetDomains.assert_called_once()
         self.assertEqual(mockGetInfo.call_count,3)
-        self.assertEqual(sleep.call_count,3)
 
         for domainName, domainInfo in zip(self.domains, self.domainInfo):
             with open(targetDirectory+domainName, "r") as f:
