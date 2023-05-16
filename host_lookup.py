@@ -77,13 +77,17 @@ def saveShodanInfoOf(IPAddressListFilePath: str, addressDataDirPath: str, keyFil
     api = getShodanApi(keyFilePath)
     IPAddressesList = getIPAddressesList(IPAddressListFilePath)
     for IPAddress in IPAddressesList:
-        IPAddressFile = open(getIPAddressFilePath(IPAddress, addressDataDirPath), 'w')
         try:
             result = str(api.host(IPAddress))
         except Exception as e:
+            log(e)
             result = str(e)
-        IPAddressFile.write(result)
-        IPAddressFile.close()
+        
+        writeStringToFile(
+            getIPAddressFilePath(IPAddress, addressDataDirPath),
+            result,
+            overwrite=True
+        )
         time.sleep(random.uniform(5, 10))
 
 if __name__ == "__main__":
