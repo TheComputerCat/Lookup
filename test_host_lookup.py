@@ -1,5 +1,3 @@
-import builtins
-
 import host_lookup
 import unittest
 import shodan
