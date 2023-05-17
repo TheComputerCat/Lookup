@@ -5,10 +5,15 @@ import re
 import subprocess
 
 
-def doNsLookupToListOfHosts(hostFilePath):
-    hostList = getHostListFromPath(hostFilePath)
-    for host in hostList:
-        nslookupCommandWith(host)
+def doNsLookupToListOfHosts(hostFilePath, saveDomainFileDirectoryPath):
+    host = getHostListFromPath(hostFilePath)
+    domainsPath = saveDomainFileDirectoryPath+'/new_domain_list'
+    domains = open(domainsPath, 'w')
+    for host in host:
+        domain = nslookupCommandWith(host).stdout
+        domains.write(domain)
+    domains.close()
+    return domainsPath
 
 def nslookupCommandWith(IP:str):
     return subprocess.run(['nslookup', IP], stdout=subprocess.PIPE)
