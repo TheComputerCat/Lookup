@@ -1,5 +1,3 @@
-import builtins
-
 import host_lookup
 import unittest
 import shodan
@@ -17,19 +15,20 @@ class Test(unittest.TestCase):
     def test_call_nmap_command_with_ipv4(self, runMock):
         host_lookup.getNmapInfoOf("8.8.8.8", False)
 
-        command = ["nmap", "-sT", "-sU", "-verbose", "8.8.8.8"]
-        runMock.assert_called_once_with(
-            command,
-            capture_output=True,
-            text=True
-        )
+        TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "8.8.8.8"]
+        UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "8.8.8.8"]
+
+        runMock.assert_has_calls([
+            call(TCPcommand, capture_output=True, text=True), 
+            call(UDPcommand, capture_output=True, text=True), 
+        ])
     
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv6(self, runMock):
         host_lookup.getNmapInfoOf("2001:0db8:85a3:0000:0000:8a2e:0370:7334", True)
 
-        command = ["nmap", "-sT", "-sU", "-verbose", "-6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"]
-        runMock.assert_called_once_with(
+        command = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "-6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"]
+        runMock.assert_called_with(
             command,
             capture_output=True,
             text=True
@@ -39,51 +38,53 @@ class Test(unittest.TestCase):
     def test_call_nmap_command_with_ipv6(self, runMock):
         host_lookup.getNmapInfoOf("2345:0425:2CA1:0000:0000:0567:5673:23b5", True)
 
-        command = ["nmap", "-sT", "-sU", "-verbose", "-6", "2345:0425:2CA1:0000:0000:0567:5673:23b5"]
-        runMock.assert_called_once_with(
-            command,
-            capture_output=True,
-            text=True
-        )
+
+        TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "-6", "2345:0425:2CA1:0000:0000:0567:5673:23b5"]
+        UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "-6", "2345:0425:2CA1:0000:0000:0567:5673:23b5"]
+
+        runMock.assert_has_calls([
+            call(TCPcommand, capture_output=True, text=True), 
+            call(UDPcommand, capture_output=True, text=True), 
+        ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="")
     def test_read_empty_ip_list_file(self, mockFile):
-        addresses = host_lookup.getAddressList()
+        addresses = host_lookup.getAddressListFromFile('./data/ip_list')
 
         self.assertEqual(addresses, [])
         mockFile.assert_called_once_with("./data/ip_list", "r")
     
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8")
     def test_read_ip_list_file_with_one_address(self, mockFile):
-        addresses = host_lookup.getAddressList()
+        addresses = host_lookup.getAddressListFromFile('./data/ip_list')
 
         self.assertEqual(addresses, ["8.8.8.8"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
     
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n1.1.1.1")
     def test_read_ip_list_file_with_two_addresses(self, mockFile):
-        addresses = host_lookup.getAddressList()
+        addresses = host_lookup.getAddressListFromFile('./data/ip_list')
 
         self.assertEqual(addresses, ["8.8.8.8", "1.1.1.1"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
     
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n\n1.1.1.1")
     def test_read_ip_list_file_with_two_address_and_multiple_newlines(self, mockFile):
-        addresses = host_lookup.getAddressList()
+        addresses = host_lookup.getAddressListFromFile('./data/ip_list')
 
         self.assertEqual(addresses, ["8.8.8.8", "1.1.1.1"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
     
     @patch("builtins.open", new_callable=mock_open, read_data="\n8.8.8.8\n\n1.1.1.1\n")
     def test_read_ip_list_file_with_more_newlines(self, mockFile):
-        addresses = host_lookup.getAddressList()
+        addresses = host_lookup.getAddressListFromFile('./data/ip_list')
 
         self.assertEqual(addresses, ["8.8.8.8", "1.1.1.1"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
     
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n8.8.8.8")
     def test_read_ip_list_file_with_one_address_repeated(self, mockFile):
-        addresses = host_lookup.getAddressList()
+        addresses = host_lookup.getAddressListFromFile('./data/ip_list')
 
         self.assertEqual(addresses, ["8.8.8.8"])
         mockFile.assert_called_once_with("./data/ip_list", "r")
@@ -95,7 +96,7 @@ class saveShodanInfoOfTest(unittest.TestCase):
     def test_create_an_api_instance(self, mockFile):
         shodan.Shodan = Mock()
 
-        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/", "data/test_data/shodan_api_key")
 
         shodan.Shodan.assert_has_calls([call("798djfhj2208FFFEEDC4")])
 
@@ -103,7 +104,7 @@ class saveShodanInfoOfTest(unittest.TestCase):
     def test_read_the_ip_list(self, mockFile):
         shodan.Shodan = Mock()
 
-        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "./data/ip_raw_data/", "data/test_data/shodan_api_key")
 
         self.assertEqual(mockFile.call_count, 2)
         mockFile.assert_has_calls([
@@ -114,7 +115,7 @@ class saveShodanInfoOfTest(unittest.TestCase):
     def test_query_each_ip(self, mockFile):
         shodan.Shodan = Mock()
 
-        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "./data/ip_raw_data/", "data/test_data/shodan_api_key")
 
         shodan.Shodan.assert_has_calls([
             call().host('8.8.8.8'),
@@ -125,10 +126,10 @@ class saveShodanInfoOfTest(unittest.TestCase):
     def test_open_ip_file_for_each_ip(self, mockFile):
         shodan.Shodan = Mock()
 
-        _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/shodan_api_key")
+        host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/test_data/ip_raw_data/", "data/test_data/shodan_api_key")
 
         mockFile.assert_has_calls([
-            call("data/test_data/ip_raw_data/0.0.0.0", 'w'),
+            call("data/test_data/ip_raw_data/0.0.0.0", 'w'),  
         ])
         mockFile.assert_has_calls([
             call("data/test_data/ip_raw_data/8.8.8.8",'w'),
@@ -139,7 +140,7 @@ class saveShodanInfoOfTest(unittest.TestCase):
         shodan.Shodan = Mock()
 
         path = "hello/bye/"
-        _ = host_lookup.saveShodanInfoOf(path+"ip_list", "data/test_data/shodan_api_key")
+        _ = host_lookup.saveShodanInfoOf(path+"ip_list", "hello/bye/ip_raw_data/", "data/test_data/shodan_api_key")
 
         mockFile.assert_has_calls([
             call(path+"ip_raw_data/0.0.0.0", 'w'),

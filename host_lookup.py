@@ -2,17 +2,21 @@ import random
 import subprocess
 import shodan
 import time
+from common import (
+    log, 
+    getStringFromFile,
+    writeStringToFile,
+)
 
-def getAddressList():
-    with open("./data/ip_list", "r") as f:
-        addresses = f.read()
+def getAddressListFromFile(path):
+    addresses = getStringFromFile(path)
     
     allAddresses = [address for address in addresses.split("\n") if address != ""]
     return list(dict.fromkeys(allAddresses))
 
 
 def getNmapCommands(address: str, isIPv6: bool):
-    TCPCommand = ["nmap", "-sSV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
+    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
     UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX"]
     if isIPv6:
         TCPCommand += ["-6", address]
@@ -40,49 +44,50 @@ def getNmapInfoOf(address: str, isIPv6: bool):
         },
     }
 
-def saveNmapInfo():
-    IPList = getAddressList()
+def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
+    IPList = getAddressListFromFile(addressListFilePath)
     for address in IPList:
-        IPFile = open("./data/raw_nmap_data/{}".format(address), "w")
         try:
             result = str(getNmapInfoOf(address, ":" in address))
         except Exception as e:
-            result = str(e)
+            log(e)
+            continue
+        finally:
+            random.uniform(5,10)
+        
+        writeStringToFile(f'{addressDataDir}{address}', result, overwrite=True)
 
-        IPFile.write(result)
-        IPFile.close()
-        random.uniform(5,10)
-
-def getShodanApi(keyFilePath:str):
-    shodan_key = open(keyFilePath, 'r')
-    api = shodan.Shodan(shodan_key.read())
-    shodan_key.close()
+def getShodanApi(APIkeyFilePath: str):
+    shodan_key = getStringFromFile(APIkeyFilePath)
+    api = shodan.Shodan(shodan_key)
     return api
 
 def getIPAddressesList(IPAddressesListFilePath):
-    ipAddressesListFile = open(IPAddressesListFilePath, 'r')
-    ipAddressesList = ipAddressesListFile.read().splitlines()
-    ipAddressesListFile.close()
+    ipAddressesListFile = getStringFromFile(IPAddressesListFilePath)
+    ipAddressesList = ipAddressesListFile.splitlines()
     return ipAddressesList
 
 def getDirectoryPathOf(filePath: str):
     return '/'.join(filePath.split("/")[0:-1])
 
-def getIPAddressFilePath(IP: str, IPAddressesListFilePath: str):
-    path = getDirectoryPathOf(IPAddressesListFilePath)
-    return path+'/ip_raw_data/'+IP
+def getIPAddressFilePath(IP: str, addressDataDirPath: str):
+    return f'{addressDataDirPath}{IP}'
 
-def saveShodanInfoOf(IPAddressListFilePath: str, keyFilePath: str):
+def saveShodanInfoOf(IPAddressListFilePath: str, addressDataDirPath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
-    IPAddressesList = getIPAddressesList(IPAddressListFilePath)
+    IPAddressesList = getAddressListFromFile(IPAddressListFilePath)
     for IPAddress in IPAddressesList:
-        IPAddressFile = open(getIPAddressFilePath(IPAddress, IPAddressListFilePath), 'w')
         try:
             result = str(api.host(IPAddress))
         except Exception as e:
+            log(e)
             result = str(e)
-        IPAddressFile.write(result)
-        IPAddressFile.close()
+        
+        writeStringToFile(
+            getIPAddressFilePath(IPAddress, addressDataDirPath),
+            result,
+            overwrite=True
+        )
         time.sleep(random.uniform(5, 10))
 
 if __name__ == "__main__":
@@ -92,9 +97,9 @@ if __name__ == "__main__":
         args = sys.argv[1:]
 
         if args[0] == "shodan":
-            saveShodanInfoOf("./data/ip_list", "./shodan_api_key")
+            saveShodanInfoOf("./data/ip_list", "./data/ip_raw_data/", "./shodan_api_key")
         elif args[0] == "nmap":
-            saveNmapInfo()
+            saveNmapInfoFromAddressFile('./data/ip_list')
     except:
         print("Elige una opción entre 'nmap' y 'shodan'.")
         print("Ejemplo: python host_lookup.py shodan")
