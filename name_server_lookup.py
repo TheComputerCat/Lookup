@@ -1,13 +1,16 @@
-from common import log
+from common import (
+    log,
+    getTimeString,
+)
 from domain_lookup import getIteratorFromCSV
-import csv
 import re
 import subprocess
+from datetime import datetime
 
 
 def doNsLookupToListOfHosts(hostFilePath, saveDomainFileDirectoryPath):
     host = getHostListFromPath(hostFilePath)
-    domainsPath = saveDomainFileDirectoryPath+'/new_domain_list'
+    domainsPath = f"{saveDomainFileDirectoryPath}{newDomainListFileName()}"
     domains = open(domainsPath, 'w')
     for host in host:
         domain = parseNameServerLookupOutput(nslookupCommandWith(host).stdout)
@@ -36,3 +39,7 @@ def parseNameServerLookupOutput(output:str):
     s1 = str(re.escape('name ='))
     s2 = str(re.escape('Authoritative'))
     return re.findall(s1+'(.*?)'+s2, output)[0]
+
+def newDomainListFileName():
+    time = getTimeString()
+    return f"/domainList{time}"

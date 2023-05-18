@@ -35,3 +35,6 @@ def writeStringToFile(path: str, content: str, overwrite: bool=False):
     except Exception as e:
         log(e)
         return False
+
+def getTimeString():
+    return datetime.datetime.now().strftime("-%Y:%m:%d-%H:%M:%S")
