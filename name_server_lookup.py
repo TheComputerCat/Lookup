@@ -10,8 +10,8 @@ def doNsLookupToListOfHosts(hostFilePath, saveDomainFileDirectoryPath):
     domainsPath = saveDomainFileDirectoryPath+'/new_domain_list'
     domains = open(domainsPath, 'w')
     for host in host:
-        domain = nslookupCommandWith(host).stdout
-        domains.write(domain)
+        domain = parseNameServerLookupOutput(nslookupCommandWith(host).stdout)
+        domains.write(f"{domain}\n")
     domains.close()
     return domainsPath
 

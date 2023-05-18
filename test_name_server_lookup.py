@@ -11,7 +11,10 @@ from unittest.mock import (
 
 host0NslookupOutput = '0.0.0.0.in-addr.arpa\tname =my.name.Authoritative answers can be found from:\n\n'
 host1NslookupOutput = '1.1.1.1.in-addr.arpa\tname =your.lastname.Authoritative answers can be found from:\n\n'
-
+host0 = '0.0.0.0'
+host1 = '1.1.1.1'
+name0 = 'my.name.'
+name1 = 'your.lastname.'
 
 class nameServerLookupTest(unittest.TestCase):
     def test_parse_nslookup_output_case1(self):
@@ -73,7 +76,7 @@ class nameServerLookupTest(unittest.TestCase):
         '''
             Given a CSV with a single column with host directions
             When doNsLookupToListOfIp is called with the path to that file
-            It should ?
+            It should save new domain list in file
         '''
         hostFilePath = './data/hosts'
         hostsFile = open(hostFilePath, 'w')
@@ -85,7 +88,7 @@ class nameServerLookupTest(unittest.TestCase):
         domainsPath = name_server_lookup.doNsLookupToListOfHosts(hostFilePath, saveDirectoryPath)
 
         domainsFile = open(domainsPath, 'r')
-        self.assertEqual(domainsFile.read(), host0NslookupOutput+host1NslookupOutput)
+        self.assertEqual(domainsFile.read(), f"{name0}\n{name1}\n")
         domainsFile.close()
         os.remove(hostFilePath)
         os.remove(domainsPath)
