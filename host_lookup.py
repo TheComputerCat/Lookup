@@ -25,31 +25,30 @@ def getNmapInfoOf(address: str):
     TCPCommand, UDPCommand = getNmapCommands(address)
     
     TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
-    UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
+    yield {
+        "stdout": TCPResult.stdout,
+        "stderr": TCPResult.stderr,
+    }
 
-    return {
-        "tcp": {
-            "stdout": TCPResult.stdout,
-            "stderr": TCPResult.stderr,
-        },
-        "udp": {
-            "stdout": UDPResult.stdout,
-            "stderr": UDPResult.stderr,
-        },
+    UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
+    yield {
+        "stdout": UDPResult.stdout,
+        "stderr": UDPResult.stderr,
     }
 
 def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
     IPList = getAddressListFromFile(addressListFilePath)
     for address in IPList:
+        NmapResultGenerator = getNmapInfoOf(address)
         try:
-            result = str(getNmapInfoOf(address))
+            for result, label in zip(NmapResultGenerator, ['tcp', 'udp']):
+                writeStringToFile(f'{addressDataDir}{address}-{label}', str(result), overwrite=True)
         except Exception as e:
             log(e)
             continue
         finally:
             time.sleep(random.uniform(5,10))
         
-        writeStringToFile(f'{addressDataDir}{address}', result, overwrite=True)
 
 def getShodanApi(APIkeyFilePath: str):
     shodan_key = getStringFromFile(APIkeyFilePath)

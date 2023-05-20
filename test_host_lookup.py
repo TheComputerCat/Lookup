@@ -13,7 +13,10 @@ from unittest.mock import (
 class Test(unittest.TestCase):
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv4(self, runMock):
-        host_lookup.getNmapInfoOf("8.8.8.8")
+        generator = host_lookup.getNmapInfoOf("8.8.8.8")
+        next(generator)
+        next(generator)
+
 
         TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "8.8.8.8"]
         UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "8.8.8.8"]
