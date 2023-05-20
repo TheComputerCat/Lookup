@@ -2,6 +2,7 @@ import random
 import subprocess
 import shodan
 import time
+import traceback
 from common import (
     log,
     asHexString, 
@@ -93,8 +94,11 @@ if __name__ == "__main__":
         if args[0] == "shodan":
             saveShodanInfoOf("./data/ip_list", "./data/ip_raw_data/", "./shodan_api_key")
         elif args[0] == "nmap":
-            saveNmapInfoFromAddressFile('./data/ip_list')
-    except:
-        print("Elige una opción entre 'nmap' y 'shodan'.")
-        print("Ejemplo: python host_lookup.py shodan")
-        print("Para usar la opción 'nmap' se requieren privilegios de superusuario.")
+            saveNmapInfoFromAddressFile('./data/ip_list', './data/raw_nmap_data')
+        else:
+            print("Elige una opción entre 'nmap' y 'shodan'.")
+            print("Ejemplo: python host_lookup.py shodan")
+            print("Para usar la opción 'nmap' se requieren privilegios de superusuario.")
+    except Exception as e:
+        print(e)
+        print(traceback.format_exc())
