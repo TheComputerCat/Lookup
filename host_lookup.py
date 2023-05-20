@@ -47,7 +47,7 @@ def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
             log(e)
             continue
         finally:
-            random.uniform(5,10)
+            time.sleep(random.uniform(5,10))
         
         writeStringToFile(f'{addressDataDir}{address}', result, overwrite=True)
 
