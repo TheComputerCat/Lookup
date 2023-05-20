@@ -13,34 +13,10 @@ from unittest.mock import (
 class Test(unittest.TestCase):
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv4(self, runMock):
-        host_lookup.getNmapInfoOf("8.8.8.8", False)
+        host_lookup.getNmapInfoOf("8.8.8.8")
 
         TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "8.8.8.8"]
         UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "8.8.8.8"]
-
-        runMock.assert_has_calls([
-            call(TCPcommand, capture_output=True, text=True), 
-            call(UDPcommand, capture_output=True, text=True), 
-        ])
-    
-    @patch("subprocess.run")
-    def test_call_nmap_command_with_ipv6(self, runMock):
-        host_lookup.getNmapInfoOf("2001:0db8:85a3:0000:0000:8a2e:0370:7334", True)
-
-        command = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "-6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"]
-        runMock.assert_called_with(
-            command,
-            capture_output=True,
-            text=True
-        )
-    
-    @patch("subprocess.run")
-    def test_call_nmap_command_with_ipv6(self, runMock):
-        host_lookup.getNmapInfoOf("2345:0425:2CA1:0000:0000:0567:5673:23b5", True)
-
-
-        TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "-6", "2345:0425:2CA1:0000:0000:0567:5673:23b5"]
-        UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "-6", "2345:0425:2CA1:0000:0000:0567:5673:23b5"]
 
         runMock.assert_has_calls([
             call(TCPcommand, capture_output=True, text=True), 

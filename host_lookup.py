@@ -15,20 +15,14 @@ def getAddressListFromFile(path):
     return list(dict.fromkeys(allAddresses))
 
 
-def getNmapCommands(address: str, isIPv6: bool):
-    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX"]
-    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX"]
-    if isIPv6:
-        TCPCommand += ["-6", address]
-        UDPCommand += ["-6", address]
-    else:
-        TCPCommand += [address]
-        UDPCommand += [address]
+def getNmapCommands(address: str):
+    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", address]
+    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX", address]
     
     return TCPCommand, UDPCommand
 
-def getNmapInfoOf(address: str, isIPv6: bool):
-    TCPCommand, UDPCommand = getNmapCommands(address, isIPv6)
+def getNmapInfoOf(address: str):
+    TCPCommand, UDPCommand = getNmapCommands(address)
     
     TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
     UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
@@ -48,7 +42,7 @@ def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
     IPList = getAddressListFromFile(addressListFilePath)
     for address in IPList:
         try:
-            result = str(getNmapInfoOf(address, ":" in address))
+            result = str(getNmapInfoOf(address))
         except Exception as e:
             log(e)
             continue
