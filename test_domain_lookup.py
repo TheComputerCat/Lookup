@@ -4,6 +4,10 @@ import shodan
 import os
 import json
 
+from common import (
+    asHexString,
+)
+
 from unittest.mock import (
     patch,
     MagicMock,
@@ -97,7 +101,7 @@ class Test(unittest.TestCase):
     def test_save_domain_info(self, mockGetInfo):
         domainName = "dominio1"
         targetDirectory = "./data/domain_raw_data/"
-        relativePathOfNewFile = targetDirectory+domainName
+        relativePathOfNewFile = targetDirectory+asHexString(domainName)
 
         domain_lookup.saveDomainInfo(domainName, targetDirectory, 'shodan_api_key')
 
@@ -139,7 +143,7 @@ class Test(unittest.TestCase):
         mockGetDomains.assert_called_once()
         self.assertEqual(mockGetInfo.call_count,3)
 
-        for domainName, domainInfo in zip(self.domains, self.domainInfo):
+        for domainName, domainInfo in zip(map(asHexString, self.domains), self.domainInfo):
             with open(targetDirectory+domainName, "r") as f:
                 self.assertEqual(f.read(), domainInfo)
             os.remove(targetDirectory+domainName)

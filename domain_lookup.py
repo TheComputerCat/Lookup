@@ -1,5 +1,6 @@
 from common import (
     log,
+    asHexString,
     getStringFromFile,
     writeStringToFile,
 )
@@ -49,7 +50,7 @@ def getShodanInfoOf(domain: str, APIkeyFilePath: str):
     return json.dumps(info)
 
 def saveDomainInfo(domainName: str, domainInfoDirPath: str, APIkeyFilePath: str):
-    relativePathToNewFile = f'{domainInfoDirPath}{domainName}'
+    relativePathToNewFile = f'{domainInfoDirPath}{asHexString(domainName)}'
     shodanInfo = getShodanInfoOf(domainName, APIkeyFilePath)
     writeStringToFile(relativePathToNewFile, shodanInfo, overwrite=True)
 
