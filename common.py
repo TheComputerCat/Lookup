@@ -41,6 +41,9 @@ def writeStringToFile(path: str, content: str, overwrite: bool=False):
 def getTimeString():
     return datetime.datetime.now().strftime("-%Y:%m:%d-%H:%M:%S")
 
+def asHexString(string: str):
+    return string.encode("utf-8").hex()
+
 def createFixture(setup, teardown):
     def decorator(**kwargsDecorator):
         def wrapper(function):

@@ -3,8 +3,10 @@ import subprocess
 import shodan
 import time
 from common import (
-    log, 
+    log,
+    asHexString, 
     getStringFromFile,
+    getTimeString,
     writeStringToFile,
 )
 
@@ -42,13 +44,12 @@ def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
         NmapResultGenerator = getNmapInfoOf(address)
         try:
             for result, label in zip(NmapResultGenerator, ['tcp', 'udp']):
-                writeStringToFile(f'{addressDataDir}{address}-{label}', str(result), overwrite=True)
+                writeStringToFile(f'{addressDataDir}{asHexString(address)}-{label}{getTimeString()}', str(result), overwrite=True)
         except Exception as e:
             log(e)
             continue
         finally:
             time.sleep(random.uniform(5,10))
-        
 
 def getShodanApi(APIkeyFilePath: str):
     shodan_key = getStringFromFile(APIkeyFilePath)
