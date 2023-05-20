@@ -2,7 +2,7 @@ import datetime
 import inspect
 import os
 
-def log(message, logPath="./data/log", debug=False, printing=False):
+def log(message, logPath="./log", debug=False, testing = True):
     if debug:
         raise message
     try:
