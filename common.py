@@ -44,6 +44,18 @@ def getTimeString():
 def asHexString(string: str):
     return string.encode("utf-8").hex()
 
+def formatDirPath(dirPath):
+    if dirPath[-1] != '/':
+        return dirPath+'/'
+    
+    return dirPath
+
+def formatFilePath(filePath):
+    if filePath[-1] == '/':
+        return filePath[:-1]
+    
+    return filePath
+
 def createFixture(setup, teardown):
     def decorator(**kwargsDecorator):
         def wrapper(function):

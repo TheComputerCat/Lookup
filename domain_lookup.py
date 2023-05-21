@@ -3,6 +3,8 @@ from common import (
     asHexString,
     getStringFromFile,
     writeStringToFile,
+    formatFilePath,
+    formatDirPath,
 )
 import csv
 import json
@@ -80,11 +82,31 @@ def saveIpList(IPListFilePath: str, domainDataDirPath: str):
     result = '\n'.join(allDomainsIPAddresses) + '\n'
     writeStringToFile(IPListFilePath, result, overwrite=True)
 
-
 if __name__ == '__main__':
     args = sys.argv[1:]
+    try:
+        if len(args) == 0:
+            raise Exception("Se necesita escoger una opción entre 'lookup' y 'get_addresses'.")
 
-    if   args[0] == 'lookup':
-        saveShodanInfoFromDomainFile('./data/domain_list', './data/domain_raw_data/', './shodan_api_key')
-    elif args[0] == 'get_addresses':
-        saveIpList('./data/ip_list', './data/domain_raw_data/')
+        if   args[0] == 'lookup':
+            if len(args) < 4:
+                raise Exception("""Se necesitan tres argumentos más:
+    1. la ruta al archivo con la lista de dominios,
+    2. La ruta al directorio donde se guardará la información de los dominios,
+    3. La ruta al archivo con la llave de la API de Shodan.""")
+            domainListFilePath = formatFilePath(args[1])
+            domainDataDirPath = formatDirPath(args[2])
+            shodanAPIKeyFilePath = formatFilePath(args[3])
+            
+            saveShodanInfoFromDomainFile(domainListFilePath, domainDataDirPath, shodanAPIKeyFilePath)
+        elif args[0] == 'get_addresses':
+            if len(args) < 3:
+                raise Exception("""Se necesitan dos argumentos más:
+    1. la ruta al archivo donde se guardarán las direcciones,
+    2. La ruta al directorio donde está la información de los dominios.""")
+            addressListFilePath = formatFilePath(args[1])
+            domainDataDirPath = formatDirPath(args[2])
+
+            saveIpList(addressListFilePath, domainDataDirPath)
+    except Exception as e:
+        print(e)
