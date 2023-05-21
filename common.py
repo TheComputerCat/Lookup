@@ -2,7 +2,7 @@ import datetime
 import inspect
 import os
 
-def log(message, logPath="./data/log", debug=False, testing = True):
+def log(message, logPath="./data/log", debug=False, printing=False):
     if debug:
         raise message
     try:
@@ -10,7 +10,7 @@ def log(message, logPath="./data/log", debug=False, testing = True):
         logMessage = "{} : {}\n\n".format(datetime.datetime.now(), message)
         f.write(logMessage)
         f.close()
-        if not testing:
+        if printing:
             print(logMessage)
     except Exception as e:
         print(e)
@@ -21,7 +21,7 @@ def getStringFromFile(path: str):
         string = f.read()
         f.close()
     except Exception as e:
-        log(e)
+        log(e, printing=True)
         return ""
 
     return string
@@ -35,7 +35,7 @@ def writeStringToFile(path: str, content: str, overwrite: bool=False):
         f.close()
         return True
     except Exception as e:
-        log(e)
+        log(e, printing=True)
         return False
 
 def getTimeString():
