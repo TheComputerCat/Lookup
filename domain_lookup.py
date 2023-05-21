@@ -7,7 +7,6 @@ from common import (
 import csv
 import json
 import os
-from random import randint
 import shodan
 import sys
 
