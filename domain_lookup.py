@@ -6,10 +6,9 @@ from common import (
 )
 import csv
 import json
+import os
 from random import randint
 import shodan
-import time
-
 
 def getIteratorFromCSV(path: str, delimiter: str=","):
     try:
@@ -62,23 +61,21 @@ def saveShodanInfoFromDomainFile(domainListFilePath: str, domainDataDirPath: str
 def getIPAddressesFromDict(JSONdict: dict):
     return [item['value'] for item in JSONdict if item['type'] == 'A']
 
-def getIPAddressesFromShodanInfo(domainName: str, domainDataDirPath: str):
-    relativePathToNewFile = f'{domainDataDirPath}{domainName}'
-    jsonString = getStringFromFile(relativePathToNewFile)
+def getIPAddressesFromShodanInfo(domainInfoFilePath):
+    jsonString = getStringFromFile(domainInfoFilePath)
     domainInfo = json.loads(jsonString)
     
-    domainIPAddresses = []
-    for page in domainInfo:
-        domainIPAddresses += getIPAddressesFromDict(page['data'])
+    domainIPAddresses = sum(map(getIPAddressesFromDict, [page['data'] for page in domainInfo]), [])
 
     return '\n'.join(domainIPAddresses) + '\n'
     
-def saveIpList(domainListPath: str, IPListFilePath: str):
-    allDomains = getDomainListFromPath(domainListPath)
+def saveIpList(IPListFilePath: str, domainDataDirPath: str):
+    domainInfoFilePaths = [
+        domainDataDirPath+fileName for fileName in os.listdir(domainDataDirPath)
+        if os.path.isfile(domainDataDirPath+fileName)
+    ]
 
-    allDomainsIPAddresses = []
-    for domain in allDomains:
-        allDomainsIPAddresses.append(getIPAddressesFromShodanInfo(domain))
+    allDomainsIPAddresses = sum(map(getIPAddressesFromShodanInfo, domainInfoFilePaths), [])
 
     result = '\n'.join(allDomainsIPAddresses) + '\n'
     writeStringToFile(IPListFilePath, result, overwrite=True)
