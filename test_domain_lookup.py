@@ -185,7 +185,7 @@ class Test(unittest.TestCase):
              'data': [
                 {
                     "type": "AAAA",
-                    "value": "74.125.142.82",
+                    "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                 },
                  {
                     "type": "A",
@@ -200,7 +200,7 @@ class Test(unittest.TestCase):
         
         domainIp = domain_lookup.getIPAddressesFromShodanInfo('dominio1', './data/domain_raw_data/')
 
-        self.assertEqual(domainIp, "74.125.142.81\n74.125.142.82\n74.125.142.83\n")
+        self.assertEqual(domainIp, "74.125.142.81\n74.125.142.83\n")
 
     @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1","dominio2","dominio3"])
     @patch("domain_lookup.getIPAddressesFromShodanInfo",side_effect = ["74.125.142.80\n74.125.142.81","74.125.142.82","74.125.142.83"])

@@ -60,7 +60,7 @@ def saveShodanInfoFromDomainFile(domainListFilePath: str, domainDataDirPath: str
         saveDomainInfo(domain, domainDataDirPath, APIkeyFilePath)
 
 def getIPAddressesFromDict(JSONdict: dict):
-    return [item['value'] for item in JSONdict if item['type'] in ['A', 'AAAA']]
+    return [item['value'] for item in JSONdict if item['type'] == 'A']
 
 def getIPAddressesFromShodanInfo(domainName: str, domainDataDirPath: str):
     relativePathToNewFile = f'{domainDataDirPath}{domainName}'
