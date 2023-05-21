@@ -50,7 +50,7 @@ def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
             for result, label in zip(NmapResultGenerator, ['tcp', 'udp']):
                 writeStringToFile(f'{addressDataDir}{asHexString(address)}-{label}{getTimeString()}', str(result), overwrite=True)
         except Exception as e:
-            log(e)
+            log(e, printing=True)
             continue
         finally:
             time.sleep(random.uniform(5,10))
@@ -78,7 +78,7 @@ def saveShodanInfoOf(IPAddressListFilePath: str, addressDataDirPath: str, keyFil
         try:
             result = str(api.host(IPAddress))
         except Exception as e:
-            log(e)
+            log(e, printing=True)
             result = str(e)
         
         writeStringToFile(

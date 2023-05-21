@@ -18,7 +18,7 @@ def getIteratorFromCSV(path: str, delimiter: str=","):
         f = open(path, "r", newline="")
         CSVRowsIterator = csv.reader(f, delimiter=delimiter)
     except Exception as e:
-        log(e)
+        log(e, printing=True)
         return iter(()), None
     return CSVRowsIterator, f
 
@@ -28,7 +28,7 @@ def getDomainListFromPath(path: str):
     try:
         domainColumnIndex = CSVIterator.__next__().index("domain")
     except Exception as e:
-        log(e)
+        log(e, printing=True)
         return []
     
     domainList = [row[domainColumnIndex] for row in CSVIterator]
