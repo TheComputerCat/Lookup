@@ -11,6 +11,7 @@ import json
 import os
 import shodan
 import sys
+import traceback
 
 def getIteratorFromCSV(path: str, delimiter: str=","):
     try:
@@ -109,4 +110,4 @@ if __name__ == '__main__':
 
             saveIpList(addressListFilePath, domainDataDirPath)
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())

@@ -3,12 +3,15 @@ import subprocess
 import shodan
 import time
 import traceback
+import sys
 from common import (
     log,
     asHexString, 
     getStringFromFile,
     getTimeString,
     writeStringToFile,
+    formatDirPath,
+    formatFilePath,
 )
 
 def getAddressListFromFile(path):
@@ -86,19 +89,30 @@ def saveShodanInfoOf(IPAddressListFilePath: str, addressDataDirPath: str, keyFil
         time.sleep(random.uniform(5, 10))
 
 if __name__ == "__main__":
-    import sys
-    
+    args = sys.argv[1:]
     try:
-        args = sys.argv[1:]
+        if len(args) == 0:
+            raise Exception("Se necesita escoger una opción entre 'shodan' y 'nmap'.")
 
         if args[0] == "shodan":
-            saveShodanInfoOf("./data/ip_list", "./data/ip_raw_data/", "./shodan_api_key")
+            if len(args) < 4:
+                raise Exception("""Se necesitan tres argumentos más:
+    1. la ruta al archivo con la lista de direcciones IP,
+    2. La ruta al directorio donde se guardará la información de los hosts correspondientes,
+    3. La ruta al archivo con la llave de la API de Shodan.""")
+            addressListFilePath = formatFilePath(args[1])
+            addressDataDirPath = formatDirPath(args[2])
+            shodanAPIKeyFilePath = formatFilePath(args[3])
+
+            saveShodanInfoOf(addressListFilePath, addressDataDirPath,shodanAPIKeyFilePath)
         elif args[0] == "nmap":
-            saveNmapInfoFromAddressFile('./data/ip_list', './data/raw_nmap_data')
-        else:
-            print("Elige una opción entre 'nmap' y 'shodan'.")
-            print("Ejemplo: python host_lookup.py shodan")
-            print("Para usar la opción 'nmap' se requieren privilegios de superusuario.")
+            if len(args) < 3:
+                raise Exception("""Se necesitan tres argumentos más:
+    1. la ruta al archivo con la lista de direcciones IP,
+    2. La ruta al directorio donde se guardará la información de los hosts correspondientes.""")
+            addressListFilePath = formatFilePath(args[1])
+            addressDataDirPath = formatDirPath(args[2])
+
+            saveNmapInfoFromAddressFile(addressListFilePath, addressDataDirPath)
     except Exception as e:
-        print(e)
         print(traceback.format_exc())
