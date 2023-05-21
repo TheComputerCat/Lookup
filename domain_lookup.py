@@ -9,6 +9,7 @@ import json
 import os
 from random import randint
 import shodan
+import sys
 
 def getIteratorFromCSV(path: str, delimiter: str=","):
     try:
@@ -79,3 +80,12 @@ def saveIpList(IPListFilePath: str, domainDataDirPath: str):
 
     result = '\n'.join(allDomainsIPAddresses) + '\n'
     writeStringToFile(IPListFilePath, result, overwrite=True)
+
+
+if __name__ == '__main__':
+    args = sys.argv[1:]
+
+    if   args[0] == 'lookup':
+        saveShodanInfoFromDomainFile('./data/domain_list', './data/domain_raw_data/', './shodan_api_key')
+    elif args[0] == 'get_addresses':
+        saveIpList('./data/ip_list', './data/domain_raw_data/')
