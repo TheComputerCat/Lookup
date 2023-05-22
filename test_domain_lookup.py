@@ -18,17 +18,10 @@ from unittest.mock import (
 
 from common import (
     createFixture,
-    writeStringToFile
+    writeStringToFile,
+    setUpWithATextFile,
+    tearDownWithATextFile,
 )
-
-def setUpWithATextFile(pathToTextFile, content):
-    writeStringToFile(pathToTextFile, content)
-
-def tearDownWithATextFile(pathToTextFile):
-    os.remove(pathToTextFile)
-    dirname = os.path.dirname(pathToTextFile)
-    if(dirname != '.' and dirname != os.getcwd()):
-        os.removedirs(os.path.dirname(pathToTextFile))
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 

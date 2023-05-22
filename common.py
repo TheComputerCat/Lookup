@@ -75,3 +75,12 @@ def createFixture(setup, teardown):
 def filterKargsForFunction(function, kargs):
     functionKargs = inspect.signature(function).parameters
     return { karg: kargs[karg] for karg in kargs if karg in functionKargs }
+
+def setUpWithATextFile(pathToTextFile, content):
+    writeStringToFile(pathToTextFile, content)
+
+def tearDownWithATextFile(pathToTextFile):
+    os.remove(pathToTextFile)
+    dirname = os.path.dirname(pathToTextFile)
+    if(dirname != '.' and dirname != os.getcwd()):
+        os.removedirs(os.path.dirname(pathToTextFile))
