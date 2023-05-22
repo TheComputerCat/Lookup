@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from typing import Any
 import unittest
 import domain_lookup
 import shodan
@@ -10,215 +12,196 @@ from common import (
 
 from unittest.mock import (
     patch,
-    MagicMock,
-    mock_open,
+    call,
+    Mock,
 )
 
+from common import (
+    createFixture,
+    writeStringToFile
+)
+
+def setUpWithATextFile(pathToTextFile, content):
+    writeStringToFile(pathToTextFile, content)
+
+def tearDownWithATextFile(pathToTextFile):
+    os.remove(pathToTextFile)
+    dirname = os.path.dirname(pathToTextFile)
+    if(dirname != '.' and dirname != os.getcwd()):
+        os.removedirs(os.path.dirname(pathToTextFile))
+
+withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
+
 class TestGetDomainList(unittest.TestCase):
-    def test_get_nonexistent_file(self):
-        '''
+    def test_getDomainListFromPath_getUnexistentFile(self):
+        """
             When getRowsFromCSV is called with a path of a nonexistent file,
             it should return an empty list.
-        '''
+        """
         res = domain_lookup.getDomainListFromPath('./path/to/nothing')
     
         self.assertEqual(res, [])
-    
-    def test_get_file_good_format(self):
-        '''
+
+    @withATextFile(pathToTextFile='./data/domains', content='domain\ngoogle.com\nfacebook.com')
+    def test_getDomainListFromPath_file_good_format(self, pathToTextFile):
+        """
             Given a CSV file with a single column with domain names,
             when getRowsFromCSV is called with the path of that file,
             it should return a list with all the domains in the column.
-        '''
-        path = './data/domains'
-        f = open(path, 'w')
-        f.write('domain\ngoogle.com\nfacebook.com')
-        f.close()
-
-        res = domain_lookup.getDomainListFromPath(path)
+        """
+        res = domain_lookup.getDomainListFromPath(pathToTextFile)
 
         self.assertEqual(res, ["google.com", "facebook.com"])
 
-        os.remove(path)
-
-class Test(unittest.TestCase):
-    @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
-    def test_take_shodan_api_key(self, mockFile):
-        shodan.Shodan = MagicMock()
-        shodan.Shodan().dns.domain_info = MagicMock(return_value={'more':False, 'ip': 12345})
+class TestGetShodanInfoDomain(unittest.TestCase):
+    @withATextFile(pathToTextFile='./shodan_api_key', content='798djfhj2208FFFEEDC4')
+    @patch('shodan.Shodan', new_callable=Mock)
+    def test_getShodanInfoOf_domainWithMultipleDataPages(self, shodanMock):
+        """
+            Given a domain, shodan API is called with correct credentials and
+            response from shodan API with multiple pages is saved to JSON 
+            correctly.
+        """
+        shodan.Shodan().dns.domain_info = Mock(side_effect=[{'more':True, 'ip': '168.176.196.13'},{'more':False, 'ip': '168.176.196.11'}])
         
-        _ = domain_lookup.getShodanInfoOf("example.com", 'shodan_api_key')
+        infoOptained = domain_lookup.getShodanInfoOf('example.com', 'shodan_api_key')
 
-        mockFile.assert_called_once_with('shodan_api_key', 'r')
-        shodan.Shodan.assert_called_with("798djfhj2208FFFEEDC4")
+        shodan.Shodan.assert_called_with('798djfhj2208FFFEEDC4')
 
-    @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
-    def test_shodan_domain_lookup_single_page(self, _):
-        shodan.Shodan = MagicMock()
-        shodan.Shodan().dns.domain_info = MagicMock(return_value={'more':False, 'ip': 12345})
+        shodan.Shodan().dns.domain_info.assert_has_calls([
+            call(domain='example.com', history=False, type=None, page=1),
+            call(domain='example.com', history=False, type=None, page=2)
+        ])
+
+        self.assertEqual(infoOptained,json.dumps([{'more':True, 'ip': '168.176.196.13'},{'more':False, 'ip': '168.176.196.11'}]))
+
+
+class TestSaveDomainInfo(unittest.TestCase):
+    domainName = 'domain1'
+    targetDirectory = "./data/domain_raw_data/"
+
+    @classmethod
+    def tearDownClass(self):
+        os.remove(f'{self.targetDirectory}{self.domainName}')
+        os.removedirs(self.targetDirectory)
         
-        infoOptained = domain_lookup.getShodanInfoOf("example.com", 'shodan_api_key')
-        self.assertEqual(infoOptained,json.dumps([{'more':False, 'ip': 12345}]))
-
-        shodan.Shodan().dns.domain_info.assert_called_once_with(
-            domain="example.com",
-            history=False,
-            type=None,
-            page=1
-        )
-
-    @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
-    def test_shodan_domain_lookup_multiple_page(self,_):
-        shodan.Shodan = MagicMock()
-        shodan.Shodan().dns.domain_info = MagicMock(side_effect=[{'more':True, 'ip': 12345},{'more':False, 'ip': 12345}])
-        
-        infoOptained = domain_lookup.getShodanInfoOf("example.com", 'shodan_api_key')
-        self.assertEqual(infoOptained,json.dumps([{'more':True, 'ip': 12345},{'more':False, 'ip': 12345}]))
-
-        
-        shodan.Shodan().dns.domain_info.assert_called_with(
-            domain="example.com",
-            history=False,
-            type=None,
-            page=2
-        )
-
-    def test_get_domain_many(self):
-        
-        path = "./data/domains"
-        f = open(path, "w")
-        f.write("domain\ngoogle.com\nfacebook.com")
-        f.close()
-
-        res = domain_lookup.getDomainListFromPath(path)
-
-
-        self.assertEqual(res, ["google.com","facebook.com"])
-
-        os.remove(path)
-
-    @patch("domain_lookup.getShodanInfoOf", return_value="\{ip : 123456\}")
-    def test_save_domain_info(self, mockGetInfo):
-        domainName = "dominio1"
-        targetDirectory = "./data/domain_raw_data/"
-        relativePathOfNewFile = targetDirectory+asHexString(domainName)
-
-        domain_lookup.saveDomainInfo(domainName, targetDirectory, 'shodan_api_key')
-
-        numberOfFilesCreated = len(os.listdir(targetDirectory))
-        self.assertGreater(numberOfFilesCreated,0)
-
-        os.remove(relativePathOfNewFile)
+    @patch('domain_lookup.writeStringToFile', new_callable=Mock, wraps=writeStringToFile)
+    @patch('domain_lookup.getShodanInfoOf', new_callable=Mock, return_value='{ip : 123456}')
+    def test_saveDomainInfo(self, mockGetShodanInfoOf, spyWriteStringToFile):
+        """
+        Given a domain, the information from Shodan is saved 
+        in a file.
+        """
+        domain_lookup.saveDomainInfo(self.domainName, self.targetDirectory, 'shodan_api_key')
     
-        mockGetInfo.assert_called_once_with(
-            domainName,
+        mockGetShodanInfoOf.assert_called_once_with(
+            self.domainName,
             'shodan_api_key'
         )
 
-    @patch('time.sleep', return_value=None)
-    @patch("domain_lookup.getShodanInfoOf", return_value= 'domain.data')
-    @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1"])
-    def test_get_all_data_single(self, mockGetDomains,mockGetInfo,sleep):
-        targetDirectory = "./data/domain_raw_data/"
-        domain_lookup.saveShodanInfoFromDomainFile('./data/domain_list', targetDirectory, 'shodan_api_key')
-        
-        numberOfFilesCreated = len(os.listdir(targetDirectory))
-        self.assertGreater(numberOfFilesCreated,0)
+        spyWriteStringToFile.assert_called_once_with(
+            f'{self.targetDirectory}{self.domainName}',
+            '{ip : 123456}',
+            overwrite=True
+        )
 
-        mockGetDomains.assert_called_once()
-        mockGetInfo.assert_called_once_with("dominio1", 'shodan_api_key')
+class TestSaveShodanInfoFromDomainFile(unittest.TestCase):
+    domainsPathFile = './data/domain_list'
+    domains = ["domain1","domain2","domain3"]
+    domainsInfo = ['domain1.data','domain2.data','domain3.data']
+    targetDirectory = "./data/domain_raw_data/"
+    shodanAPIKeyPathFile = 'shodan_api_key'
 
-    domains = ["dominio1","dominio2","dominio3"]
-    domainInfo = ['domain1.data','domain2.data','domain3.data']
-    @patch('time.sleep', return_value=None)
-    @patch("domain_lookup.getShodanInfoOf", side_effect=domainInfo)
-    @patch("domain_lookup.getDomainListFromPath",return_value = domains)
-    def test_get_all_data_many(self, mockGetDomains,mockGetInfo,sleep):
-        targetDirectory = "./data/domain_raw_data/"
-        domain_lookup.saveShodanInfoFromDomainFile('./data/domain_list', targetDirectory,'shodan_api_key')
-        
-        numberOfFilesCreated = len(os.listdir(targetDirectory))
-        self.assertEqual(numberOfFilesCreated, 3)
-
-        mockGetDomains.assert_called_once()
-        self.assertEqual(mockGetInfo.call_count,3)
-
-        for domainName, domainInfo in zip(map(asHexString, self.domains), self.domainInfo):
-            with open(targetDirectory+domainName, "r") as f:
-                self.assertEqual(f.read(), domainInfo)
-            os.remove(targetDirectory+domainName)
+    @classmethod
+    def tearDownClass(self):
+        for domainName in self.domains:
+            os.remove(f'{self.targetDirectory}{domainName}')
+        os.removedirs(self.targetDirectory)
     
-    @patch("builtins.open", new_callable=mock_open, 
-        read_data=json.dumps([
-            {'more':False, 
-             'data': [
-                {
-                    "type": "CNAME",
-                    "value": "uberproxy.l.google.com"
-                },
-                {
-                    "type": "A",
-                    "value": "74.125.142.81",
-                }
-                ]
-            }
-        ])
-    )
-
-    def test_get_domain_single_ip(self, _):
+    @patch('domain_lookup.saveDomainInfo', new_callable=Mock, wraps=domain_lookup.saveDomainInfo)
+    @patch('domain_lookup.getShodanInfoOf', new_callable=Mock,side_effect=domainsInfo)
+    @patch('domain_lookup.getDomainListFromPath', new_callable=Mock, return_value = domains)
+    def test_saveShodanInfoFromDomainFile_multipleDomains(self, mockGetDomainListFromPath, mockGetShodanInfoOf, spySaveDomainInfo):
+        """
+        Given file with 3 different domains, saveShodanInfoFromDomainFile is called with this path, a target directory
+        and the path to the API KEY. Then de information recollected by getShodanInfoOf is saved in files using
+        saveDomainInfo
+        """
+        domain_lookup.saveShodanInfoFromDomainFile(self.domainsPathFile, self.targetDirectory, self.shodanAPIKeyPathFile)
         
-        domainIp = domain_lookup.getIPAddressesFromShodanInfo('./data/domain_raw_data/dominio1')
+        mockGetDomainListFromPath.assert_called_once_with(
+            self.domainsPathFile
+        )
 
-        self.assertEqual(domainIp, "74.125.142.81\n")
+        self.assertEqual(spySaveDomainInfo.call_count, 3)
+
+        for domain in self.domains:
+            with self.subTest(domain=domain):
+                spySaveDomainInfo.assert_has_calls([call(domain, self.targetDirectory, self.shodanAPIKeyPathFile)])
     
-    @patch("builtins.open", new_callable=mock_open, 
-        read_data=json.dumps([
-            {'more':True, 
-             'data': [
-                {
-                    "type": "A",
-                    "value": "74.125.142.81",
-                }
-                ]
+class TestGetIPAddressesFromShodanInfo(unittest.TestCase):
+    @withATextFile(pathToTextFile='./data/domain_raw_data/domain1', content=json.dumps([
+            {
+                'more':True, 
+                'data': [{
+                    'type': 'A',
+                    'value': '74.125.142.81',
+                }]
             },
-            {'more':False, 
-             'data': [
-                {
-                    "type": "AAAA",
-                    "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+            {
+                'more':False, 
+                'data': [{
+                    'type': 'AAAA',
+                    'value': '74.125.142.82',
                 },
-                 {
-                    "type": "A",
-                    "value": "74.125.142.83",
-                }
-                ]
+                {
+                    'type': 'A',
+                    'value': '74.125.142.83',
+                }]
             }
         ])
     )
-
-    def test_get_domain_many_pages_ip(self, _):
+    def test_getIPAddressesFromShodanInfo_multiplePages(self, pathToTextFile):
+        """
+        Given a file with the data recollected from shodan, getIPAddressesFromShodanInfo 
+        gets the ips from this data.
+        """
         
-        domainIp = domain_lookup.getIPAddressesFromShodanInfo('./data/domain_raw_data/dominio1')
+        domainIp = domain_lookup.getIPAddressesFromShodanInfo('domain1', os.path.dirname(pathToTextFile) + '/')
 
-        self.assertEqual(domainIp, "74.125.142.81\n74.125.142.83\n")
+        self.assertEqual(domainIp, '74.125.142.81\n74.125.142.82\n74.125.142.83\n')
 
-    # @patch("domain_lookup.getDomainListFromPath",return_value = ["dominio1","dominio2","dominio3"])
-    # @patch("domain_lookup.getIPAddressesFromShodanInfo",side_effect = ["74.125.142.80\n74.125.142.81","74.125.142.82","74.125.142.83"])
-    # def test_create_ipList(self,mockgetIPAddressesFromShodanInfo,mockGetDomains):
+class TestSaveIpList(unittest.TestCase):
+    domainListPath = './data/domain_list'
+    IPListFilePath = './data/ip_list'
+    domains = ['domain1','domain2','domain3']
 
-    #     domain_lookup.saveIpList('./data/ip_list', './data/domain_raw_data/')
+    @classmethod
+    def tearDownClass(self):
+        os.remove(self.IPListFilePath)
+    
+    @patch('domain_lookup.writeStringToFile', new_callable=Mock, wraps=writeStringToFile)
+    @patch('domain_lookup.getDomainListFromPath', return_value=domains)
+    @patch('domain_lookup.getIPAddressesFromShodanInfo', side_effect = ['74.125.142.80\n74.125.142.81','74.125.142.82','74.125.142.83'])
+    def test_saveIpList(self, mockGetIPAddressesFromShodanInfo, mockGetDomainListFromPath, spyWriteStringToFile):
+
+        domain_lookup.saveIpList(self.domainListPath, self.IPListFilePath)
         
-    #     self.assertTrue(os.path.isfile('./data/ip_list'))
-    #     with open("./data/ip_list", 'r') as ipListFile:
-    #         ipList = ipListFile.read()
-    #         ipListFile.close()
-    #         self.assertEqual(ipList,'74.125.142.80\n74.125.142.81\n74.125.142.82\n74.125.142.83\n')
-        
-    #     os.remove('./data/ip_list')
+        mockGetDomainListFromPath.assert_called_once_with(self.domainListPath)
 
-    #     mockGetDomains.assert_called_once()
-    #     self.assertEqual(mockgetIPAddressesFromShodanInfo.call_count,3)
-    #     mockgetIPAddressesFromShodanInfo.assert_called()
+        self.assertEqual(mockGetIPAddressesFromShodanInfo.call_count,3)
 
-if __name__ == "__main__":
+        for domain in self.domains:
+            with self.subTest(domain=domain):
+                mockGetIPAddressesFromShodanInfo.assert_has_calls([
+                    call(domain)
+                ])
+
+        spyWriteStringToFile.assert_called_once_with(
+            self.IPListFilePath,
+            '74.125.142.80\n74.125.142.81\n74.125.142.82\n74.125.142.83\n',
+            overwrite=True
+        )
+
+if __name__ == '__main__':
      unittest.main()
