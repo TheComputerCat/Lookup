@@ -4,6 +4,7 @@ import shodan
 import time
 import traceback
 import sys
+import os
 from common import (
     log,
     asHexString, 
@@ -21,14 +22,16 @@ def getAddressListFromFile(path):
     return list(dict.fromkeys(allAddresses))
 
 
-def getNmapCommands(address: str):
-    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", address]
-    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX", address]
+def getNmapCommands(address: str, addressDataDirPath: str):
+    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", 
+                  f"{addressDataDirPath}{asHexString(address)}-tcp{getTimeString()}", address]
+    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX",
+                  f"{addressDataDirPath}{asHexString(address)}-udp{getTimeString()}", address]
     
     return TCPCommand, UDPCommand
 
-def getNmapInfoOf(address: str):
-    TCPCommand, UDPCommand = getNmapCommands(address)
+def getNmapInfoOf(address: str, addressDataDirPath: str):
+    TCPCommand, UDPCommand = getNmapCommands(address, addressDataDirPath)
     
     TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
     yield {
@@ -43,11 +46,13 @@ def getNmapInfoOf(address: str):
     }
 
 def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
+    os.makedirs(addressDataDir, exist_ok=True)
     IPList = getAddressListFromFile(addressListFilePath)
     for address in IPList:
-        NmapResultGenerator = getNmapInfoOf(address)
+        NmapResultGenerator = getNmapInfoOf(address, addressDataDir)
         try:
-            for result, label in zip(NmapResultGenerator, ['tcp', 'udp']):
+            getNmapInfoOf(address, addressDataDir)
+            for result, label in zip(NmapResultGenerator, ['tcp-std', 'udp-std']):
                 writeStringToFile(f'{addressDataDir}{asHexString(address)}-{label}{getTimeString()}', str(result), overwrite=True)
         except Exception as e:
             log(e, printing=True)

@@ -5,6 +5,7 @@ from common import (
     writeStringToFile,
     formatFilePath,
     formatDirPath,
+    getTimeString,
 )
 import csv
 import json
@@ -52,7 +53,7 @@ def getShodanInfoOf(domain: str, APIkeyFilePath: str):
     return json.dumps(info)
 
 def saveDomainInfo(domainName: str, domainInfoDirPath: str, APIkeyFilePath: str):
-    relativePathToNewFile = f'{domainInfoDirPath}{asHexString(domainName)}'
+    relativePathToNewFile = f'{domainInfoDirPath}{asHexString(domainName)}{getTimeString()}'
     shodanInfo = getShodanInfoOf(domainName, APIkeyFilePath)
     writeStringToFile(relativePathToNewFile, shodanInfo, overwrite=True)
 
@@ -62,7 +63,7 @@ def saveShodanInfoFromDomainFile(domainListFilePath: str, domainDataDirPath: str
         saveDomainInfo(domain, domainDataDirPath, APIkeyFilePath)
 
 def getIPAddressesFromDict(JSONdict: dict):
-    return [item['value'] for item in JSONdict if item['type'] == 'A']
+    return [item['value'] for item in JSONdict if item['type'] == 'A' and item['subdomain'] == '']
 
 def getIPAddressesFromShodanInfo(domainInfoFilePath):
     jsonString = getStringFromFile(domainInfoFilePath)
@@ -78,7 +79,7 @@ def saveIpList(IPListFilePath: str, domainDataDirPath: str):
         if os.path.isfile(domainDataDirPath+fileName)
     ]
 
-    allDomainsIPAddresses = sum(map(getIPAddressesFromShodanInfo, domainInfoFilePaths), [])
+    allDomainsIPAddresses = map(getIPAddressesFromShodanInfo, domainInfoFilePaths)
 
     result = '\n'.join(allDomainsIPAddresses) + '\n'
     writeStringToFile(IPListFilePath, result, overwrite=True)

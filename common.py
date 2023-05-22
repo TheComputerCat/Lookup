@@ -2,7 +2,7 @@ import datetime
 import inspect
 import os
 
-def log(message, logPath="./log", debug=False, testing = True):
+def log(message, logPath="./log", debug=False, printing=False):
     if debug:
         raise message
     try:
@@ -79,8 +79,9 @@ def filterKargsForFunction(function, kargs):
 def setUpWithATextFile(pathToTextFile, content):
     writeStringToFile(pathToTextFile, content)
 
-def tearDownWithATextFile(pathToTextFile):
+def tearDownWithATextFile(pathToTextFile, deleteFolder=True):
     os.remove(pathToTextFile)
     dirname = os.path.dirname(pathToTextFile)
-    if(dirname != '.' and dirname != os.getcwd()):
+
+    if(deleteFolder and dirname != '.' and dirname != os.getcwd()):
         os.removedirs(os.path.dirname(pathToTextFile))

@@ -10,16 +10,23 @@ from unittest.mock import (
     call,
 )
 
+from common import (
+    asHexString,
+)
+
 class Test(unittest.TestCase):
+    @patch("host_lookup.getTimeString", new_callable=Mock(return_value=lambda:""))
     @patch("subprocess.run")
-    def test_call_nmap_command_with_ipv4(self, runMock):
-        generator = host_lookup.getNmapInfoOf("8.8.8.8")
+    def test_call_nmap_command_with_ipv4(self, runMock, _):
+        generator = host_lookup.getNmapInfoOf("8.8.8.8", "./data/host_nmap_data/")
         next(generator)
         next(generator)
 
 
-        TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", "8.8.8.8"]
-        UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX", "8.8.8.8"]
+        TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX",
+                     "./data/host_nmap_data/{}-tcp".format(asHexString("8.8.8.8")), "8.8.8.8"]
+        UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX",
+                     "./data/host_nmap_data/{}-udp".format(asHexString("8.8.8.8")), "8.8.8.8"]
 
         runMock.assert_has_calls([
             call(TCPcommand, capture_output=True, text=True), 
