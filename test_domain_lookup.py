@@ -138,40 +138,40 @@ class TestSaveShodanInfoFromDomainFile(unittest.TestCase):
             with self.subTest(domain=domain):
                 spySaveDomainInfo.assert_has_calls([call(domain, self.targetDirectory, self.shodanAPIKeyPathFile)])
     
-# class TestGetIPAddressesFromShodanInfo(unittest.TestCase):
-#     @withATextFile(pathToTextFile='./data/domain_raw_data/domain1', content=json.dumps([
-#             {
-#                 'more':True, 
-#                 'data': [{
-#                     'type': 'A',
-#                     'subdomain': '',
-#                     'value': '74.125.142.81',
-#                 }]
-#             },
-#             {
-#                 'more':False, 
-#                 'data': [{
-#                     'type': 'AAAA',
-#                     'subdomain': '',
-#                     'value': '74.125.142.82',
-#                 },
-#                 {
-#                     'type': 'A',
-#                     'subdomain': '',
-#                     'value': '74.125.142.83',
-#                 }]
-#             }
-#         ])
-#     )
-#     def test_getIPAddressesFromShodanInfo_multiplePages(self, pathToTextFile):
-#         """
-#         Given a file with the data recollected from shodan, getIPAddressesFromShodanInfo 
-#         gets the ips from this data.
-#         """
+class TestGetIPAddressesFromShodanInfo(unittest.TestCase):
+    @withATextFile(pathToTextFile='./data/domain_raw_data/domain1', content=json.dumps([
+            {
+                'more':True, 
+                'data': [{
+                    'type': 'A',
+                    'subdomain': '',
+                    'value': '74.125.142.81',
+                }]
+            },
+            {
+                'more':False, 
+                'data': [{
+                    'type': 'AAAA',
+                    'subdomain': '',
+                    'value': '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+                },
+                {
+                    'type': 'A',
+                    'subdomain': '',
+                    'value': '74.125.142.83',
+                }]
+            }
+        ])
+    )
+    def test_getIPAddressesFromShodanInfo_multiplePages(self, pathToTextFile):
+        """
+        Given a file with the data recollected from shodan, getIPAddressesFromShodanInfo 
+        gets the ips from this data.
+        """
         
-#         domainIp = domain_lookup.getIPAddressesFromShodanInfo(pathToTextFile)
+        domainIp = domain_lookup.getIPAddressesFromShodanInfo(pathToTextFile)
 
-#         self.assertEqual(domainIp, '74.125.142.81\n74.125.142.82\n74.125.142.83\n')
+        self.assertEqual(domainIp, '74.125.142.81\n74.125.142.83\n')
 
 # class TestSaveIpList(unittest.TestCase):
 #     domainListPath = './data/domain_list'
