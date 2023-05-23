@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         next(generator)
 
 
-        TCPcommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX",
+        TCPcommand = ["nmap", "-sTV", "-top-ports", "2000", "--version-light", "-vv", "-oX",
                      "./data/host_nmap_data/{}-tcp".format(asHexString("8.8.8.8")), "8.8.8.8"]
         UDPcommand = ["nmap", "-sUV", "-top-ports", "200", "--version-light", "-vv", "-oX",
                      "./data/host_nmap_data/{}-udp".format(asHexString("8.8.8.8")), "8.8.8.8"]

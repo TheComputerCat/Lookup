@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import random
 import subprocess
 import shodan
@@ -23,7 +24,7 @@ def getAddressListFromFile(path):
 
 
 def getNmapCommands(address: str, addressDataDirPath: str):
-    TCPCommand = ["nmap", "-sTV", "-top-ports", "5000", "--version-light", "-vv", "-oX", 
+    TCPCommand = ["nmap", "-sTV", "-top-ports", "2000", "--version-light", "-vv", "-oX", 
                   f"{addressDataDirPath}{asHexString(address)}-tcp{getTimeString()}", address]
     UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX",
                   f"{addressDataDirPath}{asHexString(address)}-udp{getTimeString()}", address]
@@ -45,20 +46,25 @@ def getNmapInfoOf(address: str, addressDataDirPath: str):
         "stderr": UDPResult.stderr,
     }
 
+def doNmapAndSaveStd(address: str, addressDataDirPath: str):
+    NmapResultGenerator = getNmapInfoOf(address, addressDataDirPath)
+    for result, label in zip(NmapResultGenerator, ['tcp-std', 'udp-std']):
+        writeStringToFile(f'{addressDataDirPath}{asHexString(address)}-{label}{getTimeString()}', str(result), overwrite=True)
+
 def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
     os.makedirs(addressDataDir, exist_ok=True)
     IPList = getAddressListFromFile(addressListFilePath)
+    pool = mp.Pool(len(IPList))
+
     for address in IPList:
-        NmapResultGenerator = getNmapInfoOf(address, addressDataDir)
         try:
-            getNmapInfoOf(address, addressDataDir)
-            for result, label in zip(NmapResultGenerator, ['tcp-std', 'udp-std']):
-                writeStringToFile(f'{addressDataDir}{asHexString(address)}-{label}{getTimeString()}', str(result), overwrite=True)
+            pool.apply_async(doNmapAndSaveStd, args=(address, addressDataDir))
         except Exception as e:
             log(e, printing=True)
             continue
-        finally:
-            time.sleep(random.uniform(5,10))
+    
+    pool.close()
+    pool.join()
 
 def getShodanApi(APIkeyFilePath: str):
     shodan_key = getStringFromFile(APIkeyFilePath)
