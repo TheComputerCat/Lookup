@@ -54,24 +54,23 @@ class testGetRowsFromDomainInfoPage(unittest.TestCase):
     def test_getARegisters(self):
         result = dump_domains.getARegisters(self.inputJson)
 
-        self.assertDictEqual(
+        self.assertEqual(
             result,
             [
                 dump_domains.TypeARegisterRow({
                     "subdomain": "*.cloud.sandbox",
                     "type": "A",
                     "value": "74.125.142.81",
-                    "last_seen": "2021-01-15T12:57:18.133727+00:00"
+                    "last_seen": "2021-01-15T12:57:18.133727+00:00",
                 }),
                 dump_domains.TypeARegisterRow({
-                "subdomain": "",
-                "type": "A",
-                "value": "74.125.142.23",
-                "last_seen": "2021-01-15T12:57:18.133727+00:00"
+                    "subdomain": "",
+                    "type": "A",
+                    "value": "74.125.142.23",
+                    "last_seen": "2021-01-15T12:57:18.133727+00:00",
                 }),
             ]
         )
 
 if __name__ == '__main__':
      unittest.main()
-
