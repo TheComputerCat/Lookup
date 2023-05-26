@@ -1,5 +1,4 @@
 from common import (
-    log,
     tryTo,
 )
 
