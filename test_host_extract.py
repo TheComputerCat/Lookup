@@ -2,7 +2,6 @@ import host_extract
 import json
 import unittest
 
-
 class TestExtractInfoFromShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""
     {
@@ -93,6 +92,14 @@ class TestExtractInfoFromShodanOutput(unittest.TestCase):
                 "dns.google",
             ]
         )
+    
+    def test_getPortsFromDict(self):
+        result = host_extract.getPortsFromDict(self.dictFromJSON)
+        self.assertEqual(result, [53])
+    
+    def test_getCountryCodeFromDict(self):
+        result = host_extract.getCountryCodeFromDict(self.dictFromJSON)
+        self.assertEqual(result, "US")
 
 if __name__ == "__main__":
     unittest.main()

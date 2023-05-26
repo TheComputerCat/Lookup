@@ -1,10 +1,13 @@
 from common import (
     log,
+    tryTo,
 )
 
+def getCountryCodeFromDict(dict):
+    return tryTo(lambda: dict['country_code'], None)
+
 def getHostNamesFromDict(dict):
-    try:
-        return dict['hostnames']
-    except Exception as e:
-        log(e)
-        return []
+    return tryTo(lambda: dict['hostnames'], [])
+
+def getPortsFromDict(dict):
+    return tryTo(lambda: dict['ports'], [])
