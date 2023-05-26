@@ -9,11 +9,11 @@ import os
 from common import (
     log,
     asHexString, 
+    formatDirPath,
+    formatFilePath,
     getStringFromFile,
     getTimeString,
     writeStringToFile,
-    formatDirPath,
-    formatFilePath,
 )
 
 def getAddressListFromFile(path):
