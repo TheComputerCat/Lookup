@@ -1,6 +1,7 @@
 import datetime
 import inspect
 import os
+import json
 
 def log(message, logPath="./log", debug=False, printing=False, testing=True):
     if debug:
@@ -85,3 +86,12 @@ def tearDownWithATextFile(pathToTextFile, deleteFolder=True):
 
     if(deleteFolder and dirname != '.' and dirname != os.getcwd()):
         os.removedirs(os.path.dirname(pathToTextFile))
+
+def getDictFromJSONFile(path: str):
+    try:
+        object = json.loads(getStringFromFile(path))
+    except Exception as e:
+        log(e, printing=True)
+        return {}
+
+    return object
