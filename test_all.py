@@ -26,13 +26,13 @@ class TestDomainLookup(unittest.TestCase):
                         self.domainDataDirPath])
 
 class TestHostLookup(unittest.TestCase):
-    @withATextFile(pathToTextFile='./data/ip_tiny_list', content='8.8.8.8\n45.33.32.156\n209.51.188.116', deleteFolder=False)
+    @withATextFile(pathToTextFile='./data/ip_tiny_list', content='8.8.8.8\n209.51.188.116', deleteFolder=False)
     def test_1_doShodan(self):
         subprocess.run(['python3', 'host_lookup.py',
                         'shodan', './data/ip_tiny_list',
                         './data/host_shodan_data', './shodan_api_key'])
     
-    @withATextFile(pathToTextFile='./data/ip_tiny_list', content='8.8.8.8\n45.33.32.156\n209.51.188.116', deleteFolder=False)
+    @withATextFile(pathToTextFile='./data/ip_tiny_list', content='8.8.8.8\n209.51.188.116', deleteFolder=False)
     def test_1_doNmap(self):
         subprocess.run(['sudo', 'python3', 'host_lookup.py',
                         'nmap', './data/ip_tiny_list',
