@@ -24,14 +24,16 @@ def _execute(query,return_results = False):
 
 # Define the CRUD functions
 def insert_in(table_name, dict):
-    if validate_with_DTO(table_name,dict):
-        insert_statement = """
-        INSERT INTO {table_name} ({columns}) VALUES ({values});
+    if not validate_with_DTO(table_name,dict):
+        return
+
+    insert_statement = """
+    INSERT INTO {table_name} ({columns}) VALUES ({values});
     """.format(
         table_name=table_name,
         columns=", ".join(dict.keys()),
         values=", ".join([str(value) for _, value in dict.items()])
     )
-        _execute(insert_statement)
-        writeStringToFile('./data/insertions',insert_statement)
-
+    
+    _execute(insert_statement)
+    writeStringToFile('./data/insertions',insert_statement)
