@@ -10,15 +10,6 @@ def getAttrFromDict(dict, key):
 def getListFromDict(dict, key):
     return tryTo(lambda: dict[key], [])
 
-def getCountryCodeFromDict(dict):
-    return getAttrFromDict(dict, 'country_code')
-
-def getHostNamesFromDict(dict):
-    return getListFromDict(dict, 'hostnames')
-
-def getPortsFromDict(dict):
-    return getListFromDict(dict, 'ports')
-
 def trimServiceInfo(dict):
     return {
         "service": getAttrFromDict(dict, "product"),
@@ -45,9 +36,9 @@ def getHostInfoFromDict(dict):
     
     return {
         "ip": address,
-        "hostnames": getHostNamesFromDict(dict),
-        "ports": getPortsFromDict(dict),
-        "country": getCountryCodeFromDict(dict),
+        "hostnames": getListFromDict(dict, 'hostnames'),
+        "ports": getListFromDict(dict, 'ports'),
+        "country": getAttrFromDict(dict, 'country_code'),
         "services": getServicesFromDict(dict),
     }
 

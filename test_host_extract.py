@@ -83,23 +83,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         ]
     }
     """)
-
-    def test_getHostNamesFromDict(self):
-        result = host_extract.getHostNamesFromDict(self.dictFromJSON)
-        self.assertEqual(
-            result,
-            [
-                "dns.google",
-            ]
-        )
-    
-    def test_getPortsFromDict(self):
-        result = host_extract.getPortsFromDict(self.dictFromJSON)
-        self.assertEqual(result, [53])
-    
-    def test_getCountryCodeFromDict(self):
-        result = host_extract.getCountryCodeFromDict(self.dictFromJSON)
-        self.assertEqual(result, "US")
     
     def test_getServicesFromDict(self):
         result = host_extract.getServicesFromDict(self.dictFromJSON)
@@ -114,9 +97,9 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             result,
             {
                 "ip": "8.8.8.8",
-                "hostnames": host_extract.getHostNamesFromDict(self.dictFromJSON),
-                "ports": host_extract.getPortsFromDict(self.dictFromJSON),
-                "country": host_extract.getCountryCodeFromDict(self.dictFromJSON),
+                "hostnames": host_extract.getListFromDict(self.dictFromJSON, 'hostnames'),
+                "ports": host_extract.getListFromDict(self.dictFromJSON, 'ports'),
+                "country": host_extract.getAttrFromDict(self.dictFromJSON, 'country_code'),
                 "services": host_extract.getServicesFromDict(self.dictFromJSON),
             }
         )
