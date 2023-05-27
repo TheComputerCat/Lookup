@@ -9,7 +9,6 @@ class ORGS(Schema):
 class A_RECORDS(Schema):
     id = fields.Integer(allow_none=True)
 
-
 class DOMAINS(Schema):
     id = fields.Integer(allow_none=True)
 
