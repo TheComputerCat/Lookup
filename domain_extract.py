@@ -81,6 +81,7 @@ REGISTERS = {
     'MX': MX,
     'TXT': TXT
 }
+
 def filterData(jsonData):
     filteredData = {'main': {}, 'subdomains': {}}
 
