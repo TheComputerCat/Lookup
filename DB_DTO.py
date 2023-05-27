@@ -20,6 +20,7 @@ def validate_with_DTO(table_name,dict):
     except (ValidationError, Exception) as e:
         log(e)
         return False
+
 def get_correct_DTO(table_name):
     schemas = {
         'ORGS' : ORGS()
