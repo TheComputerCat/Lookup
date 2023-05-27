@@ -209,6 +209,13 @@ class TestExtractShodanInfoFromCroppedShodanOutput(unittest.TestCase):
                 },
             ]
         )
+    
+    def test_getHostInfoFromDict(self):
+        result = host_extract.getHostInfoFromDict(self.dictFromJSON)
+        self.assertEqual(
+            result,
+            {}
+        )
 
 
 if __name__ == "__main__":
