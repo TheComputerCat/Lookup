@@ -2,6 +2,8 @@ from common import (
     tryTo,
 )
 
+import DB_API
+
 def getAttrFromDict(dict, key):
     return tryTo(lambda: dict[key], None)
 
@@ -49,3 +51,31 @@ def getHostInfoFromDict(dict):
         "services": getServicesFromDict(dict),
     }
 
+def getServiceRowFromServiceDict(serviceDict):
+    return {
+        "name": getAttrFromDict(serviceDict, "service"),
+        "version": getAttrFromDict(serviceDict, "version"),
+    }
+
+def getHostRowID(address):
+    row = {"address": address}
+    if not DB_API.isRowInTable("HOSTS", row):
+        DB_API.insert_in("HOSTS", row)
+    
+    query = DB_API.searchForSingleRowQuery("HOSTS", row)
+
+    response = DB_API._execute(query, return_results=True)
+
+    return tryTo(lambda: response[0], None)
+
+
+def insertServiceRowsFromTrimmedDict(trimmedDict):
+    SERVICES = "SERVICES"
+
+    rowsToInsert = filter(
+        lambda row: not DB_API.isRowInTable(SERVICES, row),
+        map(getServiceRowFromServiceDict, trimmedDict["services"])
+    )
+
+    for row in rowsToInsert:
+        DB_API.insert_in(SERVICES, row)

@@ -37,14 +37,20 @@ def insert_in(table_name, dict):
     _execute(insert_statement)
     writeStringToFile('./data/insertions',insert_statement)
 
+def searchForSingleRowQuery(tableName, dict):
+    if not validate_with_DTO(tableName, dict):
+        return ""
+    
+    return "SELECT * FROM {} WHERE {} LIMIT 1".format(
+        tableName,
+        " AND ".join([f"{key}={value}" for key, value in dict.items()])
+    )
+
 def isRowInTable(tableName, dict):
     if not validate_with_DTO(tableName, dict):
         return False
     
-    expression = "SELECT EXISTS(SELECT * FROM {} WHERE {} LIMIT 1)".format(
-        tableName,
-        " AND ".join([f"{key}={value}" for key, value in dict.items()])
-    )
+    expression = "SELECT EXISTS({})".format(searchForSingleRowQuery(tableName, dict))
 
     result = _execute(expression, return_results=True)
 
