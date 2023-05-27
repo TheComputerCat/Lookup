@@ -1,5 +1,5 @@
 import unittest
-import shodan_data_extract
+import domain_extract
 import os
 import json
 
@@ -30,7 +30,7 @@ class TestGetJson(unittest.TestCase):
         """
             Read json from file path
         """
-        jsonResponse = shodan_data_extract.getJsonFromFile(self.pathFile)
+        jsonResponse = domain_extract.getJsonFromFile(self.pathFile)
 
         spyOpen.assert_called_once_with(self.pathFile, 'r')
         self.assertDictEqual(jsonResponse, json.loads(content))
@@ -39,7 +39,7 @@ class TestGetJson(unittest.TestCase):
         """
             Read json from nonexisting path
         """
-        jsonResponse = shodan_data_extract.getJsonFromFile(self.pathFile)
+        jsonResponse =domain_extract.getJsonFromFile(self.pathFile)
         self.assertDictEqual(jsonResponse, {})
 
 class TestGetData(unittest.TestCase):
@@ -180,7 +180,7 @@ class TestGetData(unittest.TestCase):
         """
             Get Data from a empty json dictionary
         """
-        jsonResponse = shodan_data_extract.filterJson(self.jsonDic)
+        jsonResponse = domain_extract.filterJson(self.jsonDic)
 
         self.maxDiff = None
 
