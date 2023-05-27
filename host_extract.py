@@ -48,3 +48,4 @@ def getHostInfoFromDict(dict):
         "country": getCountryCodeFromDict(dict),
         "services": getServicesFromDict(dict),
     }
+
