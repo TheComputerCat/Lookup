@@ -28,10 +28,23 @@ def trimServiceInfo(dict):
     }
 
 def getServicesFromDict(dict):
-    data = tryTo(lambda: dict['data'], [])
+    data = getListFromDict(dict, 'data')
     return list(
         map(
             trimServiceInfo,
             filter(lambda aDict: "product" in aDict, data)
         )
     )
+
+def getHostInfoFromDict(dict):
+    address = getAttrFromDict(dict, "ip_str")
+    if address is None:
+        return {}
+    
+    return {
+        "ip": address,
+        "hostnames": getHostNamesFromDict(dict),
+        "ports": getPortsFromDict(dict),
+        "country": getCountryCodeFromDict(dict),
+        "services": getServicesFromDict(dict),
+    }

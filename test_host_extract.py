@@ -107,6 +107,19 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             result,
             []
         )
+    
+    def test_getHostInfoFromDict(self):
+        result = host_extract.getHostInfoFromDict(self.dictFromJSON)
+        self.assertEqual(
+            result,
+            {
+                "ip": "8.8.8.8",
+                "hostnames": host_extract.getHostNamesFromDict(self.dictFromJSON),
+                "ports": host_extract.getPortsFromDict(self.dictFromJSON),
+                "country": host_extract.getCountryCodeFromDict(self.dictFromJSON),
+                "services": host_extract.getServicesFromDict(self.dictFromJSON),
+            }
+        )
 
 class TestExtractShodanInfoFromCroppedShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""
