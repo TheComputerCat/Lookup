@@ -9,13 +9,13 @@ def getListFromDict(dict, key):
     return tryTo(lambda: dict[key], [])
 
 def getCountryCodeFromDict(dict):
-    return tryTo(lambda: dict['country_code'], None)
+    return getAttrFromDict(dict, 'country_code')
 
 def getHostNamesFromDict(dict):
-    return tryTo(lambda: dict['hostnames'], [])
+    return getListFromDict(dict, 'hostnames')
 
 def getPortsFromDict(dict):
-    return tryTo(lambda: dict['ports'], [])
+    return getListFromDict(dict, 'ports')
 
 def trimServiceInfo(dict):
     return {
