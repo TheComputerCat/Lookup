@@ -2,6 +2,8 @@ from common import (
     log
 )
 import json
+from os import listdir
+from os.path import isfile, join
 
 
 def getJsonFromFile(filePath):
@@ -88,5 +90,36 @@ def filterData(jsonData):
         filteredData['subdomains'][register] = subdomains
 
     return filteredData
+
+def getJoinedData(jsonList):
+    joinedData = []
+    for json in jsonList:
+        if hasData(json):
+            joinedData += json["data"]
+    return joinedData
+
+def getDomain(jsonList):
+    return jsonList[0]["domain"]
+
+def hasInfo(jsonList):
+    return len(jsonList) > 0 and hasData(jsonList[0])
+
+def filterFromJsonList(jsonList):
+    if hasInfo(jsonList):
+        joined = {
+            "domain": getDomain(jsonList),
+            "data": getJoinedData(jsonList)
+        }
+
+        return filterJson(joined)
+    return {}
+    
+def extractDataFromFile(path):
+    jsonList = getJsonFromFile(path)
+    return filterFromJsonList(jsonList)
+
+def extractDataFromFolder(path):
+    filesInFolder = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
+    return list(map(extractDataFromFile, filesInFolder))
 
 

@@ -1,21 +1,22 @@
 import unittest
 import domain_extract
-import os
 import json
-
-from common import (
-    asHexString,
-)
 
 from unittest.mock import (
     patch,
-    call,
     Mock,
+)
+
+from domain_extract_fixtures import (
+    jsonDic1,
+    jsonDic2,
+    jsonDataDic1,
+    jsonDataDic2,
+    jsonDataDicJoined
 )
 
 from common import (
     createFixture,
-    writeStringToFile,
     setUpWithATextFile,
     tearDownWithATextFile,
 )
@@ -43,147 +44,72 @@ class TestGetJson(unittest.TestCase):
         self.assertDictEqual(jsonResponse, {})
 
 class TestGetData(unittest.TestCase):
-    jsonDic = {
-        'domain': 'domain.org',
-        'tags': [
-            'dmarc',
-            'spf'
-        ],
-        'subdomains': [
-            'sub1',
-            'sub2'
-        ],
-        'data': [
-            {
-                'tags': [],
-                'subdomain': '',
-                'type': 'A',
-                'ports': [
-                    2222
-                ],
-                'value': '192.168.1.1',
-                'last_seen': '1991-05-17T07:53:21.000000'
-            },
-            {
-                'subdomain': '',
-                'type': 'A',
-                'value': '172.132.16.77',
-                'last_seen': '2011-05-17T01:26:37.000000'
-            },
-            {
-                'subdomain': '',
-                'type': 'MX',
-                'value': 'mail.domain.org',
-                'last_seen': '1991-05-23T15:17:24.000000'
-            },
-            {
-                'subdomain': '',
-                'type': 'MX',
-                'value': 'mail2.domain.org',
-                'last_seen': '1992-05-23T15:17:24.000000'
-            },
-            {
-                "subdomain": "",
-                "type": "TXT",
-                "value": "v=spf1 a mx ip4:144.91.118.158 ip4:206.212.100.31 ~all",
-                "last_seen": "2023-05-23T15:11:10.584000"
-            },
-            {
-                'subdomain': 'sub1',
-                'type': 'A',
-                "ports": [
-                    21,
-                    25,
-                ],
-                'value': 'sub1.domain.org',
-                'last_seen': '1996-05-23T15:17:24.000000'
-            },
-            {
-                'subdomain': 'sub2',
-                'type': 'MX',
-                'value': 'sub2.domain.org',
-                'last_seen': '1996-05-23T15:17:24.000000'
-            },
-            {
-                'subdomain': '_dmarc',
-                'type': 'TXT',
-                'value': 'v=DMARC1; p=none"',
-                'last_seen': '1996-05-23T15:17:24.000000',
-            }
-        ],
-        'more': False,
-    }
-    jsonDataDic = {
-        'domain': 'domain.org',
-        'main' :{
-            'A':[
-                {
-                    'ports': [
-                        2222
-                    ],
-                    'value': '192.168.1.1',
-                    'last_seen': '1991-05-17T07:53:21.000000',
-                    
-                },
-                {
-                    'ports': [],
-                    'value': '172.132.16.77',
-                    'last_seen': '2011-05-17T01:26:37.000000',
-                }
-            ],
-            'MX': [
-                {
-                    'value': 'mail.domain.org',
-                    'last_seen': '1991-05-23T15:17:24.000000'
-                },
-                {
-                    'value': 'mail2.domain.org',
-                    'last_seen': '1992-05-23T15:17:24.000000'
-                }
-            ],
-            'TXT':[
-                {
-                    "value": "v=spf1 a mx ip4:144.91.118.158 ip4:206.212.100.31 ~all",
-                    "last_seen": "2023-05-23T15:11:10.584000"
-                }
-            ]
-        },
-        'subdomains': {
-            'A':[
-                {   
-                    'subdomain': 'sub1',
-                    'ports': [
-                        21,
-                        25,
-                    ],
-                    'value': 'sub1.domain.org',
-                    'last_seen': '1996-05-23T15:17:24.000000',
-                }
-            ],
-            'MX': [
-                {
-                    'subdomain': 'sub2',
-                    'value': 'sub2.domain.org',
-                    'last_seen': '1996-05-23T15:17:24.000000',
-                }
-            ],
-            'TXT': [
-                {
-                    'subdomain': '_dmarc',
-                    'value': 'v=DMARC1; p=none"',
-                    'last_seen': '1996-05-23T15:17:24.000000',
-                }
-            ]
-        }
-    }
+    jsonDicList = [jsonDic1, jsonDic2]
+    jsonDataDicList = jsonDataDicJoined
+
     def test_filterDataFomJson_withAExistingFile(self):
         """
-            Get Data from a empty json dictionary
+            Get Data from a json dictionary from shodan
         """
-        jsonResponse = domain_extract.filterJson(self.jsonDic)
+        jsonResponse = domain_extract.filterJson(jsonDic1)
 
         self.maxDiff = None
 
-        self.assertDictEqual(jsonResponse, self.jsonDataDic)
+        self.assertDictEqual(jsonResponse, jsonDataDic1)
+    
+    def test_filterJsonList_withAnArrayOfJson(self):
+        """
+            Get array of filtered data from a array of JSON
+        """
+
+        jsonRepose = domain_extract.filterFromJsonList(self.jsonDicList)
+
+        self.maxDiff = None
+
+        self.assertDictEqual(jsonRepose, jsonDataDicJoined)
+
+
+class TestExtractDataFromFolder(unittest.TestCase):
+    pathFile1 = './data/domain_raw_data/file1'
+
+    jsonInFile1 = f'[{json.dumps(jsonDic1)},{json.dumps(jsonDic2)}]'
+    jsonFilteredDataFile1 = jsonDataDicJoined
+
+    @withATextFile(pathToTextFile=pathFile1, content=jsonInFile1)
+    def test_extractDataFromFile_fromAFile(self, pathToTextFile):
+        """
+            From a file containing a shodan response, an array of two json, 
+            extractDataFromFile returns an array of the filtered data from each
+            json.
+        """
+
+        jsonReposesList = domain_extract.extractDataFromFile(pathToTextFile)
+
+        self.maxDiff = None
+
+        self.assertDictEqual(jsonReposesList, jsonDataDicJoined)
+
+    pathFile2 = './data/domain_raw_data/file2'
+    pathFile3 = './data/domain_raw_data/file3'
+
+    jsonInFile2 = f'[{json.dumps(jsonDic1)},{json.dumps(jsonDic2)}]'
+    jsonInFile3 = f'[{json.dumps(jsonDic2)}]'
+
+    filteredDataInFolder = [jsonDataDicJoined, jsonDataDic2]
+
+    folderPath = './data/domain_raw_data/'
+
+    @withATextFile(pathToTextFile=pathFile3, content=jsonInFile3)
+    @withATextFile(pathToTextFile=pathFile2, content=jsonInFile2, deleteFolder=False)
+    def test_extractDataFromFolder_fromAFolderWithTwoFiles(self):
+
+        dataListFromFolder = domain_extract.extractDataFromFolder(self.folderPath)
+
+        self.maxDiff = None
+
+        for i in range(0, 1):
+            with self.subTest(i=i):
+                self.assertDictEqual(dataListFromFolder[i], self.filteredDataInFolder[i])
+
 if __name__ == '__main__':
      unittest.main()
