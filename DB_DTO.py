@@ -1,16 +1,36 @@
 from marshmallow import Schema, fields, EXCLUDE, ValidationError
 from common import log
 class ORGS(Schema):
-    id = fields.Integer(allow_none=True)
     domain = fields.String(required = True)
     class Meta:
         unknown = EXCLUDE
 
 class A_RECORDS(Schema):
-    id = fields.Integer(allow_none=True)
+    address = fields.Integer(required = True)
+    parent_domain = fields.Integer(required = True)
+    time = fields.DateTime(required = True)
+    class Meta:
+        unknown = EXCLUDE
 
 class DOMAINS(Schema):
-    id = fields.Integer(allow_none=True)
+    name = fields.String(allow_none=True)
+    subdomain = fields.Boolean(required = True)
+    org = fields.Integer(allow_none=True, required=True)
+    class Meta:
+        unknown = EXCLUDE
+
+class HOST(Schema):
+    address = fields.Integer(required = True)
+    class Meta:
+        unknown = EXCLUDE
+
+class MX_RECORDS(Schema):
+    value = fields.String(required = True)
+    subdomain = fields.Boolean(required = True)
+    parent_domain = fields.Integer(required = True)
+    time = fields.DateTime(required = True)
+    class Meta:
+        unknown = EXCLUDE
 
 def validate_with_DTO(table_name,dict):
     try:
@@ -22,7 +42,4 @@ def validate_with_DTO(table_name,dict):
         return False
 
 def get_correct_DTO(table_name):
-    schemas = {
-        'ORGS' : ORGS()
-    }
-    return schemas[table_name]
+    return globals()[table_name]()

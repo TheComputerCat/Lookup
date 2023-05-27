@@ -22,7 +22,6 @@ def _execute(query,return_results = False):
             cursor.close()
             connection.close()
 
-# Define the CRUD functions
 def insert_in(table_name, dict):
     if not validate_with_DTO(table_name, dict):
         return
