@@ -39,7 +39,7 @@ class SERVICES(Schema):
 class HOST_SERVICES(Schema):
     host = fields.Integer(required=True)
     service = fields.Integer(required=True)
-    time = fields.DateTime(required=True)
+    timestamp = fields.DateTime(required=True)
     port = fields.Integer(required=True)
 
 class CPE_CODES(Schema):

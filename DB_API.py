@@ -37,11 +37,12 @@ def insert_in(table_name, dict):
     _execute(insert_statement)
     writeStringToFile('./data/insertions',insert_statement)
 
-def searchForSingleRowQuery(tableName, dict):
+def searchForSingleRowQuery(tableName, dict, cols=["*"]):
     if not validate_with_DTO(tableName, dict):
         return ""
     
-    return "SELECT * FROM {} WHERE {} LIMIT 1".format(
+    return "SELECT {} FROM {} WHERE {} LIMIT 1".format(
+        ", ".join(cols),
         tableName,
         " AND ".join([f"{key}={value}" for key, value in dict.items()])
     )
