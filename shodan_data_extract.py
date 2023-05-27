@@ -2,8 +2,6 @@ from common import (
     log
 )
 import json
-import os
-import functools
 
 
 def getJsonFromFile(filePath):
@@ -59,21 +57,35 @@ def isMXRegister(data):
 def isTXTRegister(data):
     return data['type'] == 'TXT'
 
+def A():
+    return formatARegisters, isARegister
 
+def MX():
+    return formatMXRegisters, isMXRegister
+
+def TXT():
+    return formatMXRegisters, isTXTRegister
+
+def getRegister(register, data):
+    formatter, selector = register()
+    registerData = list(map(formatter ,list(filter(selector, data))))
+
+    main = list(map(removeSubdomainKey, list(filter(isMainDomain, registerData))))
+    subdomains = list(filter(lambda x : not isMainDomain(x), registerData))
+    return main, subdomains
+
+REGISTERS = {
+    'A': A,
+    'MX': MX,
+    'TXT': TXT
+}
 def filterData(jsonData):
     filteredData = {'main': {}, 'subdomains': {}}
 
-    A = list(map(formatARegisters ,list(filter(isARegister, jsonData))))
-    MX = list(map(formatMXRegisters ,list(filter(isMXRegister, jsonData))))
-    TXT = list(map(formatMXRegisters ,list(filter(isTXTRegister, jsonData))))
-
-    filteredData['main']['A'] = list(map(removeSubdomainKey ,list(filter(isMainDomain, A))))
-    filteredData['main']['MX'] = list(map(removeSubdomainKey ,list(filter(isMainDomain, MX))))
-    filteredData['main']['TXT'] = list(map(removeSubdomainKey ,list(filter(isMainDomain, TXT))))
-
-    filteredData['subdomains']['A'] = list(filter(lambda x : not isMainDomain(x), A))
-    filteredData['subdomains']['MX'] = list(filter(lambda x : not isMainDomain(x), MX))
-    filteredData['subdomains']['TXT'] = list(filter(lambda x : not isMainDomain(x), TXT))
+    for register in REGISTERS:
+        main, subdomains = getRegister(REGISTERS[register], jsonData)
+        filteredData['main'][register] = main
+        filteredData['subdomains'][register] = subdomains
 
     return filteredData
 
