@@ -2,7 +2,7 @@ import host_extract
 import json
 import unittest
 
-class TestExtractInfoFromShodanOutput(unittest.TestCase):
+class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""
     {
         "region_code": null,
@@ -100,6 +100,103 @@ class TestExtractInfoFromShodanOutput(unittest.TestCase):
     def test_getCountryCodeFromDict(self):
         result = host_extract.getCountryCodeFromDict(self.dictFromJSON)
         self.assertEqual(result, "US")
+    
+    def test_getServicesFromDict(self):
+        result = host_extract.getServicesFromDict(self.dictFromJSON)
+        self.assertEqual(
+            result,
+            []
+        )
+
+class TestExtractShodanInfoFromCroppedShodanOutput(unittest.TestCase):
+    dictFromJSON = json.loads("""
+    {
+        "data": [
+            {
+            "hash": 4674193,
+            "_shodan": {
+                "region": "eu",
+                "ptr": true,
+                "module": "http",
+                "id": "0c791bcb-782d-4168-bd37-b76540f11916",
+                "options": {},
+                "crawler": "bf213bc419cc8491376c12af31e32623c1b6f467"
+            },
+            "product": "nginx",
+            "http": {
+                "status": 301,
+                "robots_hash": null,
+                "redirects": [],
+                "securitytxt": null,
+                "title": "301 Moved Permanently",
+                "sitemap_hash": null,
+                "robots": null,
+                "server": "nginx/1.9.4",
+                "headers_hash": 1258854265,
+                "host": "5.9.111.213",
+                "location": "/",
+                "components": {},
+                "html_hash": -1755514192,
+                "sitemap": null,
+                "securitytxt_hash": null
+            },
+            "os": null,
+            "timestamp": "2023-05-16T13:23:58.464783",
+            "isp": "Hetzner Online GmbH",
+            "cpe23": [
+                "cpe:2.3:a:igor_sysoev:nginx:1.9.4"
+            ],
+            "cpe": [
+                "cpe:/a:igor_sysoev:nginx:1.9.4"
+            ],
+            "transport": "tcp",
+            "asn": "AS24940",
+            "hostnames": [
+                "karisma.org.co"
+            ],
+            "location": {
+                "city": "N\u00fcrnberg",
+                "region_code": "BY",
+                "area_code": null,
+                "longitude": 11.07752,
+                "latitude": 49.45421,
+                "country_code": "DE",
+                "country_name": "Germany"
+            },
+            "version": "1.9.4",
+            "ip": 84504533,
+            "domains": [
+                "karisma.org.co"
+            ],
+            "org": "Hetzner Online GmbH",
+            "port": 80,
+            "opts": {},
+            "ip_str": "5.9.111.213"
+        }
+        ]
+    }
+    """)
+
+    def test_getServicesFromDict(self):
+        result = host_extract.getServicesFromDict(self.dictFromJSON)
+        self.assertEqual(
+            result,
+            [
+                {
+                    "service": "nginx",
+                    "version": "1.9.4",
+                    "cpe": [
+                        "cpe:/a:igor_sysoev:nginx:1.9.4"
+                    ],
+                    "cpe23": [
+                        "cpe:2.3:a:igor_sysoev:nginx:1.9.4"
+                    ],
+                    "timestamp": "2023-05-16T13:23:58.464783",
+                    "port": 80,
+                },
+            ]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
