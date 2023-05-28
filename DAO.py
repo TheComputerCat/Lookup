@@ -44,7 +44,6 @@ class Domain(Base):
     organization: Mapped[Optional[Organization]] = relationship(back_populates="domains")
     a_records: Mapped[List["ARecord"]] = relationship(back_populates="parent_domain")
     mx_records: Mapped[List["MXRecord"]] = relationship(back_populates="parent_domain")
-    mx_records_with_domain: Mapped[List["MXRecord"]] = relationship(back_populates="domain")
     txt_records: Mapped[List["TXTRecord"]] = relationship(back_populates="parent_domain")
 
 class Host(Base):
@@ -72,11 +71,10 @@ class MXRecord(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     parent_domain_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS.id"), nullable=False)
-    domain_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS.id"), nullable=False)
+    domain: Mapped[str] = mapped_column(String(255), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     parent_domain: Mapped[Domain] = relationship(back_populates="mx_records")
-    domain: Mapped[Domain] = relationship(back_populates="mx_records_with_domain")
 
 class TXTRecord(Base):
     __tablename__ = "TXT_RECORDS"

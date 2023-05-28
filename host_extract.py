@@ -2,6 +2,12 @@ from common import (
     tryTo,
 )
 
+from DAO import (
+    CPECode,
+    Host,
+    HostService,
+)
+
 def getAttrFromDict(dict, key):
     return tryTo(lambda: dict[key], None)
 
