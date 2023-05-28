@@ -10,4 +10,4 @@ log
 
 .coverage
 
-DB_credentials.json
+data_base_config.ini
