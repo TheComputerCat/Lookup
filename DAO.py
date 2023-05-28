@@ -21,8 +21,6 @@ from typing import (
     Optional,
 )
 
-import urllib.parse
-
 class Base(DeclarativeBase):
     pass
 
