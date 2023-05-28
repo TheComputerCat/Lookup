@@ -115,7 +115,7 @@ if __name__ == "__main__":
             addressDataDirPath = formatDirPath(args[2])
             shodanAPIKeyFilePath = formatFilePath(args[3])
 
-            saveShodanInfoOf(addressListFilePath, addressDataDirPath,shodanAPIKeyFilePath)
+            saveShodanInfoOf(addressListFilePath, addressDataDirPath, shodanAPIKeyFilePath)
         elif args[0] == "nmap":
             if len(args) < 3:
                 raise Exception("""Se necesitan tres argumentos más:
