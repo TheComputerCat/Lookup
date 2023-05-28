@@ -2,7 +2,7 @@ from common import (
     tryTo,
 )
 
-from DAO import (
+from Model import (
     CPECode,
     Host,
     HostService,
