@@ -25,6 +25,8 @@ from typing import (
     Optional,
 )
 
+import urllib.parse
+
 metadata_obj = MetaData()
 class Base(DeclarativeBase):
     pass
@@ -35,7 +37,7 @@ class Host(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     address: Mapped[str] = mapped_column(String(15))
 
-    host_services: Mapped[List["HostService"]] = relationship(back_populates="host")
+    services_in_host: Mapped[List["HostService"]] = relationship(back_populates="host")
 
 class Service(Base):
     __tablename__ = "SERVICES"
@@ -45,7 +47,7 @@ class Service(Base):
     version: Mapped[str] = mapped_column(String(100), nullable=True)
 
     cpe_code: Mapped["CPECode"] = relationship(back_populates="service")
-    host_services: Mapped[List["HostService"]] = relationship(back_populates="service")
+    hosts_with_service: Mapped[List["HostService"]] = relationship(back_populates="service")
 
 class HostService(Base):
     __tablename__ = "HOST_SERVICES"
@@ -56,8 +58,8 @@ class HostService(Base):
     source: Mapped[str] = mapped_column(String(100), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    host: Mapped[Host] = relationship(back_populates="host_services")
-    service: Mapped[Service] = relationship(back_populates="host_services")
+    host: Mapped[Host] = relationship(back_populates="services_in_host")
+    service: Mapped[Service] = relationship(back_populates="hosts_with_service")
 
 class CPECode(Base):
     __tablename__ = "CPE_CODES"
