@@ -25,7 +25,7 @@ def getConfig():
     config = configparser.ConfigParser()
     try:
         if CONFIG_FILE_PATH is None:
-            raise Exception("CONFIG_FILE_PATH is not set")
+            raise Exception('CONFIG_FILE_PATH is not set')
         config.read(CONFIG_FILE_PATH)
         return config
     except Exception as e:
@@ -54,6 +54,6 @@ def insert(TableObject):
             session.add(TableObject)
             session.commit()
         except Exception as e:
-            log(e)
+            log(e, debug=True, printing=True) 
         finally:
             session.rollback()
