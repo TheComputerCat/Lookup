@@ -46,8 +46,10 @@ class Domain(Base):
 class Host(Base):
     __tablename__ = "HOSTS"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    address: Mapped[str] = mapped_column(String(15))
+    address: Mapped[str] = mapped_column(String(15), primary_key=True)
+    country: Mapped[str] = mapped_column(String(2), nullable=True)
+    provider: Mapped[str] = mapped_column(String(100), nullable=True)
+    isp: Mapped[str] = mapped_column(String(100), nullable=True)
 
     services_in_host: Mapped[List["HostService"]] = relationship(back_populates="host")
     a_records_with_host: Mapped[List["ARecord"]] = relationship(back_populates="address")
@@ -56,8 +58,8 @@ class ARecord(Base):
     __tablename__ = "A_RECORDS"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    ip_address: Mapped[str] = mapped_column(ForeignKey("HOSTS.address"), nullable=False)
     parent_domain_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS.id"), nullable=False)
-    address_id: Mapped[int] = mapped_column(ForeignKey("HOSTS.id"), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     parent_domain: Mapped[Domain] = relationship(back_populates="a_records")
@@ -97,7 +99,7 @@ class HostService(Base):
     __tablename__ = "HOST_SERVICES"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    host_id: Mapped[int] = mapped_column(ForeignKey("HOSTS.id"), nullable=False)
+    address: Mapped[str] = mapped_column(ForeignKey("HOSTS.address"), nullable=False)
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=True)
     source: Mapped[str] = mapped_column(String(100), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
@@ -113,3 +115,13 @@ class CPECode(Base):
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=False)
 
     service: Mapped[Service] = relationship(back_populates="cpe_code")
+
+
+if __name__ == "__main__":
+    from query_manager import (
+        setConfigFile,
+        createTables,
+    )
+
+    setConfigFile("./data/credentials.ini")
+    createTables()
