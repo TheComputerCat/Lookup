@@ -115,13 +115,3 @@ class CPECode(Base):
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=False)
 
     service: Mapped[Service] = relationship(back_populates="cpe_code")
-
-
-if __name__ == "__main__":
-    from query_manager import (
-        setConfigFile,
-        createTables,
-    )
-
-    setConfigFile("./data/credentials.ini")
-    createTables()
