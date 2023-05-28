@@ -80,7 +80,7 @@ def getDirectoryPathOf(filePath: str):
     return '/'.join(filePath.split("/")[0:-1])
 
 def getIPAddressFilePath(IP: str, addressDataDirPath: str):
-    return f'{addressDataDirPath}{IP}'
+    return f'{addressDataDirPath}{asHexString(IP)}{getTimeString()}'
 
 def saveShodanInfoOf(IPAddressListFilePath: str, addressDataDirPath: str, keyFilePath: str):
     api = getShodanApi(keyFilePath)
