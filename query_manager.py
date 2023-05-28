@@ -1,22 +1,38 @@
-from DAO import *
 import configparser
-from common import (
-    log
-)
-
+import os
+from sqlalchemy import create_engine
 from sqlalchemy.orm import (
     Session
 )
 
-from datetime import (
-    datetime,
+from common import (
+    log
 )
+from model import *
 
+CONFIG_FILE_PATH = None
+
+def setConfigFile(configFilePath):
+    global CONFIG_FILE_PATH
+    try:
+        if not os.path.exists(configFilePath):
+            raise Exception(f'{configFilePath} file do not exist')
+        CONFIG_FILE_PATH = configFilePath
+    except Exception as e:
+        log(e, debug=True, printing=True) 
+
+def getConfig():
+    config = configparser.ConfigParser()
+    try:
+        if CONFIG_FILE_PATH is None:
+            raise Exception("CONFIG_FILE_PATH is not set")
+        config.read(CONFIG_FILE_PATH)
+        return config
+    except Exception as e:
+        log(e, debug=True, printing=True)  
 
 def getDBEngine():
-    config = configparser.ConfigParser()
-    config.read("data_base_config.ini")
-
+    config = getConfig()
     host = config['default']['host']
     port = config['default']['port']
     database = config['default']['database']
