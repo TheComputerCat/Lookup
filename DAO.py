@@ -4,13 +4,9 @@ from datetime import (
 
 from sqlalchemy import (
     create_engine,
-    Column,
     DateTime,
     ForeignKey,
-    Integer,
-    MetaData,
     String,
-    Table,
 )
 
 from sqlalchemy.orm import (
@@ -22,12 +18,10 @@ from sqlalchemy.orm import (
 
 from typing import (
     List,
-    Optional,
 )
 
 import urllib.parse
 
-metadata_obj = MetaData()
 class Base(DeclarativeBase):
     pass
 
