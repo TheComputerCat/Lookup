@@ -9,8 +9,6 @@ from sqlalchemy import (
     Table,
 )
 
-import urllib.parse
-
 metadata_obj = MetaData()
 
 hosts_table = Table(
