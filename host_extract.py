@@ -2,7 +2,7 @@ from common import (
     tryTo,
 )
 
-from Model import (
+from model import (
     CPECode,
     Host,
     HostService,
