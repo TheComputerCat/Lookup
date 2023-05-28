@@ -3,7 +3,6 @@ from datetime import (
 )
 
 from sqlalchemy import (
-    create_engine,
     DateTime,
     ForeignKey,
     String,
