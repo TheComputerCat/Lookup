@@ -33,7 +33,7 @@ def saveVulnerabilitiesFrom(cpeCode):
     while len(vulnerabilities) < numberOfVulnerabilities:
         time.sleep(6)
         moreVulnerabilities = queryProduct(cpeCode, len(vulnerabilities))["vulnerabilities"]
-        vulnerabilities.append(moreVulnerabilities)
+        vulnerabilities += moreVulnerabilities
 
     print('La solicitud de vulnerabilidades para {} ha terminado'.format(cpeCode))
     return vulnerabilities
