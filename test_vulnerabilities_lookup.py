@@ -275,21 +275,22 @@ result2 = """
 
 first_page = json.loads(result1)
 second_page = json.loads(result2)
+cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
+
+def side_effect(code, startIndex = 0):
+    if code != cpeCode:
+        return
+    if startIndex == 0:
+        return first_page
+    if startIndex == 1:
+        return second_page
 
 
 class Test(unittest.TestCase):
-    def test_save(self):
-        cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
-        file = open("data/cpe_query", 'w')
-        jsony = vulnerabilities_lookup.queryCPE(cpeCode)
-        file.write(json.dumps(jsony, indent=4))
-        file.close()
-
     @patch("time.sleep")
-    #@patch("vulnerabilities_lookup.queryProduct", return_value=lambda a, b: result1 if b == 0 else result2)
     def test_cpeIsQueried(self, timeMock):
-        vulnerabilities_lookup.queryProduct = Mock(return_value=second_page)
-        vulnerabilities_lookup.queryCPE = Mock(return_value=first_page)
+        vulnerabilities_lookup.queryProduct = Mock(side_effect=side_effect)
+        vulnerabilities_lookup.queryCPE = Mock(side_effect=side_effect)
         cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
 
         vulnerabilities_lookup.saveVulnerabilitiesFrom(cpeCode)
