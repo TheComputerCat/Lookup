@@ -327,15 +327,29 @@ class Test(unittest.TestCase):
     @withATextFile(pathToTextFile=cpeCodesFilePath, content='cpe\n{}\n{}'.format(cpeCode1, cpeCode2), delete_folder=False)
     @patch('vulnerabilities_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)
     @patch('vulnerabilities_lookup.writeStringToFile', new_callable=Mock)
-    @patch('vulnerabilities_lookup.getVulnerabilitiesOf', new_callable=Mock,
-           return_value='{}'.format(expectedVulnerabilities))
+    @patch('vulnerabilities_lookup.getVulnerabilitiesOf', new_callable=Mock, return_value=expectedVulnerabilities)
     def test_vulnerabilities_are_saved_correctly(self, mockVulnerabilitiesQuery, spyWriteOnFile, mockGetTimeString):
+
         vulnerabilities_lookup.saveVulnerabilitiesOfProducts(self.cpeCodesFilePath, self.targetDirectory)
 
         self.assertEqual(mockVulnerabilitiesQuery.call_count, 2)
         mockVulnerabilitiesQuery.assert_has_calls([
             call(self.cpeCode1),
             call(self.cpeCode2),
+        ])
+
+        self.assertEqual(spyWriteOnFile.call_count, 2)
+        spyWriteOnFile.assert_has_calls([
+            call(
+                f'{self.targetDirectory}_{self.cpeCode1}_{self.fakeDate}',
+                self.expectedVulnerabilities,
+                True
+            ),
+            call(
+                f'{self.targetDirectory}_{self.cpeCode2}_{self.fakeDate}',
+                self.expectedVulnerabilities,
+                True
+            ),
         ])
 
 if __name__ == "__main__":

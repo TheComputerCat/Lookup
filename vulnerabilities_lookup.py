@@ -42,7 +42,7 @@ def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath
             break
         try:
             vulnerabilities = getVulnerabilitiesOf(code)
-            writeStringToFile(f'{vulnerabilitiesDirectoryPath}{code}_{getTimeString()}', vulnerabilities, True)
+            writeStringToFile(f'{vulnerabilitiesDirectoryPath}_{code}_{getTimeString()}', vulnerabilities, True)
         except Exception as e:
             log(e)
     file.close()
