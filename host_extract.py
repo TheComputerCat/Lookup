@@ -90,9 +90,7 @@ def getAllRowDicts(addressDataDirPath):
     )
 
 def completeHostTable(addressDataDirPath):
-    hostRows = getAllRowDicts(addressDataDirPath)
-
     session = getDBSession()
-    for hostRow in hostRows:
+    for hostRow in getAllRowDicts(addressDataDirPath):
         createRowOrCompleteInfo(hostRow, session)
     session.close()
