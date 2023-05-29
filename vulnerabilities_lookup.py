@@ -50,16 +50,16 @@ def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    try:
-        if len(args):
-            if len(args) != 3:
-                raise Exception("""Se necesitan tres argumentos:
-    1. la ruta al archivo con la lista de codigos CPE,
-    2. La ruta al directorio donde se guardará la información correspondiente,
-    3. La ruta al archivo con la llave de la API de Shodan.""")
-            if len(args) == 3:
+    if len(args):
+        if len(args) != 3:
+            raise Exception("""Se necesitan tres argumentos:
+1. la ruta al archivo con la lista de codigos CPE,
+2. La ruta al directorio donde se guardará la información correspondiente,
+3. La ruta al archivo con la llave de la API de Shodan.""")
+        if len(args) == 3:
+            try:
                 cpeCodesFilePath = formatFilePath(args[1])
                 vulnerabilitiesDirectoryPath = formatDirPath(args[2])
                 saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath)
-    except:
-        print('Hubo un error al buscar las vulnerabilidades')
+            except:
+                print('Hubo un error al buscar las vulnerabilidades')
