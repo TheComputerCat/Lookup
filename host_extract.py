@@ -79,17 +79,15 @@ def createRowOrCompleteInfo(hostRow, session):
 
 def getAllRowDicts(addressDataDirPath):
     filePaths = getFilePathsInDirectory(addressDataDirPath)
+    allHostRows =  map(
+            lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
+            filePaths
+        )
 
-    hostRows = []
-    for filePath in filePaths:
-        dict = tryTo(eval(getStringFromFile(filePath)), {})
-        hostRow = getHostRowFromDict(dict)
-        if hostRow["address"] is None:
-            continue
-
-        hostRows.append(hostRow)
-    
-    return hostRows
+    return filter(
+        lambda hostRow: hostRow["address"] is not None,
+        allHostRows
+    )
 
 def completeHostTable(addressDataDirPath):
     hostRows = getAllRowDicts(addressDataDirPath)
