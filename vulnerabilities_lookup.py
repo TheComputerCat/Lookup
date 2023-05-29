@@ -25,29 +25,21 @@ if __name__ == "__main__":
 def saveVulnerabilitiesFrom(cpeCode):
     print('Solicitando vulnerabilidades para {}'.format(cpeCode))
 
-    request = queryCPE(cpeCode)
+    request = queryProduct(cpeCode)
 
-    res = request['vulnerabilities']
+    vulnerabilities = request['vulnerabilities']
+    numberOfVulnerabilities = request['totalResults']
 
-    totalResults = request['totalResults']
-    print('Resultados totales:', totalResults)
-
-    while len(res) <= totalResults:
+    while len(vulnerabilities) < numberOfVulnerabilities:
         time.sleep(6)
-        res += queryProduct(cpeCode, len(res))
+        moreVulnerabilities = queryProduct(cpeCode, len(vulnerabilities))["vulnerabilities"]
+        vulnerabilities.append(moreVulnerabilities)
 
     print('La solicitud de vulnerabilidades para {} ha terminado'.format(cpeCode))
-    return res
+    return vulnerabilities
 
 
 def queryProduct(cpeCode, startIndex=0):
-    request = requests.get(
-        'https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName={}&startIndex={}'.format(cpeCode, startIndex))
-    request = request.json()
-    return request["vulnerabilities"]
-
-
-def queryCPE(cpeCode):
-    url = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName={}'.format(cpeCode)
+    url = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName={}&startIndex={}'.format(cpeCode, startIndex)
     request = requests.get(url)
     return request.json()

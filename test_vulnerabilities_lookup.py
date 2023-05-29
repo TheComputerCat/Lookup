@@ -277,7 +277,7 @@ first_page = json.loads(result1)
 second_page = json.loads(result2)
 cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
 
-def side_effect(code, startIndex = 0):
+def productQueryMock(code, startIndex = 0):
     if code != cpeCode:
         return
     if startIndex == 0:
@@ -289,15 +289,12 @@ def side_effect(code, startIndex = 0):
 class Test(unittest.TestCase):
     @patch("time.sleep")
     def test_cpeIsQueried(self, timeMock):
-        vulnerabilities_lookup.queryProduct = Mock(side_effect=side_effect)
-        vulnerabilities_lookup.queryCPE = Mock(side_effect=side_effect)
-        cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
+        vulnerabilities_lookup.queryProduct = Mock(side_effect=productQueryMock)
 
         vulnerabilities_lookup.saveVulnerabilitiesFrom(cpeCode)
 
-        vulnerabilities_lookup.queryCPE.assert_called_once_with(cpeCode)
-        vulnerabilities_lookup.queryProduct.assert_called_once_with(cpeCode, 1)
-
+        self.assertEqual(vulnerabilities_lookup.queryProduct.call_count, 2)
+        vulnerabilities_lookup.queryProduct.assert_has_calls([call(cpeCode), call(cpeCode, 1)])
 
 if __name__ == "__main__":
     unittest.main()
