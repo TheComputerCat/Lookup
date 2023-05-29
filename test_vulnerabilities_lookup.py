@@ -1,3 +1,5 @@
+import builtins
+
 import vulnerabilities_lookup
 import json
 import unittest
@@ -6,6 +8,13 @@ from unittest.mock import (
     Mock,
     patch,
     call,
+)
+from common import (
+    createFixture,
+    writeStringToFile,
+    setUpWithATextFile,
+    tearDownWithATextFile,
+    removeFile,
 )
 
 result1 = """
@@ -275,12 +284,12 @@ result2 = """
 
 
 class Test(unittest.TestCase):
+    cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
     first_page = json.loads(result1)
     second_page = json.loads(result2)
-    cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
     expectedVulnerabilities = [first_page["vulnerabilities"][0], second_page["vulnerabilities"][0]]
 
-    def productQueryMock(self, code, startIndex = 0):
+    def productQueryMock(self, code, startIndex=0):
         if code != "cpe:2.3:o:microsoft:windows_10:1607":
             return
         if startIndex == 0:
@@ -300,5 +309,34 @@ class Test(unittest.TestCase):
         self.assertEqual(vulnerabilities, self.expectedVulnerabilities)
 
         vulnerabilities_lookup.queryProduct.reset_mock()
+
+
+class Test(unittest.TestCase):
+    targetDirectory = "./data/vulnerabilities_raw_data/"
+    cpeCodesFilePath = "./data/cpeCodes"
+    fakeDate = '1945:05:09-00:00:00'
+
+    cpeCode1 = "cpe:2.3:o:microsoft:windows_10:1607"
+    cpeCode2 = "cpe:2.3:o:microsoft:outlook_10:1408"
+    first_page = json.loads(result1)
+    second_page = json.loads(result2)
+    expectedVulnerabilities = [first_page["vulnerabilities"][0], second_page["vulnerabilities"][0]]
+
+    withATextFile = createFixture(setUpWithATextFile, removeFile)
+
+    @withATextFile(pathToTextFile=cpeCodesFilePath, content='cpe\n{}\n{}'.format(cpeCode1, cpeCode2), delete_folder=False)
+    @patch('vulnerabilities_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)
+    @patch('vulnerabilities_lookup.writeStringToFile', new_callable=Mock)
+    @patch('vulnerabilities_lookup.getVulnerabilitiesOf', new_callable=Mock,
+           return_value='{}'.format(expectedVulnerabilities))
+    def test_vulnerabilities_are_saved_correctly(self, mockVulnerabilitiesQuery, spyWriteOnFile, mockGetTimeString):
+        vulnerabilities_lookup.saveVulnerabilitiesOfProducts(self.cpeCodesFilePath, self.targetDirectory)
+
+        self.assertEqual(mockVulnerabilitiesQuery.call_count, 2)
+        mockVulnerabilitiesQuery.assert_has_calls([
+            call(self.cpeCode1),
+            call(self.cpeCode2),
+        ])
+
 if __name__ == "__main__":
     unittest.main()
