@@ -3,7 +3,6 @@ from common import (
 )
 
 from model import (
-    CPECode,
     Host,
     HostService,
 )
