@@ -75,11 +75,12 @@ def createRowOrCompleteInfo(hostRow, session):
         session.add(hostObject)
     else:
         for key, value in hostRow.items():
-            setattr(hostObject, key, value)
+            if getattr(hostObject, key) is not None:
+                setattr(hostObject, key, value)
 
 def getAllRowDicts(addressDataDirPath):
     filePaths = getFilePathsInDirectory(addressDataDirPath)
-    allHostRows =  map(
+    allHostRows = map(
         lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
         filePaths
     )
@@ -91,6 +92,10 @@ def getAllRowDicts(addressDataDirPath):
 
 def completeHostTable(addressDataDirPath):
     session = getDBSession()
+
     for hostRow in getAllRowDicts(addressDataDirPath):
+        print(hostRow)
         createRowOrCompleteInfo(hostRow, session)
+    
+    session.commit()
     session.close()
