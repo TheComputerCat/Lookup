@@ -273,31 +273,31 @@ result2 = """
 }
 """
 
-first_page = json.loads(result1)
-second_page = json.loads(result2)
-cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
-
-def productQueryMock(code, startIndex = 0):
-    if code != cpeCode:
-        return
-    if startIndex == 0:
-        return first_page
-    if startIndex == 1:
-        return second_page
-
 
 class Test(unittest.TestCase):
+    first_page = json.loads(result1)
+    second_page = json.loads(result2)
+    cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
+    expectedVulnerabilities = [first_page["vulnerabilities"][0], second_page["vulnerabilities"][0]]
+
+    def productQueryMock(self, code, startIndex = 0):
+        if code != "cpe:2.3:o:microsoft:windows_10:1607":
+            return
+        if startIndex == 0:
+            return self.first_page
+        if startIndex == 1:
+            return self.second_page
+
     @patch("time.sleep")
     def test_vulnerabilities_are_queried_correctly(self, timeMock):
-        vulnerabilities_lookup.queryProduct = Mock(side_effect=productQueryMock)
+        vulnerabilities_lookup.queryProduct = Mock(side_effect=self.productQueryMock)
 
-        vulnerabilities = vulnerabilities_lookup.getVulnerabilitiesOf(cpeCode)
+        vulnerabilities = vulnerabilities_lookup.getVulnerabilitiesOf(self.cpeCode)
 
         self.assertEqual(vulnerabilities_lookup.queryProduct.call_count, 2)
-        vulnerabilities_lookup.queryProduct.assert_has_calls([call(cpeCode), call(cpeCode, 1)])
+        vulnerabilities_lookup.queryProduct.assert_has_calls([call(self.cpeCode), call(self.cpeCode, 1)])
 
-        expectedVulnerabilities = [first_page["vulnerabilities"][0], second_page["vulnerabilities"][0]]
-        self.assertEqual(vulnerabilities, expectedVulnerabilities)
+        self.assertEqual(vulnerabilities, self.expectedVulnerabilities)
 
         vulnerabilities_lookup.queryProduct.reset_mock()
 if __name__ == "__main__":
