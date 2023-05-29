@@ -1,10 +1,19 @@
 from common import (
+    getDictFromJSONFile,
+    getFilePathsInDirectory,
+    getStringFromFile,
     tryTo,
 )
 
 from model import (
     Host,
     HostService,
+)
+
+from query_manager import (
+    setConfigFile,
+    getConfig,
+    getDBSession,
 )
 
 def getAttrFromDict(dict, key):
@@ -50,3 +59,42 @@ def getServiceRowFromServiceDict(serviceDict):
         "name": getAttrFromDict(serviceDict, "service"),
         "version": getAttrFromDict(serviceDict, "version"),
     }
+
+def getHostRowFromDict(dict):
+    return {
+        "address": getAttrFromDict(dict, "ip_str"),
+        "country": getAttrFromDict(dict, "country_code"),
+        "provider": getAttrFromDict(dict, "org"),
+        "isp": getAttrFromDict(dict, "isp"),
+    }
+
+def createRowOrCompleteInfo(hostRow, session):
+    hostObject = session.get(Host, hostRow["address"])
+    if hostObject is None:
+        hostObject = Host(**hostRow)
+        session.add(hostObject)
+    else:
+        for key, value in hostRow.items():
+            setattr(hostObject, key, value)
+
+def getAllRowDicts(addressDataDirPath):
+    filePaths = getFilePathsInDirectory(addressDataDirPath)
+
+    hostRows = []
+    for filePath in filePaths:
+        dict = tryTo(eval(getStringFromFile(filePath)), {})
+        hostRow = getHostRowFromDict(dict)
+        if hostRow["address"] is None:
+            continue
+
+        hostRows.append(hostRow)
+    
+    return hostRows
+
+def completeHostTable(addressDataDirPath):
+    hostRows = getAllRowDicts(addressDataDirPath)
+
+    session = getDBSession()
+    for hostRow in hostRows:
+        createRowOrCompleteInfo(hostRow, session)
+    session.close()

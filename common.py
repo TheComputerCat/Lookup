@@ -23,6 +23,18 @@ def tryTo(fun, default):
         log(e)
         return default
 
+def getFilePathsInDirectory(directoryPath):
+    if directoryPath[-1] == "/":
+        suffix = ""
+    else:
+        suffix = "/"
+    fixedDirPath = directoryPath+suffix
+
+    return [
+        fixedDirPath+fileName for fileName in os.listdir(fixedDirPath)
+        if os.path.isfile(fixedDirPath+fileName)
+    ]
+
 def getStringFromFile(path: str):
     try:
         f = open(path, "r")
