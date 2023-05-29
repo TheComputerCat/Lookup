@@ -288,10 +288,10 @@ def productQueryMock(code, startIndex = 0):
 
 class Test(unittest.TestCase):
     @patch("time.sleep")
-    def test_productIsQueriedCorrectly(self, timeMock):
+    def test_vulnerabilities_are_queried_correctly(self, timeMock):
         vulnerabilities_lookup.queryProduct = Mock(side_effect=productQueryMock)
 
-        vulnerabilities = vulnerabilities_lookup.saveVulnerabilitiesFrom(cpeCode)
+        vulnerabilities = vulnerabilities_lookup.getVulnerabilitiesOf(cpeCode)
 
         self.assertEqual(vulnerabilities_lookup.queryProduct.call_count, 2)
         vulnerabilities_lookup.queryProduct.assert_has_calls([call(cpeCode), call(cpeCode, 1)])
