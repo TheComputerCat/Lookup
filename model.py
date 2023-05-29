@@ -91,7 +91,7 @@ class Service(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     version: Mapped[str] = mapped_column(String(100), nullable=True)
-    cpe_code: Mapped[str] = mapped_column(String(100), nullable=False)
+    cpe_code: Mapped[str] = mapped_column(String(100), nullable=True)
 
     hosts_with_service: Mapped[List["HostService"]] = relationship(back_populates="service")
 
