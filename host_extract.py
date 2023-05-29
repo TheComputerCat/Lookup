@@ -80,9 +80,9 @@ def createRowOrCompleteInfo(hostRow, session):
 def getAllRowDicts(addressDataDirPath):
     filePaths = getFilePathsInDirectory(addressDataDirPath)
     allHostRows =  map(
-            lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
-            filePaths
-        )
+        lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
+        filePaths
+    )
 
     return filter(
         lambda hostRow: hostRow["address"] is not None,
