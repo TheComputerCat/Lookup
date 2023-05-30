@@ -67,32 +67,3 @@ def insertMany(TableObjects):
             log(e, debug=True, printing=True) 
         finally:
             session.rollback()
-
-setConfigFile('./data_base_config.ini')
-createTables()
-from datetime import datetime
-import time
-start_time = time.time()
-with getDBSession() as session:
-    session.add_all(
-        [
-            Organization(
-                name='farc',
-                domains=[
-                    Domain(
-                        name=f'farc.com.{idx}',
-                        a_records = [
-                            ARecord(
-                                address=Host(address=f'8.8.8.8.{idx}'),
-                                timestamp=datetime.now(),
-                            )
-                        ]
-                    )
-                ]
-            )
-            for idx in range(100000)
-        ]
-    )
-    session.commit()
-duration = time.time() - start_time
-print(f"ORM bulk_save_objects with PKs: {duration:.2f} seconds")
