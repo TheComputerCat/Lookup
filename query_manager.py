@@ -39,7 +39,7 @@ def getDBEngine():
     username = config['credentials']['username']
     password = config['credentials']['password']
 
-    return create_engine(f'postgresql://{username}:{password}@{host}:{port}/{database}', echo=True)
+    return create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}', echo=False, executemany_mode='values_plus_batch')
 
 def getDBSession():
     return Session(getDBEngine())
@@ -57,3 +57,42 @@ def insert(TableObject):
             log(e, debug=True, printing=True) 
         finally:
             session.rollback()
+
+def insertMany(TableObjects):
+    with getDBSession() as session:
+        try:
+            session.add_all(TableObjects)
+            session.commit()
+        except Exception as e:
+            log(e, debug=True, printing=True) 
+        finally:
+            session.rollback()
+
+setConfigFile('./data_base_config.ini')
+createTables()
+from datetime import datetime
+import time
+start_time = time.time()
+with getDBSession() as session:
+    session.add_all(
+        [
+            Organization(
+                name='farc',
+                domains=[
+                    Domain(
+                        name=f'farc.com.{idx}',
+                        a_records = [
+                            ARecord(
+                                address=Host(address=f'8.8.8.8.{idx}'),
+                                timestamp=datetime.now(),
+                            )
+                        ]
+                    )
+                ]
+            )
+            for idx in range(100000)
+        ]
+    )
+    session.commit()
+duration = time.time() - start_time
+print(f"ORM bulk_save_objects with PKs: {duration:.2f} seconds")
