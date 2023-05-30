@@ -91,8 +91,8 @@ class Service(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     version: Mapped[str] = mapped_column(String(100), nullable=True)
+    cpe_code: Mapped[str] = mapped_column(String(100), nullable=True)
 
-    cpe_code: Mapped["CPECode"] = relationship(back_populates="service")
     hosts_with_service: Mapped[List["HostService"]] = relationship(back_populates="service")
 
 class HostService(Base):
@@ -106,12 +106,3 @@ class HostService(Base):
 
     host: Mapped[Host] = relationship(back_populates="services_in_host")
     service: Mapped[Service] = relationship(back_populates="hosts_with_service")
-
-class CPECode(Base):
-    __tablename__ = "CPE_CODES"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(String(100), nullable=False)
-    service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=False)
-
-    service: Mapped[Service] = relationship(back_populates="cpe_code")

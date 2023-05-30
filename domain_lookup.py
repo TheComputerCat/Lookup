@@ -1,6 +1,7 @@
 from common import (
     log,
     asHexString,
+    getFilePathsInDirectory,
     getStringFromFile,
     writeStringToFile,
     formatFilePath,
@@ -74,10 +75,7 @@ def getIPAddressesFromShodanInfo(domainInfoFilePath):
     return '\n'.join(domainIPAddresses) + '\n'
     
 def saveIpList(IPListFilePath: str, domainDataDirPath: str):
-    domainInfoFilePaths = [
-        domainDataDirPath+fileName for fileName in os.listdir(domainDataDirPath)
-        if os.path.isfile(domainDataDirPath+fileName)
-    ]
+    domainInfoFilePaths = getFilePathsInDirectory(domainDataDirPath)
 
     allDomainsIPAddresses = map(getIPAddressesFromShodanInfo, domainInfoFilePaths)
 
