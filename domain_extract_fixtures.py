@@ -1,4 +1,4 @@
-jsonDic1 = {
+shodanJson1 = {
     'domain': 'domain.org',
     'tags': [
         'dmarc',
@@ -68,7 +68,7 @@ jsonDic1 = {
     ],
     'more': True,
 }
-jsonDataDic1 = {
+filteredShodanJson1 = {
     'domain': 'domain.org',
     'main' :{
         'A':[
@@ -132,7 +132,7 @@ jsonDataDic1 = {
     }
 }
 
-jsonDic2 = {
+shodanJson2 = {
     'domain': 'domain.org',
     'tags': [
         'dmarc',
@@ -190,7 +190,7 @@ jsonDic2 = {
     ],
     'more': False,
 }
-jsonDataDic2 = {
+filteredShodanJson2 = {
     'domain': 'domain.org',
     'main' :{
         'A':[
@@ -245,7 +245,7 @@ jsonDataDic2 = {
     }
 }
 
-jsonDataDicJoined = {
+filteredJoinedShodanJson1AndJson2 = {
     'domain': 'domain.org',
     'main' :{
         'A':[
