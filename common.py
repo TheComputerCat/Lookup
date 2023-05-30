@@ -94,6 +94,9 @@ def tearDownWithATextFile(pathToTextFile, deleteFolder=True):
     if(deleteFolder and dirname != '.' and dirname != os.getcwd()):
         os.removedirs(os.path.dirname(pathToTextFile))
 
+def removeFile(pathToTextFile):
+    os.remove(pathToTextFile)
+
 def getDictFromJSONFile(path: str):
     try:
         object = json.loads(getStringFromFile(path))
