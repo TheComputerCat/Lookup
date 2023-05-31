@@ -35,10 +35,7 @@ def getVulnerabilitiesOf(cpeCode):
 
 def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath):
     file = open(cpeCodesFilePath)
-    while True:
-        code = file.readline().strip()
-        if not code:
-            break
+    while code := file.readline().strip():
         try:
             vulnerabilities = str(getVulnerabilitiesOf(code))
             name = f'{vulnerabilitiesDirectoryPath}/{code}_{getTimeString()}'
@@ -50,16 +47,16 @@ def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if len(args):
-        if len(args) != 2:
-            raise Exception("""Se necesitan tres argumentos:
+
+    if len(args) != 2:
+        raise Exception("""Se necesitan tres argumentos:
 1. la ruta al archivo con la lista de codigos CPE,
 2. La ruta al directorio donde se guardará la información correspondiente""")
-        if len(args) == 2:
-            try:
-                cpeCodesFilePath = formatFilePath(args[0])
-                vulnerabilitiesDirectoryPath = formatDirPath(args[1])
-                saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath)
-            except Exception as e:
-                print('Hubo un error al buscar las vulnerabilidades')
-                log(e,printing=True)
+
+    try:
+        cpeCodesFilePath = formatFilePath(args[0])
+        vulnerabilitiesDirectoryPath = formatDirPath(args[1])
+        saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath)
+    except Exception as e:
+        print('Hubo un error al buscar las vulnerabilidades')
+        log(e, printing=True)
