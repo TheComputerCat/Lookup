@@ -298,7 +298,7 @@ class Test(unittest.TestCase):
             return self.second_page
 
     @patch("time.sleep")
-    def test_vulnerabilities_are_queried_correctly(self, timeMock):
+    def test_vulnerabilities_are_queried_correctly(self, _):
         vulnerabilities_lookup.queryProduct = Mock(side_effect=self.productQueryMock)
 
         vulnerabilities = vulnerabilities_lookup.getVulnerabilitiesOf(self.cpeCode)
