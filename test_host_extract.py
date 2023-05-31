@@ -96,10 +96,11 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         self.assertEqual(
             result,
             {
-                "ip": "8.8.8.8",
-                "hostnames": host_extract.getListFromDict(self.dictFromJSON, 'hostnames'),
+                "address": "8.8.8.8",
+                "country": host_extract.getAttrFromDict(self.dictFromJSON, "country_code"),
+                "provider": host_extract.getAttrFromDict(self.dictFromJSON, "org"),
+                "isp": host_extract.getAttrFromDict(self.dictFromJSON, "isp"),
                 "ports": host_extract.getListFromDict(self.dictFromJSON, 'ports'),
-                "country": host_extract.getAttrFromDict(self.dictFromJSON, 'country_code'),
                 "services": host_extract.getServicesFromDict(self.dictFromJSON),
             }
         )

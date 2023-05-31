@@ -8,6 +8,7 @@ from common import (
 from model import (
     Host,
     HostService,
+    Service,
 )
 
 from query_manager import (
@@ -53,10 +54,11 @@ def getHostInfoFromDict(dict):
         return {}
     
     return {
-        "ip": address,
-        "hostnames": getListFromDict(dict, 'hostnames'),
+        "address": getAttrFromDict(dict, "ip_str"),
+        "country": getAttrFromDict(dict, "country_code"),
+        "provider": getAttrFromDict(dict, "org"),
+        "isp": getAttrFromDict(dict, "isp"),
         "ports": getListFromDict(dict, 'ports'),
-        "country": getAttrFromDict(dict, 'country_code'),
         "services": getServicesFromDict(dict),
     }
 
@@ -64,13 +66,14 @@ def getServiceRowFromServiceDict(serviceDict):
     return {
         "name": getAttrFromDict(serviceDict, "service"),
         "version": getAttrFromDict(serviceDict, "version"),
+        "cpe_code": tryTo(lambda: serviceDict["cpe23"][0], None),
     }
 
-def getHostRowFromDict(dict):
+def getHostRowFromHostInfoDict(dict):
     return {
-        "address": getAttrFromDict(dict, "ip_str"),
-        "country": getAttrFromDict(dict, "country_code"),
-        "provider": getAttrFromDict(dict, "org"),
+        "address": getAttrFromDict(dict, "address"),
+        "country": getAttrFromDict(dict, "country"),
+        "provider": getAttrFromDict(dict, "provider"),
         "isp": getAttrFromDict(dict, "isp"),
     }
 
@@ -86,11 +89,13 @@ def createHostRowOrCompleteInfo(hostRow, session):
         session.add(hostObject)
     else:
         completeObjectInfo(hostObject, hostRow)
+    
+    session.commit()
 
-def getAllRowDicts():
+def getAllHostInfoDicts():
     filePaths = getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH)
     allHostRows = map(
-        lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
+        lambda filePath: getHostInfoFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
         filePaths
     )
 
@@ -102,8 +107,31 @@ def getAllRowDicts():
 def completeHostTable():
     session = getDBSession()
 
-    for hostRow in getAllRowDicts(ADDRESS_DATA_DIR_PATH):
-        createHostRowOrCompleteInfo(hostRow, session)
+    for row in getAllHostInfoDicts():
+        createHostRowOrCompleteInfo(getHostRowFromHostInfoDict(row), session)
     
     session.commit()
     session.close()
+
+def createServiceRowIfNeeded(serviceDict, session):
+    serviceRow = getServiceRowFromServiceDict(serviceDict)
+
+    serviceObject = session.query(Service).filter_by(
+        **serviceRow
+    ).first()
+
+    if serviceObject is None:
+        session.add(
+            Service(
+                **serviceRow
+            )
+        )
+    
+    session.commit()
+
+def completeServiceTable():
+    session = getDBSession()
+
+    for dict in getAllHostInfoDicts():
+        for serviceDict in dict["services"]:
+            createServiceRowIfNeeded(serviceDict, session)
