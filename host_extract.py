@@ -100,7 +100,6 @@ def completeHostTable():
     session = getDBSession()
 
     for hostRow in getAllRowDicts(ADDRESS_DATA_DIR_PATH):
-        print(hostRow)
         createRowOrCompleteInfo(hostRow, session)
     
     session.commit()
