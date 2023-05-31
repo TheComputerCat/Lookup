@@ -343,12 +343,12 @@ class Test(unittest.TestCase):
         spyWriteOnFile.assert_has_calls([
             call(
                 f'{self.targetDirectory}/{self.cpeCode1}_{self.fakeDate}',
-                str(self.expectedVulnerabilities),
+                json.dumps(self.expectedVulnerabilities),
                 True
             ),
             call(
                 f'{self.targetDirectory}/{self.cpeCode2}_{self.fakeDate}',
-                str(self.expectedVulnerabilities),
+                json.dumps(self.expectedVulnerabilities),
                 True
             ),
         ])

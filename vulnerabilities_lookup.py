@@ -1,3 +1,4 @@
+import json
 import requests
 import sys
 import time
@@ -37,7 +38,7 @@ def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath
     file = open(cpeCodesFilePath)
     while code := file.readline().strip():
         try:
-            vulnerabilities = str(getVulnerabilitiesOf(code))
+            vulnerabilities = json.dumps(getVulnerabilitiesOf(code))
             name = f'{vulnerabilitiesDirectoryPath}/{code}_{getTimeString()}'
             writeStringToFile(name, vulnerabilities, True)
         except Exception as e:
