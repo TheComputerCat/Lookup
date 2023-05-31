@@ -16,6 +16,12 @@ from query_manager import (
     getDBSession,
 )
 
+ADDRESS_DATA_DIR_PATH = None
+
+def setAddressDataDirPath(path):
+    global ADDRESS_DATA_DIR_PATH
+    ADDRESS_DATA_DIR_PATH = path
+
 def getAttrFromDict(dict, key):
     return tryTo(lambda: dict[key], None)
 
@@ -78,8 +84,8 @@ def createRowOrCompleteInfo(hostRow, session):
             if getattr(hostObject, key) is not None:
                 setattr(hostObject, key, value)
 
-def getAllRowDicts(addressDataDirPath):
-    filePaths = getFilePathsInDirectory(addressDataDirPath)
+def getAllRowDicts():
+    filePaths = getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH)
     allHostRows = map(
         lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
         filePaths
@@ -90,10 +96,10 @@ def getAllRowDicts(addressDataDirPath):
         allHostRows
     )
 
-def completeHostTable(addressDataDirPath):
+def completeHostTable():
     session = getDBSession()
 
-    for hostRow in getAllRowDicts(addressDataDirPath):
+    for hostRow in getAllRowDicts(ADDRESS_DATA_DIR_PATH):
         print(hostRow)
         createRowOrCompleteInfo(hostRow, session)
     
