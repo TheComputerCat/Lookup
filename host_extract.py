@@ -135,3 +135,5 @@ def completeServiceTable():
     for dict in getAllHostInfoDicts():
         for serviceDict in dict["services"]:
             createServiceRowIfNeeded(serviceDict, session)
+    
+    session.close()
