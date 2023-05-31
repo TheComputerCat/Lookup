@@ -35,31 +35,31 @@ def getVulnerabilitiesOf(cpeCode):
 
 def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath):
     file = open(cpeCodesFilePath)
-    file.readline()
     while True:
         code = file.readline().strip()
         if not code:
             break
         try:
-            vulnerabilities = getVulnerabilitiesOf(code)
-            writeStringToFile(f'{vulnerabilitiesDirectoryPath}_{code}_{getTimeString()}', vulnerabilities, True)
+            vulnerabilities = str(getVulnerabilitiesOf(code))
+            name = f'{vulnerabilitiesDirectoryPath}/{code}_{getTimeString()}'
+            writeStringToFile(name, vulnerabilities, True)
         except Exception as e:
-            log(e)
+            log(e, printing=True)
     file.close()
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     if len(args):
-        if len(args) != 3:
+        if len(args) != 2:
             raise Exception("""Se necesitan tres argumentos:
 1. la ruta al archivo con la lista de codigos CPE,
-2. La ruta al directorio donde se guardará la información correspondiente,
-3. La ruta al archivo con la llave de la API de Shodan.""")
-        if len(args) == 3:
+2. La ruta al directorio donde se guardará la información correspondiente""")
+        if len(args) == 2:
             try:
-                cpeCodesFilePath = formatFilePath(args[1])
-                vulnerabilitiesDirectoryPath = formatDirPath(args[2])
+                cpeCodesFilePath = formatFilePath(args[0])
+                vulnerabilitiesDirectoryPath = formatDirPath(args[1])
                 saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath)
-            except:
+            except Exception as e:
                 print('Hubo un error al buscar las vulnerabilidades')
+                log(e,printing=True)

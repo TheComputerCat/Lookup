@@ -324,11 +324,12 @@ class Test(unittest.TestCase):
 
     withATextFile = createFixture(setUpWithATextFile, removeFile)
 
-    @withATextFile(pathToTextFile=cpeCodesFilePath, content='cpe\n{}\n{}'.format(cpeCode1, cpeCode2), delete_folder=False)
+    @withATextFile(pathToTextFile=cpeCodesFilePath, content='{}\n{}'.format(cpeCode1, cpeCode2), delete_folder=False)
+    @patch("time.sleep")
     @patch('vulnerabilities_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)
     @patch('vulnerabilities_lookup.writeStringToFile', new_callable=Mock)
     @patch('vulnerabilities_lookup.getVulnerabilitiesOf', new_callable=Mock, return_value=expectedVulnerabilities)
-    def test_vulnerabilities_are_saved_correctly(self, mockVulnerabilitiesQuery, spyWriteOnFile, mockGetTimeString):
+    def test_vulnerabilities_are_saved_correctly(self, mockVulnerabilitiesQuery, spyWriteOnFile, mockGetTimeString, mockTime):
 
         vulnerabilities_lookup.saveVulnerabilitiesOfProducts(self.cpeCodesFilePath, self.targetDirectory)
 
@@ -341,16 +342,17 @@ class Test(unittest.TestCase):
         self.assertEqual(spyWriteOnFile.call_count, 2)
         spyWriteOnFile.assert_has_calls([
             call(
-                f'{self.targetDirectory}_{self.cpeCode1}_{self.fakeDate}',
-                self.expectedVulnerabilities,
+                f'{self.targetDirectory}/{self.cpeCode1}_{self.fakeDate}',
+                str(self.expectedVulnerabilities),
                 True
             ),
             call(
-                f'{self.targetDirectory}_{self.cpeCode2}_{self.fakeDate}',
-                self.expectedVulnerabilities,
+                f'{self.targetDirectory}/{self.cpeCode2}_{self.fakeDate}',
+                str(self.expectedVulnerabilities),
                 True
             ),
         ])
+
 
 if __name__ == "__main__":
     unittest.main()
