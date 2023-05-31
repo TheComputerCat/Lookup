@@ -137,3 +137,28 @@ def completeServiceTable():
             createServiceRowIfNeeded(serviceDict, session)
     
     session.close()
+
+def completeHostServiceTable():
+    session = getDBSession()
+
+    for dict in getAllHostInfoDicts():
+        address = dict["address"]
+        for serviceDict in dict["services"]:
+            serviceRow = getServiceRowFromServiceDict(serviceDict)
+
+            serviceObject = session.query(Service).filter_by(
+                **serviceRow
+            ).first()
+
+            session.add(
+                HostService(
+                    address=address,
+                    service=serviceObject,
+                    source="shodan",
+                    timestamp=serviceDict["timestamp"]
+                )
+            )
+    
+            session.commit()
+    
+    session.close()
