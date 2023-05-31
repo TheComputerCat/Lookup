@@ -39,7 +39,7 @@ def getDBEngine():
     username = config['credentials']['username']
     password = config['credentials']['password']
 
-    return create_engine(f'postgresql://{username}:{password}@{host}:{port}/{database}', echo=True)
+    return create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}', echo=False, executemany_mode='values_plus_batch')
 
 def getDBSession():
     return Session(getDBEngine())
@@ -52,6 +52,16 @@ def insert(TableObject):
     with getDBSession() as session:
         try:
             session.add(TableObject)
+            session.commit()
+        except Exception as e:
+            log(e, debug=True, printing=True) 
+        finally:
+            session.rollback()
+
+def insertMany(TableObjects):
+    with getDBSession() as session:
+        try:
+            session.add_all(TableObjects)
             session.commit()
         except Exception as e:
             log(e, debug=True, printing=True) 

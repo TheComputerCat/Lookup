@@ -6,74 +6,74 @@ from os import listdir
 from os.path import isfile, join
 
 
-def getJsonFromFile(filePath):
+def getJsonFromFile(path):
     try:
-        f = open(filePath, 'r')
-        jsonDic = json.load(f)
+        f = open(path, 'r')
+        json_ = json.load(f)
         f.close()
     except Exception as e:
         log(e, printing=True)
         return {}
-    return jsonDic
+    return json_
 
-def hasData(jsonDic):
-    return jsonDic is not None and 'data' in jsonDic
+def hasData(json):
+    return json is not None and 'data' in json
 
-def filterJson(jsonDic):
+def filterJson(json):
     filteredJson = {}
-    if hasData(jsonDic):
-        filteredJson['domain'] = jsonDic['domain']
-        filteredData = filterData(jsonDic['data'])
+    if hasData(json):
+        filteredJson['domain'] = json['domain']
+        filteredData = filterData(json['data'])
         for dataDomain in filteredData:
             filteredJson[dataDomain] = filteredData[dataDomain]
     return filteredJson
 
-def formatRegister(data):
+def formatRecord(data):
     newData = {key: data[key] for key in ['value', 'subdomain', 'ports', 'last_seen'] if key in data}
     newData['ports'] = newData['ports'] if 'ports' in newData else []
     return newData
 
-def formatARegisters(data):
-    return formatRegister(data)
+def formatARecord(data):
+    return formatRecord(data)
 
-def formatMXRegisters(data):
-    return removeKeyDictionary(formatRegister(data), 'ports')
+def formatMXRecord(data):
+    return removeDictionaryKey(formatRecord(data), 'ports')
 
-def removeKeyDictionary(dic, key):
+def removeDictionaryKey(dic, key):
     newDict = dict(dic)
     del newDict[key]
     return newDict
 
 def removeSubdomainKey(dict):
-    return removeKeyDictionary(dict, 'subdomain')
+    return removeDictionaryKey(dict, 'subdomain')
 
 def isMainDomain(data):
     return data['subdomain'] == ''
 
-def isARegister(data):
+def isARecord(data):
     return data['type'] == 'A'
 
-def isMXRegister(data):
+def isMXRecord(data):
     return data['type'] == 'MX'
 
-def isTXTRegister(data):
+def isTXTRecord(data):
     return data['type'] == 'TXT'
 
 def A():
-    return formatARegisters, isARegister
+    return formatARecord, isARecord
 
 def MX():
-    return formatMXRegisters, isMXRegister
+    return formatMXRecord, isMXRecord
 
 def TXT():
-    return formatMXRegisters, isTXTRegister
+    return formatMXRecord, isTXTRecord
 
-def getRegister(register, data):
+def getRecords(register, data):
     formatter, selector = register()
-    registerData = list(map(formatter ,list(filter(selector, data))))
+    recordData = list(map(formatter ,list(filter(selector, data))))
 
-    main = list(map(removeSubdomainKey, list(filter(isMainDomain, registerData))))
-    subdomains = list(filter(lambda x : not isMainDomain(x), registerData))
+    main = list(map(removeSubdomainKey, list(filter(isMainDomain, recordData))))
+    subdomains = list(filter(lambda x : not isMainDomain(x), recordData))
     return main, subdomains
 
 REGISTERS = {
@@ -82,11 +82,11 @@ REGISTERS = {
     'TXT': TXT
 }
 
-def filterData(jsonData):
+def filterData(json):
     filteredData = {'main': {}, 'subdomains': {}}
 
     for register in REGISTERS:
-        main, subdomains = getRegister(REGISTERS[register], jsonData)
+        main, subdomains = getRecords(REGISTERS[register], json)
         filteredData['main'][register] = main
         filteredData['subdomains'][register] = subdomains
 
@@ -120,7 +120,7 @@ def extractDataFromFile(path):
     return filterFromJsonList(jsonList)
 
 def extractDataFromFolder(path):
-    filesInFolder = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
+    filesInFolder = (join(path, f) for f in listdir(path) if isfile(join(path, f)))
     return list(map(extractDataFromFile, filesInFolder))
 
 

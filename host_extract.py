@@ -16,6 +16,12 @@ from query_manager import (
     getDBSession,
 )
 
+ADDRESS_DATA_DIR_PATH = None
+
+def setAddressDataDirPath(path):
+    global ADDRESS_DATA_DIR_PATH
+    ADDRESS_DATA_DIR_PATH = path
+
 def getAttrFromDict(dict, key):
     return tryTo(lambda: dict[key], None)
 
@@ -68,18 +74,21 @@ def getHostRowFromDict(dict):
         "isp": getAttrFromDict(dict, "isp"),
     }
 
-def createRowOrCompleteInfo(hostRow, session):
+def completeObjectInfo(obj, row):
+    for key, value in row.items():
+        if getattr(obj, key) is None:
+            setattr(obj, key, value)
+
+def createHostRowOrCompleteInfo(hostRow, session):
     hostObject = session.get(Host, hostRow["address"])
     if hostObject is None:
         hostObject = Host(**hostRow)
         session.add(hostObject)
     else:
-        for key, value in hostRow.items():
-            if getattr(hostObject, key) is not None:
-                setattr(hostObject, key, value)
+        completeObjectInfo(hostObject, hostRow)
 
-def getAllRowDicts(addressDataDirPath):
-    filePaths = getFilePathsInDirectory(addressDataDirPath)
+def getAllRowDicts():
+    filePaths = getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH)
     allHostRows = map(
         lambda filePath: getHostRowFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
         filePaths
@@ -90,12 +99,11 @@ def getAllRowDicts(addressDataDirPath):
         allHostRows
     )
 
-def completeHostTable(addressDataDirPath):
+def completeHostTable():
     session = getDBSession()
 
-    for hostRow in getAllRowDicts(addressDataDirPath):
-        print(hostRow)
-        createRowOrCompleteInfo(hostRow, session)
+    for hostRow in getAllRowDicts(ADDRESS_DATA_DIR_PATH):
+        createHostRowOrCompleteInfo(hostRow, session)
     
     session.commit()
     session.close()
