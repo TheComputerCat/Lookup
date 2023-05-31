@@ -74,15 +74,18 @@ def getHostRowFromDict(dict):
         "isp": getAttrFromDict(dict, "isp"),
     }
 
-def createRowOrCompleteInfo(hostRow, session):
+def completeObjectInfo(obj, row):
+    for key, value in row.items():
+        if getattr(obj, key) is None:
+            setattr(obj, key, value)
+
+def createHostRowOrCompleteInfo(hostRow, session):
     hostObject = session.get(Host, hostRow["address"])
     if hostObject is None:
         hostObject = Host(**hostRow)
         session.add(hostObject)
     else:
-        for key, value in hostRow.items():
-            if getattr(hostObject, key) is not None:
-                setattr(hostObject, key, value)
+        completeObjectInfo(hostObject, hostRow)
 
 def getAllRowDicts():
     filePaths = getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH)
@@ -100,7 +103,7 @@ def completeHostTable():
     session = getDBSession()
 
     for hostRow in getAllRowDicts(ADDRESS_DATA_DIR_PATH):
-        createRowOrCompleteInfo(hostRow, session)
+        createHostRowOrCompleteInfo(hostRow, session)
     
     session.commit()
     session.close()
