@@ -49,8 +49,12 @@ def getServicesFromDict(dict):
     )
 
 def getHostInfoFromDict(dict):
+    address = getAttrFromDict(dict, "ip_str")
+    if address is None:
+        return {}
+    
     return {
-        "address": getAttrFromDict(dict, "ip_str"),
+        "address": address,
         "country": getAttrFromDict(dict, "country_code"),
         "provider": getAttrFromDict(dict, "org"),
         "isp": getAttrFromDict(dict, "isp"),
@@ -96,7 +100,7 @@ def getAllHostInfoDicts():
     )
 
     return filter(
-        lambda hostRow: hostRow["address"] is not None,
+        lambda hostRow: "address" in hostRow,
         allHostRows
     )
 

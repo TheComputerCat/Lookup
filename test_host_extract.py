@@ -2,6 +2,10 @@ import host_extract
 import json
 import unittest
 
+from model import (
+    Host,
+)
+
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""
     {
@@ -200,6 +204,32 @@ class TestExtractShodanInfoFromCroppedShodanOutput(unittest.TestCase):
             result,
             {}
         )
+
+class TestDatabaseHelpers(unittest.TestCase):
+    def test_fillObject(self):
+        obj = Host(address="8.8.8.8")
+        row = {
+            "address": "8.8.8.8",
+            "country": "US",
+            "provider": "Google",
+            "isp": "Google",
+        }
+        host_extract.completeObjectInfo(obj, row)
+        for key in row:
+            self.assertEqual(row[key], getattr(obj, key))
+    
+    def test_fillObject(self):
+        obj = Host(address="8.8.8.8")
+        row = {
+            "address": "8.8.8.8",
+            "country": "US",
+            "provider": "Google",
+        }
+        host_extract.completeObjectInfo(obj, row)
+        for key in row:
+            self.assertEqual(row[key], getattr(obj, key))
+        self.assertIsNone(obj.isp)
+
 
 if __name__ == "__main__":
     unittest.main()
