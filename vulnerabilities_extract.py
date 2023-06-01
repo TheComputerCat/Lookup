@@ -1,3 +1,5 @@
+THIRD_VERSION = "3.1"
+
 def getAttribute(element, attribute):
     return element.get(attribute)
 
@@ -8,22 +10,28 @@ def getVersion(cveScoring):
     return getAttribute(cveScoring, 'version')
 
 def getBaseScore(cveScoring):
-    return getAttribute(cveScoring, 'baseScore')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'baseScore')
 
 def getAccessVectorScore(cveScoring):
-    return getAttribute(cveScoring, 'attackVector')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'attackVector')
 
 def getAccessComplexityScore(cveScoring):
-    return getAttribute(cveScoring, 'attackComplexity')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'attackComplexity')
 
 def getAuthenticationRequirement(cveScoring):
-    return getAttribute(cveScoring, 'privilegesRequired')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'privilegesRequired')
 
 def getConfidentialityImpact(cveScoring):
-    return getAttribute(cveScoring,'confidentialityImpact')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'confidentialityImpact')
 
 def getIntegrityImpact(cveScoring):
-    return getAttribute(cveScoring,'integrityImpact')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'integrityImpact')
 
 def getAvailabilityImpact(cveScoring):
     return getAttribute(cveScoring, 'availabilityImpact')
