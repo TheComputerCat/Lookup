@@ -1,5 +1,21 @@
 THIRD_VERSION = "3.1"
 
+def trimVulnerabilityInfo(cve, version):
+    cveScoreFromVersion = getAttribute(cve['metrics'], version)
+    if cveScoreFromVersion == None:
+        return
+    cveScoring = cveScoreFromVersion[0]['cvssData']
+    return {
+        "cve": getCveId(cve),
+        "baseScore": getBaseScore(cveScoring),
+        "vector": getAccessVectorScore(cveScoring),
+        "complexity": getAccessComplexityScore(cveScoring),
+        "authentication": getAuthenticationRequirement(cveScoring),
+        "confidentialityImpact": getConfidentialityImpact(cveScoring),
+        "integrityImpact": getIntegrityImpact(cveScoring),
+        "availabilityImpact": getAvailabilityImpact(cveScoring),
+    }
+
 def getAttribute(element, attribute):
     return element.get(attribute)
 

@@ -49,6 +49,20 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             ["HIGH", vulnerabilities_extract.getAvailabilityImpact(secondVulnerabilityData)],
             [None, vulnerabilities_extract.getAttribute(firstVulnerabilityData, "hello")],
             [7.2, vulnerabilities_extract.getAttribute(firstVulnerabilityData, "baseScore")],
+            [
+                {
+                    "cve": 'CVE-2023-31740',
+                    "baseScore": 7.2,
+                    "vector": "NETWORK",
+                    "complexity": "LOW",
+                    "authentication": "HIGH",
+                    "confidentialityImpact": "HIGH",
+                    "integrityImpact": "MEDIUM",
+                    "availabilityImpact": "LOW"
+                },
+                vulnerabilities_extract.trimVulnerabilityInfo(firstCVE, 'cvssMetricV31')
+            ],
+            [None, vulnerabilities_extract.trimVulnerabilityInfo(firstCVE, 'cvssMetricV2')]
         ]
 
         for result, expected_result in test_cases:
