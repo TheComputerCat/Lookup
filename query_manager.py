@@ -29,9 +29,9 @@ def getConfig():
         config.read(CONFIG_FILE_PATH)
         return config
     except Exception as e:
-        log(e, debug=True, printing=True)  
+        log(e, debug=True, printing=True)
 
-def getDBEngine():
+def getConnectionUrl():
     config = getConfig()
     host = config['default']['host']
     port = config['default']['port']
@@ -39,7 +39,10 @@ def getDBEngine():
     username = config['credentials']['username']
     password = config['credentials']['password']
 
-    return create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}', echo=False, executemany_mode='values_plus_batch')
+    return f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}'
+
+def getDBEngine():
+    return create_engine(getConnectionUrl(), echo=False, executemany_mode='values_plus_batch')
 
 def getDBSession():
     return Session(getDBEngine())

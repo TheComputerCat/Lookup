@@ -68,8 +68,9 @@ class TestGetDBEngine(unittest.TestCase):
         query_manager.getDBEngine()
         spyGetConfig.assert_called_once()
         spyCreate_engine.assert_called_once_with(
-            'postgresql://postgresusr:complex_password@localhost:5432/postgres',
-            echo=True
+            'postgresql+psycopg2://postgresusr:complex_password@localhost:5432/postgres',
+            echo=False,
+            executemany_mode='values_plus_batch'
         )
 
     @withConfigPatSetTo(pathToConfig=None)
