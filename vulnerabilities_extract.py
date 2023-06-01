@@ -1,9 +1,26 @@
+def getAttribute(element, attribute):
+    return element.get(attribute)
+
 def getCveId(cve):
-    return cve['id']
+    return getAttribute(cve,'id')
 
 def getBaseScore(cveScoring):
-    return cveScoring['baseScore']
+    return getAttribute(cveScoring, 'baseScore')
 
 def getAccessVectorScore(cveScoring):
-    return cveScoring['attackVector']
+    return getAttribute(cveScoring, 'attackVector')
 
+def getAccessComplexityScore(cveScoring):
+    return getAttribute(cveScoring, 'attackComplexity')
+
+def getAuthenticationRequirement(cveScoring):
+    return getAttribute(cveScoring, 'privilegesRequired')
+
+def getConfidentialityImpact(cveScoring):
+    return getAttribute(cveScoring,'confidentialityImpact')
+
+def getIntegrityImpact(cveScoring):
+    return getAttribute(cveScoring,'integrityImpact')
+
+def getAvailabilityImpact(cveScoring):
+    return getAttribute(cveScoring, 'availabilityImpact')
