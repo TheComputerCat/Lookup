@@ -2,7 +2,10 @@ def getAttribute(element, attribute):
     return element.get(attribute)
 
 def getCveId(cve):
-    return getAttribute(cve,'id')
+    return getAttribute(cve, 'id')
+
+def getVersion(cveScoring):
+    return getAttribute(cveScoring, 'version')
 
 def getBaseScore(cveScoring):
     return getAttribute(cveScoring, 'baseScore')

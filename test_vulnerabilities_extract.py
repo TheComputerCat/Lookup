@@ -44,6 +44,9 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             ["HIGH", vulnerabilities_extract.getIntegrityImpact(secondVulnerabilityData)],
             ["LOW", vulnerabilities_extract.getAvailabilityImpact(firstVulnerabilityData)],
             ["HIGH", vulnerabilities_extract.getAvailabilityImpact(secondVulnerabilityData)],
+            ["3.1", vulnerabilities_extract.getVersion(firstVulnerabilityData)],
+            ["3.1", vulnerabilities_extract.getVersion(secondVulnerabilityData)],
+            ["HIGH", vulnerabilities_extract.getAvailabilityImpact(secondVulnerabilityData)],
             [None, vulnerabilities_extract.getAttribute(firstVulnerabilityData, "hello")],
             [7.2, vulnerabilities_extract.getAttribute(firstVulnerabilityData, "baseScore")],
         ]
