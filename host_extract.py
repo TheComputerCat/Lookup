@@ -49,10 +49,6 @@ def getServicesFromDict(dict):
     )
 
 def getHostInfoFromDict(dict):
-    address = getAttrFromDict(dict, "ip_str")
-    if address is None:
-        return {}
-    
     return {
         "address": getAttrFromDict(dict, "ip_str"),
         "country": getAttrFromDict(dict, "country_code"),
@@ -95,7 +91,7 @@ def createHostRowOrCompleteInfo(hostRow, session):
 def getAllHostInfoDicts():
     filePaths = getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH)
     allHostRows = map(
-        lambda filePath: getHostInfoFromDict(tryTo(eval(getStringFromFile(filePath)), {})),
+        lambda filePath: getHostInfoFromDict(tryTo(lambda: eval(getStringFromFile(filePath)), {})),
         filePaths
     )
 

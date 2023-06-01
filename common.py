@@ -16,7 +16,7 @@ def log(message, logPath="./log", debug=False, printing=False, testing=True):
     except Exception as e:
         print(e)
 
-def tryTo(fun, default):
+def tryTo(fun: function, default):
     try:
         return fun()
     except Exception as e:
