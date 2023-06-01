@@ -2,6 +2,8 @@ import datetime
 import inspect
 import os
 import json
+from collections.abc import Callable
+
 
 def log(message, logPath="./log", debug=False, printing=False, testing=True):
     if debug:
@@ -16,7 +18,7 @@ def log(message, logPath="./log", debug=False, printing=False, testing=True):
     except Exception as e:
         print(e)
 
-def tryTo(fun: function, default):
+def tryTo(fun: Callable, default):
     try:
         return fun()
     except Exception as e:
