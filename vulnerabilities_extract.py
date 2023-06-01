@@ -3,3 +3,7 @@ def getCveId(cve):
 
 def getBaseScore(cveScoring):
     return cveScoring['baseScore']
+
+def getAccessVectorScore(cveScoring):
+    return cveScoring['attackVector']
+
