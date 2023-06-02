@@ -26,11 +26,7 @@ def tryTo(fun: Callable, default):
         return default
 
 def getFilePathsInDirectory(directoryPath):
-    if directoryPath[-1] == "/":
-        suffix = ""
-    else:
-        suffix = "/"
-    fixedDirPath = directoryPath+suffix
+    fixedDirPath = formatDirPath(directoryPath)
 
     return [
         fixedDirPath+fileName for fileName in os.listdir(fixedDirPath)

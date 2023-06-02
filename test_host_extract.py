@@ -1,6 +1,11 @@
 import host_extract
 import json
 import unittest
+from unittest.mock import (
+    MagicMock,
+    Mock,
+    patch,
+)
 
 from model import (
     Host,
@@ -218,7 +223,7 @@ class TestDatabaseHelpers(unittest.TestCase):
         for key in row:
             self.assertEqual(row[key], getattr(obj, key))
     
-    def test_fillObject(self):
+    def test_fillHostObject(self):
         obj = Host(address="8.8.8.8")
         row = {
             "address": "8.8.8.8",
@@ -229,6 +234,39 @@ class TestDatabaseHelpers(unittest.TestCase):
         for key in row:
             self.assertEqual(row[key], getattr(obj, key))
         self.assertIsNone(obj.isp)
+
+    def test_createHostRow(self):
+        session = unittest.mock.MagicMock()
+        session.get = Mock(return_value=None)
+        session.add = Mock()
+        session.commit = Mock()
+
+        hostRow = {
+            "address": "8.8.8.8",
+            "country": "US",
+            "provider": "Google",
+            "isp": "Google",
+        }
+
+        host_extract.createHostRowOrCompleteInfo(hostRow, session)
+
+        session.get.assert_called_once_with(Host, "8.8.8.8")
+        session.add.assert_called_once()
+        session.commit.assert_called_once()
+
+  
+    @patch("host_extract.getFilePathsInDirectory", new_callable=Mock(return_value=lambda _: ["path1"]))
+    @patch("host_extract.getStringFromFile", new_callable=Mock(return_value=lambda _: """{"ip_str": "8.8.8.8","country_code": "US","org": "Google","isp": "Google","ports": [53],}"""))
+    def test_getAllHostInfoDicts(self, getStringMock, fileListMock):
+        result = host_extract.getAllHostInfoDicts()
+        self.assertEqual([dict for dict in result], [eval("""{
+            "address": "8.8.8.8",
+            "country": "US",
+            "provider": "Google",
+            "isp": "Google",
+            "ports": [53],
+            "services": []
+        }""")])
 
 
 if __name__ == "__main__":
