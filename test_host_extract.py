@@ -308,6 +308,7 @@ class TestDatabase(unittest.TestCase):
 
         allHosts = [row.address for row in session.query(Host).all()]
         self.assertEqual(allHosts, ["8.8.8.8"])
+        
         session.close()
 
 if __name__ == "__main__":
