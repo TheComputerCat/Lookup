@@ -37,7 +37,7 @@ class Domain(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    organization_id: Mapped[int] = mapped_column(ForeignKey("ORGANIZATIONS.id"), nullable=True)
+    organization_id: Mapped[int] = mapped_column(ForeignKey("ORGANIZATIONS.id"), nullable=False)
 
     organization: Mapped[Optional[Organization]] = relationship(back_populates="domains")
     a_records: Mapped[List["ARecord"]] = relationship(back_populates="parent_domain")
