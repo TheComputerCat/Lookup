@@ -100,9 +100,9 @@ def setUpWithATextFile(pathToTextFile, content):
 def tearDownWithATextFile(pathToTextFile, deleteFolder=True):
     os.remove(pathToTextFile)
     dirname = os.path.dirname(pathToTextFile)
-
-    if(deleteFolder and dirname != '.' and dirname != os.getcwd()):
-        os.removedirs(os.path.dirname(pathToTextFile))
+    
+    if(deleteFolder and dirname != '.' and dirname != os.getcwd() and len(os.listdir(dirname)) == 0):
+        os.removedirs(dirname)
 
 def removeFile(pathToTextFile):
     os.remove(pathToTextFile)
