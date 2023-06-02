@@ -70,3 +70,12 @@ def insertMany(TableObjects):
             log(e, debug=True, printing=True) 
         finally:
             session.rollback()
+
+def searchInTable(classObject, dict):
+    with getDBSession() as session:
+        try:
+            session.query(classObject).filter_by(dict).one()
+        except Exception as e:
+            log(e, debug=True, printing=True) 
+        finally:
+            session.rollback()

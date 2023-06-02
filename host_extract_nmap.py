@@ -7,10 +7,14 @@ from common import (
 
 from model import (
     HostService,
+    Service
 )
+
+import query_manager
 
 import os
 import datetime
+import re
 
 import xml.etree.ElementTree as XML
 
@@ -25,8 +29,9 @@ def getAllHostServices(host_element):
     services = []
     host_address = getAddress(host_element)
     host_timestamp = getTimeStamp(host_element)
-    for port in host_element.iter('port'):
-        services.append(getHostServiceDict(port.find('service')),host_address,host_timestamp)
+    for port_element in host_element.iter('port'):
+        service_in_port = port_element.find('service')
+        services.append(getHostServiceDict(service_in_port,host_address,host_timestamp))
     services = filterUnknownServices(services)
     return map(lambda service :HostService(**service),services)
     
@@ -36,7 +41,7 @@ def filterUnknownServices(services):
 def getHostServiceDict(service_element, host_address, host_timestamp):
     service_dict = getUniqueServiceDict(service_element)
     service_id = getServiceIdIfExist(service_dict)
-    if not service_id:
+    if service_id is None:
         service_id = insertNewServiceInDB(service_dict)
     return {
           'address': host_address,
@@ -45,32 +50,39 @@ def getHostServiceDict(service_element, host_address, host_timestamp):
           'timestamp': host_timestamp
     }
 
-def getServiceIdIfExist(service_element):
-    # recorre la base de datos
-    # encuentra el id si el servicio esta registrado, en otro caso retorna null
-    return None
+def getServiceIdIfExist(service_dict):
+    found_service = query_manager.searchInTable(Service,service_dict)
+    if not found_service:
+        return None
+    return found_service.id
 
 def insertNewServiceInDB(service_dict):
-    return 0
+    query_manager.insert(Service(**service_dict))
+    return getServiceIdIfExist(service_dict)
 
 
 def getTimeStamp(host_element):
     return datetime.datetime.fromtimestamp(int(host_element.attrib['starttime']))
 
 def getUniqueServiceDict(service_element):
+    service_info = service_element.attrib.get('servicefp',"")
     return {
-          'name': service_element.attrib['name'],
-          'version': tryTo(getServiceVersion(service_element),'0.0.0')
+          'name': service_element.attrib.get('name'),
+          'version': getServiceVersion(service_info)
     }
 
-def getServiceVersion(service_element):
-    return service_element.attrib['servicefp']
+def getServiceVersion(service_info):
+    search = re.findall("(?<=V=)(.*)(?=%I)",service_info)
+    if search:
+        return search[0]
+    return 
 
 def getHostDictFromXML(xml_path: str):
     host_element = getHostElementFromXML(xml_path)
+    services_in_host = getAllHostServices(host_element)
     return {
         'address':getAddress(host_element),
-        'services_in_host': getAllHostServices(host_element),
+        'services_in_host': services_in_host,
     }
 
 def getAddress(host_element):
