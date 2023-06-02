@@ -2,7 +2,6 @@ import host_extract
 import json
 import unittest
 from unittest.mock import (
-    MagicMock,
     Mock,
     patch,
 )
@@ -10,6 +9,10 @@ from unittest.mock import (
 from model import (
     Host,
 )
+
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
+import query_manager
 
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""
@@ -267,6 +270,16 @@ class TestDatabaseHelpers(unittest.TestCase):
             "ports": [53],
             "services": []
         }""")])
+
+def testEngine():
+    return create_engine(PostgresContainer("postgres:latest").start().get_connection_url())
+
+class TestDatabaseInsertions(unittest.TestCase):
+    @patch("query_manager.getDBEngine", testEngine)
+    def test_completeHostTable(self):
+        query_manager.createTables()
+
+
 
 
 if __name__ == "__main__":
