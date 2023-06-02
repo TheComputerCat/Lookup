@@ -4,6 +4,7 @@ from datetime import (
 
 from sqlalchemy import (
     DateTime,
+    Float,
     ForeignKey,
     String,
 )
@@ -94,6 +95,22 @@ class Service(Base):
     cpe_code: Mapped[str] = mapped_column(String(100), nullable=True)
 
     hosts_with_service: Mapped[List["HostService"]] = relationship(back_populates="service")
+    vulnerabilities: Mapped[List["Vulnerability"]] = relationship(back_populates="service")
+
+class Vulnerability(Base):
+    __tablename__ = "VULNERABILITES"
+
+    cve_code: Mapped[str] = mapped_column(String(100), primary_key=True)
+    cpe_code: Mapped[str] = mapped_column(ForeignKey("SERVICES.cpe_code"), nullable=False)
+    score: Mapped[float] = mapped_column(Float, nullable=False)
+    access_vector: Mapped[str] = mapped_column(String(1), nullable=False)
+    access_complexity: Mapped[str] = mapped_column(String(1), nullable=False)
+    authentication_requirement: Mapped[str] = mapped_column(String(1), nullable=False)
+    confidentiality_impact: Mapped[str] = mapped_column(String(1), nullable=False)
+    integrity_impact: Mapped[str] = mapped_column(String(1), nullable=False)
+    availability_impact: Mapped[str] = mapped_column(String(1), nullable=False)
+
+    service: Mapped[Service] = relationship(back_populates="vulnerabilities")
 
 class HostService(Base):
     __tablename__ = "HOST_SERVICES"
