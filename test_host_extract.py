@@ -276,9 +276,6 @@ class TestDatabaseHelpers(unittest.TestCase):
             "services": []
         }""")])
 
-def testEngine():
-    return create_engine(PostgresContainer("postgres:latest").start().get_connection_url())
-
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 
 def setUpDatabase(postgres):
@@ -291,7 +288,6 @@ def tearDownDatabase(postgres):
 withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
 
 class TestDatabase(unittest.TestCase):
-    @patch("query_manager.getDBEngine", testEngine)
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
     def test_createTables(self):
         query_manager.createTables()
