@@ -1,5 +1,6 @@
 from common import (
-    getDictFromJSONFile,
+    formatDirPath,
+    formatFilePath,
     getFilePathsInDirectory,
     getStringFromFile,
     tryTo,
@@ -13,9 +14,10 @@ from model import (
 
 from query_manager import (
     setConfigFile,
-    getConfig,
     getDBSession,
 )
+
+import sys
 
 ADDRESS_DATA_DIR_PATH = None
 
@@ -162,3 +164,21 @@ def completeHostServiceTable():
             session.commit()
     
     session.close()
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+
+    if len(args) < 2:
+        raise Exception("""Se necesitan dos argumentos:
+    1. la ruta al archivo con las credenciales de la base de datos,
+    2. La ruta al directorio con la información de hosts de Shodan.""")
+
+    configFile = formatFilePath(args[0])
+    dataDirPath = formatDirPath(args[1])
+
+    setConfigFile(configFile)
+    setAddressDataDirPath(dataDirPath)
+
+    completeServiceTable()
+    completeHostTable()
+    completeHostServiceTable()

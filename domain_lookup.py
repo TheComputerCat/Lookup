@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
         if   args[0] == 'lookup':
             if len(args) < 4:
-                raise Exception("""Se necesitan tres argumentos más:
+                raise Exception("""Se necesitan tres argumentos:
     1. la ruta al archivo con la lista de dominios,
     2. La ruta al directorio donde se guardará la información de los dominios,
     3. La ruta al archivo con la llave de la API de Shodan.""")
@@ -101,7 +101,7 @@ if __name__ == '__main__':
             saveShodanInfoFromDomainFile(domainListFilePath, domainDataDirPath, shodanAPIKeyFilePath)
         elif args[0] == 'get_addresses':
             if len(args) < 3:
-                raise Exception("""Se necesitan dos argumentos más:
+                raise Exception("""Se necesitan dos argumentos:
     1. la ruta al archivo donde se guardarán las direcciones,
     2. La ruta al directorio donde está la información de los dominios.""")
             addressListFilePath = formatFilePath(args[1])
