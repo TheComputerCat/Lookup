@@ -1,3 +1,8 @@
+from common import (
+    createFixture,
+    setUpWithATextFile,
+    tearDownWithATextFile,
+)
 import host_extract
 import json
 import unittest
@@ -274,13 +279,40 @@ class TestDatabaseHelpers(unittest.TestCase):
 def testEngine():
     return create_engine(PostgresContainer("postgres:latest").start().get_connection_url())
 
-class TestDatabaseInsertions(unittest.TestCase):
+withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
+
+def setUpDatabase(postgres):
+    postgres.start()
+    query_manager.getDBEngine = lambda: create_engine(postgres.get_connection_url())
+
+def tearDownDatabase(postgres):
+    postgres.stop()
+
+withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
+
+class TestDatabase(unittest.TestCase):
     @patch("query_manager.getDBEngine", testEngine)
-    def test_completeHostTable(self):
+    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
+    def test_createTables(self):
         query_manager.createTables()
+    
+    @withATextFile(pathToTextFile="./host_data/host1", content="""{
+        "ip_str": "8.8.8.8",
+        "country_code": "US",
+        "org": "Google",
+        "ports": [53]
+    }""")
+    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
+    def test_completeHostTable(self):
+        host_extract.setAddressDataDirPath("./host_data/")
+        query_manager.createTables()
+        host_extract.completeHostTable()
 
+        session = query_manager.getDBSession()
 
-
+        allHosts = [row.address for row in session.query(Host).all()]
+        self.assertEqual(allHosts, ["8.8.8.8"])
+        session.close()
 
 if __name__ == "__main__":
     unittest.main()
