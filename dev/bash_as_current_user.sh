@@ -10,7 +10,7 @@ mkdir -p /home/user
 
 addgroup -g $CURR_USER_GID grp
 adduser -D -h /home/user -u $CURR_USER_UID -G grp user
-
+addgroup user docker
 echo "cd $VOLUME" >> /home/user/.profile
 
 su - user
