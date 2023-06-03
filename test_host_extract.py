@@ -289,7 +289,29 @@ def tearDownDatabase(postgres):
 
 withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
 
-class TestDatabase(unittest.TestCase):    
+class TestDatabase(unittest.TestCase):
+    def assertHostTableIsCorrect(self, session):
+        allHosts = session.query(Host).all()
+        self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
+
+        hostRow = session.get(Host, "8.8.8.8")
+        self.assertEqual(hostRow.country, "CO")
+        self.assertEqual(hostRow.provider, "aaa")
+        self.assertEqual(hostRow.isp, "bbb")
+    
+    def assertServiceTableIsCorrect(self, session):
+        services = session.query(Service).all()
+        self.assertEqual(
+            [(service.name, service.version, service.cpe_code) for service in services],
+            [
+                ("openssh", "7.6", "cpe:2.3:a:openbsd:openssh:7.6"),
+                ("nginx", "1.9.4", "cpe:2.3:a:igor_sysoev:nginx:1.9.4"), 
+            ]
+        )
+    
+    def assertHostServiceTableIsCorrect(self, session):
+        pass
+
     @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "US",
@@ -339,32 +361,16 @@ class TestDatabase(unittest.TestCase):
     def test_completeTables(self):
         host_extract.setAddressDataDirPath("./data/host-data/")
         query_manager.createTables()
-
-        query_manager.insert(Host(address="0.0.0.0"))
-
-        host_extract.completeHostTable()
-
         session = query_manager.getDBSession()
 
-        allHosts = session.query(Host).all()
-        self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
-
-        hostRow = session.get(Host, "8.8.8.8")
-        self.assertEqual(hostRow.country, "CO")
-        self.assertEqual(hostRow.provider, "aaa")
-        self.assertEqual(hostRow.isp, "bbb")
-
+        host_extract.completeHostTable()
+        self.assertHostTableIsCorrect(session)
 
         host_extract.completeServiceTable()
+        self.assertServiceTableIsCorrect(session)
 
-        services = session.query(Service).all()
-        self.assertEqual(
-            [(service.name, service.version, service.cpe_code) for service in services],
-            [
-                ("openssh", "7.6", "cpe:2.3:a:openbsd:openssh:7.6"),
-                ("nginx", "1.9.4", "cpe:2.3:a:igor_sysoev:nginx:1.9.4"), 
-            ]
-        )
+        # host_extract.completeHostServiceTable()
+        # self.assertHostServiceTableIsCorrect(session)
 
         session.close()
 
