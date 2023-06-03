@@ -31,7 +31,7 @@ class Organization(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=True)
 
-    domains_info: Mapped[List["MainDomain"]] = relationship(back_populates="maiorganizationn_domain")
+    main_domain: Mapped[List["MainDomain"]] = relationship(back_populates="organization")
 
 class MainDomain(Base):
     __tablename__ = "MAIN_DOMAINS"
@@ -40,7 +40,8 @@ class MainDomain(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     organization_id: Mapped[int] = mapped_column(ForeignKey("ORGANIZATIONS.id"), nullable=True)
 
-    organization: Mapped[Organization] = relationship(back_populates="domains_info")
+    organization: Mapped[Organization] = relationship(back_populates="main_domain")
+    domains_info: Mapped[List["MainDomain"]] = relationship(back_populates="main_domain")
 
 class DomainInfo(Base):
     __tablename__ = "DOMAINS_INFO"
@@ -50,7 +51,7 @@ class DomainInfo(Base):
     subdomain: Mapped[Boolean] = mapped_column(Boolean, nullable=False)
     main_domain_id: Mapped[int] = mapped_column(ForeignKey("MAIN_DOMAINS.id"), nullable=False)
 
-    main_domain: Mapped[MainDomain] = relationship(back_populates="domain_info")
+    main_domain: Mapped[MainDomain] = relationship(back_populates="domains_info")
     a_records: Mapped[List["ARecord"]] = relationship(back_populates="parent_domain_info")
     mx_records: Mapped[List["MXRecord"]] = relationship(back_populates="parent_domain_info")
     txt_records: Mapped[List["TXTRecord"]] = relationship(back_populates="parent_domain_info")
