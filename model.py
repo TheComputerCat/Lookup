@@ -161,7 +161,8 @@ class Service(Base):
 class Vulnerability(Base):
     __tablename__ = "VULNERABILITES"
 
-    cve_code: Mapped[str] = mapped_column(String(100), primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    cve_code: Mapped[str] = mapped_column(String(100))
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=False)
     score: Mapped[float] = mapped_column(Float, nullable=False)
     access_vector: Mapped[str] = mapped_column(String(10), nullable=False)
