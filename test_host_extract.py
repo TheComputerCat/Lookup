@@ -287,23 +287,19 @@ def tearDownDatabase(postgres):
 
 withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
 
-class TestDatabase(unittest.TestCase):
-    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
-    def test_createTables(self):
-        query_manager.createTables()
-    
-    @withATextFile(pathToTextFile="./host-data/host1", content="""{
+class TestDatabase(unittest.TestCase):    
+    @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "US",
         "org": "Google"
     }""")
-    @withATextFile(pathToTextFile="./host-data/host2", content="""{
+    @withATextFile(pathToTextFile="./data/host-data/host2", content="""{
         "ip_str": "0.0.0.0",
         "country_code": "US",
         "org": "aaa",
         "isp": "bbb"
     }""")
-    @withATextFile(pathToTextFile="./host-data/host3", content="""{
+    @withATextFile(pathToTextFile="./data/host-data/host3", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "CO",
         "org": "aaa",
@@ -311,7 +307,7 @@ class TestDatabase(unittest.TestCase):
     }""")
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
     def test_completeHostTable(self):
-        host_extract.setAddressDataDirPath("./host-data/")
+        host_extract.setAddressDataDirPath("./data/host-data/")
         query_manager.createTables()
 
         query_manager.insert(Host(address="0.0.0.0"))
@@ -323,9 +319,10 @@ class TestDatabase(unittest.TestCase):
         allHosts = session.query(Host).all()
         self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
 
-        self.assertEqual(session.get(Host, "8.8.8.8").country, "CO")
-        self.assertEqual(session.get(Host, "8.8.8.8").provider, "aaa")
-        self.assertEqual(session.get(Host, "8.8.8.8").isp, "bbb")
+        hostRow = session.get(Host, "8.8.8.8")
+        self.assertEqual(hostRow.country, "CO")
+        self.assertEqual(hostRow.provider, "aaa")
+        self.assertEqual(hostRow.isp, "bbb")
 
         session.close()
 
