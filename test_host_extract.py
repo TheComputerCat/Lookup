@@ -13,6 +13,7 @@ from unittest.mock import (
 
 from model import (
     Host,
+    Service,
 )
 
 from sqlalchemy import create_engine
@@ -323,6 +324,66 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(hostRow.country, "CO")
         self.assertEqual(hostRow.provider, "aaa")
         self.assertEqual(hostRow.isp, "bbb")
+
+        session.close()
+    
+    @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
+        "ip_str": "0.0.0.0",
+        "country_code": "US",
+        "org": "aaa",
+        "isp": "bbb",
+        "data": [
+            {
+                "product": "openssh",
+                "version": "7.6",
+                "port": "22",
+                "cpe23": [
+                    "cpe:2.3:a:openbsd:openssh:7.6"
+                ],
+            }
+        ]
+    }""")
+    @withATextFile(pathToTextFile="./data/host-data/host2", content="""{
+        "ip_str": "0.0.0.0",
+        "country_code": "US",
+        "org": "aaa",
+        "isp": "bbb",
+        "data": [
+            {
+                "product": "openssh",
+                "version": "7.6",
+                "port": "22",
+                "cpe23": [
+                    "cpe:2.3:a:openbsd:openssh:7.6"
+                ],
+            },
+            {
+                "product": "nginx",
+                "version": "1.9.4",
+                "port": "80",
+                "cpe23": [
+                    "cpe:2.3:a:igor_sysoev:nginx:1.9.4"
+                ],
+            }
+        ]
+    }""")
+    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
+    def test_completeServiceTable(self):
+        host_extract.setAddressDataDirPath("./data/host-data/")
+        query_manager.createTables()
+
+        host_extract.completeServiceTable()
+
+        session = query_manager.getDBSession()
+
+        services = session.query(Service).all()
+        self.assertEqual(
+            set([(service.name, service.version, service.cpe_code) for service in services]),
+            set([
+                ("nginx", "1.9.4", "cpe:2.3:a:igor_sysoev:nginx:1.9.4"), 
+                ("openssh", "7.6", "cpe:2.3:a:openbsd:openssh:7.6")
+            ])
+        )
 
         session.close()
 
