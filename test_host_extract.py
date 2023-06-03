@@ -3,6 +3,7 @@ from common import (
     setUpWithATextFile,
     tearDownWithATextFile,
 )
+from datetime import datetime
 import host_extract
 import json
 import unittest
@@ -13,6 +14,7 @@ from unittest.mock import (
 
 from model import (
     Host,
+    HostService,
     Service,
 )
 
@@ -305,12 +307,24 @@ class TestDatabase(unittest.TestCase):
             [(service.name, service.version, service.cpe_code) for service in services],
             [
                 ("openssh", "7.6", "cpe:2.3:a:openbsd:openssh:7.6"),
-                ("nginx", "1.9.4", "cpe:2.3:a:igor_sysoev:nginx:1.9.4"), 
+                ("nginx", "1.9.4", "cpe:2.3:a:igor_sysoev:nginx:1.9.4"),
+                ("Apache httpd", None, None),
             ]
         )
     
     def assertHostServiceTableIsCorrect(self, session):
-        pass
+        toDatetime = lambda string: datetime.strptime(string, '%Y-%m-%dT%H:%M:%S.%f')
+
+        hostServices = session.query(HostService).all()
+        self.assertEqual([
+            (hostService.address, hostService.service_id, hostService.source, hostService.protocol, hostService.timestamp)
+                for hostService in hostServices
+        ], [
+            ("0.0.0.0", 1, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509923")),
+            ("0.0.0.0", 2, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509950")),
+            ("0.0.0.0", 3, "shodan-host", "tcp", None),
+            ("8.8.8.8", 1, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509917")),
+        ])
 
     @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
         "ip_str": "8.8.8.8",
@@ -326,7 +340,7 @@ class TestDatabase(unittest.TestCase):
                 ],
                 "transport": "tcp",
                 "timestamp": "2023-05-23T09:52:49.509917",
-            }
+            },
         ]
     }""")
     @withATextFile(pathToTextFile="./data/host-data/host2", content="""{
@@ -343,7 +357,7 @@ class TestDatabase(unittest.TestCase):
                     "cpe:2.3:a:openbsd:openssh:7.6"
                 ],
                 "transport": "tcp",
-                "timestamp": "2023-05-23T09:52:49.509917",
+                "timestamp": "2023-05-23T09:52:49.509923",
             },
             {
                 "product": "nginx",
@@ -353,8 +367,13 @@ class TestDatabase(unittest.TestCase):
                     "cpe:2.3:a:igor_sysoev:nginx:1.9.4"
                 ],
                 "transport": "tcp",
-                "timestamp": "2023-05-23T09:52:49.509917",
-            }
+                "timestamp": "2023-05-23T09:52:49.509950",
+            },
+            {
+                "product": "Apache httpd",
+                "port": "80",
+                "transport": "tcp",
+            },
         ]
     }""")
     @withATextFile(pathToTextFile="./data/host-data/host3", content="""{

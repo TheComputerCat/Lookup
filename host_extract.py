@@ -149,13 +149,12 @@ def getHostServiceRows(session):
             row = {
                 "address": address,
                 "service": serviceObject,
-                "source": "shodan",
+                "source": "shodan-host",
                 "protocol": getAttrFromDict(serviceDict, "protocol"),
                 "timestamp": serviceDict["timestamp"],
             }
 
-            if None not in [row[key] for key in row]:
-                yield row
+            yield row
 
 
 def completeHostServiceTable():
