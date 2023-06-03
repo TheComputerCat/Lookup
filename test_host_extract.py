@@ -323,9 +323,9 @@ class TestDatabase(unittest.TestCase):
         allHosts = session.query(Host).all()
         self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
 
-        self.assertEqual(session.query(Host).get("8.8.8.8").country, "CO")
-        self.assertEqual(session.query(Host).get("8.8.8.8").provider, "aaa")
-        self.assertEqual(session.query(Host).get("8.8.8.8").isp, "bbb")
+        self.assertEqual(session.get(Host, "8.8.8.8").country, "CO")
+        self.assertEqual(session.get(Host, "8.8.8.8").provider, "aaa")
+        self.assertEqual(session.get(Host, "8.8.8.8").isp, "bbb")
 
         session.close()
 
