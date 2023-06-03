@@ -4,17 +4,29 @@ from common import (
     getFilePathsInDirectory,
     getStringFromFile,
 )
+from model import (
+    Vulnerability,
+    Service,
+)
 
 THIRD_VERSION = "3.1"
 
 
 def completeVulnerabilityTable(vulnDirPath):
     session = getDBSession()
-    getCvesDictFromAllFilesInDir(vulnDirPath)
-    #save vulnerability
+    cveList = getCvesDictFromAllFilesInDir(vulnDirPath)
+    for cve_code in cveList.values():
+        saveCve(cve_code, session)
+
     session.commit()
     session.close()
 
+
+def saveCve(cve, session):
+    vulnObject = Vulnerability(**cve)
+    session.add(vulnObject)
+    #completeObjectInfo(vulnObject, cve)
+    session.commit()
 
 def getCvesDictFromAllFilesInDir(vulnDirPath):
     dir = getFilePathsInDirectory(vulnDirPath)
@@ -38,9 +50,15 @@ def trimVulnerabilityInfo(cve, version):
     if cveScoreFromVersion == None:
         return
     cveScoring = cveScoreFromVersion[0]['cvssData']
+
+    service = {
+        "id": 0,
+        "name": "hello",
+        "cpe_code": "bye"
+    }
     return {
         "cve_code": getCveId(cve),
-        "service_id": None,
+        "service_id": 0,
         "score": getBaseScore(cveScoring),
         "access_vector": getAccessVectorScore(cveScoring),
         "access_complexity": getAccessComplexityScore(cveScoring),
@@ -48,7 +66,7 @@ def trimVulnerabilityInfo(cve, version):
         "confidentiality_impact": getConfidentialityImpact(cveScoring),
         "integrity_impact": getIntegrityImpact(cveScoring),
         "availability_impact": getAvailabilityImpact(cveScoring),
-        "service": None,
+        "service": Service(name="hi", cpe_code= "bye"),
     }
 
 def getAttribute(element, attribute):
