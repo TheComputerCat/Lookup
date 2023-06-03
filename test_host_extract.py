@@ -293,46 +293,7 @@ class TestDatabase(unittest.TestCase):
     @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "US",
-        "org": "Google"
-    }""")
-    @withATextFile(pathToTextFile="./data/host-data/host2", content="""{
-        "ip_str": "0.0.0.0",
-        "country_code": "US",
-        "org": "aaa",
-        "isp": "bbb"
-    }""")
-    @withATextFile(pathToTextFile="./data/host-data/host3", content="""{
-        "ip_str": "8.8.8.8",
-        "country_code": "CO",
-        "org": "aaa",
-        "isp": "bbb"
-    }""")
-    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
-    def test_completeHostTable(self):
-        host_extract.setAddressDataDirPath("./data/host-data/")
-        query_manager.createTables()
-
-        query_manager.insert(Host(address="0.0.0.0"))
-
-        host_extract.completeHostTable()
-
-        session = query_manager.getDBSession()
-
-        allHosts = session.query(Host).all()
-        self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
-
-        hostRow = session.get(Host, "8.8.8.8")
-        self.assertEqual(hostRow.country, "CO")
-        self.assertEqual(hostRow.provider, "aaa")
-        self.assertEqual(hostRow.isp, "bbb")
-
-        session.close()
-    
-    @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
-        "ip_str": "8.8.8.8",
-        "country_code": "US",
         "org": "Google",
-        "isp": "Google",
         "data": [
             {
                 "product": "openssh",
@@ -368,14 +329,33 @@ class TestDatabase(unittest.TestCase):
             }
         ]
     }""")
+    @withATextFile(pathToTextFile="./data/host-data/host3", content="""{
+        "ip_str": "8.8.8.8",
+        "country_code": "CO",
+        "org": "aaa",
+        "isp": "bbb"
+    }""")
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
-    def test_completeServiceTable(self):
+    def test_completeHostTable(self):
         host_extract.setAddressDataDirPath("./data/host-data/")
         query_manager.createTables()
 
-        host_extract.completeServiceTable()
+        query_manager.insert(Host(address="0.0.0.0"))
+
+        host_extract.completeHostTable()
 
         session = query_manager.getDBSession()
+
+        allHosts = session.query(Host).all()
+        self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
+
+        hostRow = session.get(Host, "8.8.8.8")
+        self.assertEqual(hostRow.country, "CO")
+        self.assertEqual(hostRow.provider, "aaa")
+        self.assertEqual(hostRow.isp, "bbb")
+
+
+        host_extract.completeServiceTable()
 
         services = session.query(Service).all()
         self.assertEqual(
