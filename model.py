@@ -112,6 +112,7 @@ class Vulnerability(Base):
 
     service: Mapped[Service] = relationship(back_populates="vulnerabilities")
 
+
 class HostService(Base):
     __tablename__ = "HOST_SERVICES"
 

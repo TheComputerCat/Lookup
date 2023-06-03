@@ -1,6 +1,6 @@
 import configparser
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import (create_engine, exc)
 from sqlalchemy.orm import (
     Session
 )
@@ -46,7 +46,7 @@ def getDBEngine():
 
 def getDBSession():
     return Session(getDBEngine())
-
+dict
 def createTables():
     engine = getDBEngine()
     Base.metadata.create_all(engine)
@@ -74,8 +74,10 @@ def insertMany(TableObjects):
 def searchInTable(classObject, dict):
     with getDBSession() as session:
         try:
-            session.query(classObject).filter_by(dict).one()
-        except Exception as e:
+           found = session.query(classObject).filter_by(**dict).one()
+           session.expunge_all()
+           return found
+        except (Exception,exc) as e:
             log(e, debug=True, printing=True) 
         finally:
             session.rollback()
