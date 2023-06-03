@@ -1,4 +1,29 @@
+import json
+from query_manager import getDBSession
+from common import (
+    getFilePathsInDirectory,
+    getStringFromFile,
+)
+
 THIRD_VERSION = "3.1"
+
+
+def completeVulnerabilityTable(vulnDirPath):
+    session = getDBSession()
+    getCvesDictFromAllFilesInDir(vulnDirPath)
+    #save vulnerability
+    session.commit()
+    session.close()
+
+
+def getCvesDictFromAllFilesInDir(vulnDirPath):
+    dir = getFilePathsInDirectory(vulnDirPath)
+    dict = {}
+    for filePath in dir:
+        queryString = getStringFromFile(filePath)
+        dict |= getCvesDictFromJson(json.loads(queryString), 'cvssMetricV31')
+    return dict
+
 
 def getCvesDictFromJson(query, cveVersion):
     dict = {}
@@ -6,6 +31,8 @@ def getCvesDictFromJson(query, cveVersion):
         vuln = trimVulnerabilityInfo(cve['cve'], cveVersion)
         dict |= {vuln['cve']: vuln}
     return dict
+
+
 def trimVulnerabilityInfo(cve, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
     if cveScoreFromVersion == None:
