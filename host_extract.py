@@ -116,29 +116,25 @@ def completeHostTable():
     session.commit()
     session.close()
 
-def createServiceRowIfNeeded(serviceDict, session):
-    serviceRow = getServiceRowFromServiceDict(serviceDict)
+def getServiceRows(session):
+    for dict in getAllHostInfoDicts():
+        for serviceDict in dict["services"]:
+            serviceRow = getServiceRowFromServiceDict(serviceDict)
 
-    serviceObject = session.query(Service).filter_by(
-        **serviceRow
-    ).first()
-
-    if serviceObject is None:
-        session.add(
-            Service(
+            serviceObject = session.query(Service).filter_by(
                 **serviceRow
-            )
-        )
-    
-    session.commit()
+            ).first()
+
+            if serviceObject is None:
+                yield serviceRow
 
 def completeServiceTable():
     session = getDBSession()
 
-    for dict in getAllHostInfoDicts():
-        for serviceDict in dict["services"]:
-            createServiceRowIfNeeded(serviceDict, session)
-    
+    for serviceRow in getServiceRows(session):
+        session.add(Service(**serviceRow))
+
+    session.commit()
     session.close()
 
 def getHostServiceRows(session):
