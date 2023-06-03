@@ -329,10 +329,10 @@ class TestDatabase(unittest.TestCase):
         session.close()
     
     @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
-        "ip_str": "0.0.0.0",
+        "ip_str": "8.8.8.8",
         "country_code": "US",
-        "org": "aaa",
-        "isp": "bbb",
+        "org": "Google",
+        "isp": "Google",
         "data": [
             {
                 "product": "openssh",
@@ -379,11 +379,11 @@ class TestDatabase(unittest.TestCase):
 
         services = session.query(Service).all()
         self.assertEqual(
-            set([(service.name, service.version, service.cpe_code) for service in services]),
-            set([
+            [(service.name, service.version, service.cpe_code) for service in services],
+            [
+                ("openssh", "7.6", "cpe:2.3:a:openbsd:openssh:7.6"),
                 ("nginx", "1.9.4", "cpe:2.3:a:igor_sysoev:nginx:1.9.4"), 
-                ("openssh", "7.6", "cpe:2.3:a:openbsd:openssh:7.6")
-            ])
+            ]
         )
 
         session.close()
