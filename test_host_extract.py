@@ -292,23 +292,41 @@ class TestDatabase(unittest.TestCase):
     def test_createTables(self):
         query_manager.createTables()
     
-    @withATextFile(pathToTextFile="./host_data/host1", content="""{
+    @withATextFile(pathToTextFile="./host-data/host1", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "US",
-        "org": "Google",
-        "ports": [53]
+        "org": "Google"
+    }""")
+    @withATextFile(pathToTextFile="./host-data/host2", content="""{
+        "ip_str": "0.0.0.0",
+        "country_code": "US",
+        "org": "aaa",
+        "isp": "bbb"
+    }""")
+    @withATextFile(pathToTextFile="./host-data/host3", content="""{
+        "ip_str": "8.8.8.8",
+        "country_code": "CO",
+        "org": "aaa",
+        "isp": "bbb"
     }""")
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
     def test_completeHostTable(self):
-        host_extract.setAddressDataDirPath("./host_data/")
+        host_extract.setAddressDataDirPath("./host-data/")
         query_manager.createTables()
+
+        query_manager.insert(Host(address="0.0.0.0"))
+
         host_extract.completeHostTable()
 
         session = query_manager.getDBSession()
 
-        allHosts = [row.address for row in session.query(Host).all()]
-        self.assertEqual(allHosts, ["8.8.8.8"])
-        
+        allHosts = session.query(Host).all()
+        self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
+
+        self.assertEqual(session.query(Host).get("8.8.8.8").country, "CO")
+        self.assertEqual(session.query(Host).get("8.8.8.8").provider, "aaa")
+        self.assertEqual(session.query(Host).get("8.8.8.8").isp, "bbb")
+
         session.close()
 
 if __name__ == "__main__":
