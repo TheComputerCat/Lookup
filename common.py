@@ -115,3 +115,24 @@ def getDictFromJSONFile(path: str):
         return {}
 
     return object
+
+def eqCreator(aClass, exceptions=[]):
+    nonSpecialMembers = [a for a in inspect.getmembers(aClass) if not a[0].startswith('_')]
+    withoutExceptions = [a[0] for a in nonSpecialMembers if a[0] not in exceptions]
+    def eq(self, other):
+        if not isinstance(other, aClass):
+            return NotImplemented
+        
+        for attribute in withoutExceptions:
+            if getattr(self, attribute) != getattr(other, attribute):
+                return False
+        return True
+    return eq
+
+def repCreator(aClass, exceptions=[]):
+    nonSpecialMembers = [a for a in inspect.getmembers(aClass) if not a[0].startswith('_')]
+    withoutExceptions = [a[0] for a in nonSpecialMembers if a[0] not in exceptions]
+    def rep(self):
+        attributesValue = [f'{attribute}={getattr(self, attribute)}' for attribute in withoutExceptions]
+        return f'{aClass.__name__}({", ".join(attributesValue)})'
+    return rep

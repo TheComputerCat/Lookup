@@ -22,6 +22,8 @@ from typing import (
     Optional,
 )
 
+import common
+
 class Base(DeclarativeBase):
     pass
 
@@ -43,6 +45,14 @@ class MainDomain(Base):
     organization: Mapped[Organization] = relationship(back_populates="main_domains")
     domains_info: Mapped[List["DomainInfo"]] = relationship(back_populates="main_domain")
 
+    def __eq__(self, other): 
+        eq = ModelsEqCreator(MainDomain, ['organization', 'domains_info'])
+        return eq(self, other)
+    
+    def __repr__(self):
+        rep = ModelsRepCreator(MainDomain, ['organization', 'domains_info'])
+        return rep(self)
+
 class DomainInfo(Base):
     __tablename__ = "DOMAINS_INFO"
 
@@ -56,6 +66,14 @@ class DomainInfo(Base):
     mx_records: Mapped[List["MXRecord"]] = relationship(back_populates="parent_domain_info")
     txt_records: Mapped[List["TXTRecord"]] = relationship(back_populates="parent_domain_info")
 
+    def __eq__(self, other): 
+        eq = ModelsEqCreator(DomainInfo, ['main_domain', 'a_records', 'mx_records', 'txt_records'])
+        return eq(self, other)
+    
+    def __repr__(self):
+        rep = ModelsRepCreator(DomainInfo, ['main_domain', 'a_records', 'mx_records', 'txt_records'])
+        return rep(self)
+
 class Host(Base):
     __tablename__ = "HOSTS"
 
@@ -66,6 +84,14 @@ class Host(Base):
 
     services_in_host: Mapped[List["HostService"]] = relationship(back_populates="host")
     a_records_with_host: Mapped[List["ARecord"]] = relationship(back_populates="address")
+
+    def __eq__(self, other): 
+        eq = ModelsEqCreator(Host, ['services_in_host', 'a_records_with_host'])
+        return eq(self, other)
+    
+    def __repr__(self):
+        rep = ModelsRepCreator(Host, ['services_in_host', 'a_records_with_host'])
+        return rep(self)
 
 class ARecord(Base):
     __tablename__ = "A_RECORDS"
@@ -78,6 +104,14 @@ class ARecord(Base):
     parent_domain_info: Mapped[DomainInfo] = relationship(back_populates="a_records")
     address: Mapped[Host] = relationship(back_populates="a_records_with_host")
 
+    def __eq__(self, other): 
+        eq = ModelsEqCreator(ARecord, ['parent_domain_info', 'address'])
+        return eq(self, other)
+    
+    def __repr__(self):
+        rep = ModelsRepCreator(ARecord, ['parent_domain_info', 'address'])
+        return rep(self)
+
 class MXRecord(Base):
     __tablename__ = "MX_RECORDS"
 
@@ -88,6 +122,14 @@ class MXRecord(Base):
 
     parent_domain_info: Mapped[DomainInfo] = relationship(back_populates="mx_records")
 
+    def __eq__(self, other): 
+        eq = ModelsEqCreator(MXRecord, ['parent_domain_info'])
+        return eq(self, other)
+    
+    def __repr__(self):
+        rep = ModelsRepCreator(MXRecord, ['parent_domain_info'])
+        return rep(self)
+
 class TXTRecord(Base):
     __tablename__ = "TXT_RECORDS"
 
@@ -97,6 +139,14 @@ class TXTRecord(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     parent_domain_info: Mapped[DomainInfo] = relationship(back_populates="txt_records")
+
+    def __eq__(self, other): 
+        eq = ModelsEqCreator(TXTRecord, ['parent_domain_info'])
+        return eq(self, other)
+    
+    def __repr__(self):
+        rep = ModelsRepCreator(TXTRecord, ['parent_domain_info'])
+        return rep(self)
 
 class Service(Base):
     __tablename__ = "SERVICES"
@@ -137,3 +187,9 @@ class HostService(Base):
 
     host: Mapped[Host] = relationship(back_populates="services_in_host")
     service: Mapped[Service] = relationship(back_populates="hosts_with_service")
+
+def ModelsEqCreator(aClass, exceptions=[]):
+    return common.eqCreator(aClass, exceptions=['registry', 'metadata'] + exceptions)
+
+def ModelsRepCreator(aClass, exceptions=[]):
+    return common.repCreator(aClass, exceptions=['registry', 'metadata'] + exceptions)

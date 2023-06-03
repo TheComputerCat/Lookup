@@ -1,15 +1,24 @@
 from common import (
     log
 )
-import json
+from datetime import datetime
+import json as JSON
 from os import listdir
 from os.path import isfile, join
+import model as model
+
+
+from datetime import datetime
+import json as JSON
+from os import listdir
+from os.path import isfile, join
+import model as model
 
 
 def getJsonFromFile(path):
     try:
         f = open(path, 'r')
-        json_ = json.load(f)
+        json_ = JSON.load(f)
         f.close()
     except Exception as e:
         log(e, printing=True)
@@ -76,7 +85,7 @@ def getRecords(register, data):
     subdomains = list(filter(lambda x : not isMainDomain(x), recordData))
     return main, subdomains
 
-REGISTERS = {
+RECORDS = {
     'A': A,
     'MX': MX,
     'TXT': TXT
@@ -85,10 +94,10 @@ REGISTERS = {
 def filterData(json):
     filteredData = {'main': {}, 'subdomains': {}}
 
-    for register in REGISTERS:
-        main, subdomains = getRecords(REGISTERS[register], json)
-        filteredData['main'][register] = main
-        filteredData['subdomains'][register] = subdomains
+    for record in RECORDS:
+        main, subdomains = getRecords(RECORDS[record], json)
+        filteredData['main'][record] = main
+        filteredData['subdomains'][record] = subdomains
 
     return filteredData
 
@@ -123,4 +132,46 @@ def extractDataFromFolder(path):
     filesInFolder = (join(path, f) for f in listdir(path) if isfile(join(path, f)))
     return list(map(extractDataFromFile, filesInFolder))
 
+#############################################################################################
+
+def ARecordObject(AJson):
+    return model.ARecord(ip_address=AJson['value'], timestamp=getTimeFromString(AJson['last_seen']))
+
+def MXRecordObject(MXJson):
+    return model.MXRecord(domain=MXJson['value'], timestamp=getTimeFromString(MXJson['last_seen']))
+
+def TXTRecordObject(TXTJson):
+    return model.TXTRecord(content=TXTJson['value'], timestamp=getTimeFromString(TXTJson['last_seen']))
+
+def getTimeFromString(strTime):
+    return datetime.strptime(strTime[:19], '%Y-%m-%dT%H:%M:%S')
+
+def recordsFromList(type, records):
+    return list(map(type, records))
+
+def subdomainObject(record, type):
+    return {
+        'subdomain': model.DomainInfo(domain=record['subdomain'], subdomain=True),
+        'info': type(record),
+    }
+
+def recordsSubdomainFromList(type, records):
+    return list(map(lambda record: subdomainObject(record, type), records))
+
+RECORDS_OBJECTS = {
+    'A': ARecordObject,
+    'MX': MXRecordObject,
+    'TXT': TXTRecordObject
+}
+
+def convertToOrmObjects(json):
+    jsonWithObjects = {'main': {}, 'subdomains' : {}}
+    jsonWithObjects['main_domain'] = model.MainDomain(name=json['domain'])
+    jsonWithObjects['main_domain_info'] = model.DomainInfo(domain='', subdomain=False)
+
+    for record in RECORDS_OBJECTS:
+        jsonWithObjects['main'][record] = recordsFromList(RECORDS_OBJECTS[record], json['main'][record])
+        jsonWithObjects['subdomains'][record] = recordsSubdomainFromList(RECORDS_OBJECTS[record], json['subdomains'][record])
+
+    return jsonWithObjects
 

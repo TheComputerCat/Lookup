@@ -1,6 +1,7 @@
 import unittest
 import domain_extract
 import json
+from datetime import datetime
 
 from unittest.mock import (
     patch,
@@ -12,7 +13,8 @@ from domain_extract_fixtures import (
     shodanJson2,
     filteredShodanJson1,
     filteredShodanJson2,
-    filteredJoinedShodanJson1AndJson2
+    filteredJoinedShodanJson1AndJson2,
+    filteredShodanJson1WithObjects
 )
 
 from common import (
@@ -20,6 +22,8 @@ from common import (
     setUpWithATextFile,
     tearDownWithATextFile,
 )
+
+import model as md
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 
@@ -109,5 +113,63 @@ class TestExtractDataFromFolder(unittest.TestCase):
             with self.subTest(i=i):
                 self.assertDictEqual(dataListFromFolder[i], self.filteredDataInFolder[i])
 
+class TestObjectRMCCreation(unittest.TestCase):
+    def test_ORMobjectsComparison(self):
+        """
+            Ensure equality assertions on plain model objects (with no other objects as attributes) 
+            are correct. 
+        """
+        host1 = md.Host(address='8.8.8.8', country='A nice country', provider='A company', isp='A isp')
+        host2 = md.Host(address='8.8.8.8', country='A nice country', provider='A company', isp='A isp')
+        host3 = md.Host(address='8.8.8.8', country='A less nice country', provider='A company', isp='A isp')
+
+        self.assertEqual(host1, host2)
+        self.assertNotEqual(host2, host3)
+
+        ARecord1 = md.ARecord(id=1, ip_address='8.8.8.8', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+        ARecord2 = md.ARecord(id=1, ip_address='8.8.8.8', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+        ARecord3 = md.ARecord(id=2, ip_address='8.8.8.8', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+
+        self.assertEqual(ARecord1, ARecord2)
+        self.assertNotEqual(ARecord2, ARecord3)
+
+        MXRecord1 = md.MXRecord(id=1, domain='adomain.com', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+        MXRecord2 = md.MXRecord(id=1, domain='adomain.com', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+        MXRecord3 = md.MXRecord(id=1, domain='adifferentdomain.com', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+
+        self.assertEqual(MXRecord1, MXRecord2)
+        self.assertNotEqual(MXRecord2, MXRecord3)
+
+        TXTRecord1 = md.TXTRecord(id=1, content='some content', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+        TXTRecord2 = md.TXTRecord(id=1, content='some content', parent_domain_info_id=1, timestamp=datetime(2000, 1, 1))
+        TXTRecord3 = md.TXTRecord(id=1, content='some content', parent_domain_info_id=2343, timestamp=datetime(2000, 1, 1))
+
+        self.assertEqual(TXTRecord1, TXTRecord2)
+        self.assertNotEqual(TXTRecord2, TXTRecord3)
+
+        domainInfo1 = md.DomainInfo(id=1, domain='', subdomain=False, main_domain_id=1)
+        domainInfo2 = md.DomainInfo(id=1, domain='', subdomain=False, main_domain_id=1)
+        domainInfo3 = md.DomainInfo(id=12, domain='someSubdomain.org', subdomain=False, main_domain_id=1)
+
+        self.assertEqual(domainInfo1, domainInfo2)
+        self.assertNotEqual(domainInfo2, domainInfo3)
+
+        mainDomain1 = md.MainDomain(id=1, name='somedomain.org', organization_id=1)
+        mainDomain2 = md.MainDomain(id=1, name='somedomain.org', organization_id=1)
+        mainDomain3 = md.MainDomain(id=1, name='otherdomain.org', organization_id=1)
+
+        self.assertEqual(mainDomain1, mainDomain2)
+        self.assertNotEqual(mainDomain2, mainDomain3)
+
+    def test_asa_fromFilteredJsonCreateObjects(self):
+        """
+            When a filtered Json is given, a new json is returned
+            with the data converted to the ORM objects.
+        """
+
+        self.maxDiff = None
+        jsonWithOrmObjects = domain_extract.convertToOrmObjects(filteredShodanJson1)
+
+        self.assertDictEqual(filteredShodanJson1WithObjects, jsonWithOrmObjects)
 if __name__ == '__main__':
      unittest.main()
