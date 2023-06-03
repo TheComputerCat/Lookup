@@ -119,6 +119,7 @@ class HostService(Base):
     address: Mapped[str] = mapped_column(ForeignKey("HOSTS.address"), nullable=False)
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=True)
     source: Mapped[str] = mapped_column(String(100), nullable=False)
+    protocol: Mapped[str] = mapped_column(String(10), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     host: Mapped[Host] = relationship(back_populates="services_in_host")

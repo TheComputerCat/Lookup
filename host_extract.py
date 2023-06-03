@@ -39,6 +39,7 @@ def trimServiceInfo(dict):
         "cpe23": getListFromDict(dict, "cpe23"),
         "timestamp": getAttrFromDict(dict, "timestamp"),
         "port": getAttrFromDict(dict, "port"),
+        "protocol": getAttrFromDict(dict, "transport"),
     }
 
 def getServicesFromDict(dict):
@@ -157,6 +158,7 @@ def completeHostServiceTable():
                     address=address,
                     service=serviceObject,
                     source="shodan",
+                    protocol=getAttrFromDict(serviceDict, "protocol"),
                     timestamp=serviceDict["timestamp"]
                 )
             )

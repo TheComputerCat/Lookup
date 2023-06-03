@@ -208,6 +208,7 @@ class TestExtractShodanInfoFromCroppedShodanOutput(unittest.TestCase):
                     ],
                     "timestamp": "2023-05-16T13:23:58.464783",
                     "port": 80,
+                    "protocol": "tcp",
                 },
             ]
         )
