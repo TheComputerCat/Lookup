@@ -141,30 +141,34 @@ def completeServiceTable():
     
     session.close()
 
-def completeHostServiceTable():
-    session = getDBSession()
-
+def getHostServiceRows(session):
     for dict in getAllHostInfoDicts():
         address = dict["address"]
         for serviceDict in dict["services"]:
             serviceRow = getServiceRowFromServiceDict(serviceDict)
-
             serviceObject = session.query(Service).filter_by(
                 **serviceRow
             ).first()
 
-            session.add(
-                HostService(
-                    address=address,
-                    service=serviceObject,
-                    source="shodan",
-                    protocol=getAttrFromDict(serviceDict, "protocol"),
-                    timestamp=serviceDict["timestamp"]
-                )
-            )
+            row = {
+                "address": address,
+                "service": serviceObject,
+                "source": "shodan",
+                "protocol": getAttrFromDict(serviceDict, "protocol"),
+                "timestamp": serviceDict["timestamp"],
+            }
+
+            if None not in [row[key] for key in row]:
+                yield row
+
+
+def completeHostServiceTable():
+    session = getDBSession()
+
+    for hostServiceRow in getHostServiceRows(session):
+        session.add(HostService(**hostServiceRow))
     
-            session.commit()
-    
+    session.commit()
     session.close()
 
 if __name__ == "__main__":
