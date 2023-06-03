@@ -7,6 +7,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     String,
+    Boolean
 )
 
 from sqlalchemy.orm import (
@@ -30,19 +31,29 @@ class Organization(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=True)
 
-    domains: Mapped[List["Domain"]] = relationship(back_populates="organization")
+    domains_info: Mapped[List["MainDomain"]] = relationship(back_populates="maiorganizationn_domain")
 
-class Domain(Base):
-    __tablename__ = "DOMAINS"
+class MainDomain(Base):
+    __tablename__ = "MAIN_DOMAINS"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     organization_id: Mapped[int] = mapped_column(ForeignKey("ORGANIZATIONS.id"), nullable=True)
 
-    organization: Mapped[Optional[Organization]] = relationship(back_populates="domains")
-    a_records: Mapped[List["ARecord"]] = relationship(back_populates="parent_domain")
-    mx_records: Mapped[List["MXRecord"]] = relationship(back_populates="parent_domain")
-    txt_records: Mapped[List["TXTRecord"]] = relationship(back_populates="parent_domain")
+    organization: Mapped[Organization] = relationship(back_populates="domains_info")
+
+class DomainInfo(Base):
+    __tablename__ = "DOMAINS_INFO"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    domain: Mapped[str] = mapped_column(String(255), nullable=False)
+    subdomain: Mapped[Boolean] = mapped_column(Boolean, nullable=False)
+    main_domain_id: Mapped[int] = mapped_column(ForeignKey("MAIN_DOMAINS.id"), nullable=False)
+
+    main_domain: Mapped[MainDomain] = relationship(back_populates="domain_info")
+    a_records: Mapped[List["ARecord"]] = relationship(back_populates="parent_domain_info")
+    mx_records: Mapped[List["MXRecord"]] = relationship(back_populates="parent_domain_info")
+    txt_records: Mapped[List["TXTRecord"]] = relationship(back_populates="parent_domain_info")
 
 class Host(Base):
     __tablename__ = "HOSTS"
@@ -60,31 +71,31 @@ class ARecord(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     ip_address: Mapped[str] = mapped_column(ForeignKey("HOSTS.address"), nullable=False)
-    parent_domain_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS.id"), nullable=False)
+    parent_domain_info_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS_INFO.id"), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    parent_domain: Mapped[Domain] = relationship(back_populates="a_records")
+    parent_domain_info: Mapped[DomainInfo] = relationship(back_populates="a_records")
     address: Mapped[Host] = relationship(back_populates="a_records_with_host")
 
 class MXRecord(Base):
     __tablename__ = "MX_RECORDS"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    parent_domain_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS.id"), nullable=False)
+    parent_domain_info_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS_INFO.id"), nullable=False)
     domain: Mapped[str] = mapped_column(String(255), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    parent_domain: Mapped[Domain] = relationship(back_populates="mx_records")
+    parent_domain_info: Mapped[DomainInfo] = relationship(back_populates="mx_records")
 
 class TXTRecord(Base):
     __tablename__ = "TXT_RECORDS"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    parent_domain_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS.id"), nullable=False)
+    parent_domain_info_id: Mapped[int] = mapped_column(ForeignKey("DOMAINS_INFO.id"), nullable=False)
     content: Mapped[str] = mapped_column(String(255), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    parent_domain: Mapped[Domain] = relationship(back_populates="txt_records")
+    parent_domain_info: Mapped[DomainInfo] = relationship(back_populates="txt_records")
 
 class Service(Base):
     __tablename__ = "SERVICES"
