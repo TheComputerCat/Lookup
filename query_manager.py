@@ -46,7 +46,7 @@ def getDBEngine():
 
 def getDBSession():
     return Session(getDBEngine())
-dict
+
 def createTables():
     engine = getDBEngine()
     Base.metadata.create_all(engine)
