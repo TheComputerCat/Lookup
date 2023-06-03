@@ -33,36 +33,42 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     thirdVulnerabilityData = thirdCVE['metrics']['cvssMetricV31'][0]['cvssData']
 
     firstVulnDict = {
-        "cve": 'CVE-2023-31740',
-        "baseScore": 7.2,
-        "vector": "NETWORK",
-        "complexity": "LOW",
-        "authentication": "HIGH",
-        "confidentialityImpact": "HIGH",
-        "integrityImpact": "MEDIUM",
-        "availabilityImpact": "LOW"
+        "cve_code": 'CVE-2023-31740',
+        "service_id": None,
+        "score": 7.2,
+        "access_vector": "NETWORK",
+        "access_complexity": "LOW",
+        "authentication_requirement": "HIGH",
+        "confidentiality_impact": "HIGH",
+        "integrity_impact": "MEDIUM",
+        "availability_impact": "LOW",
+        "service": None,
     }
 
     secondVulnDict = {
-        "cve": 'CVE-2023-31741',
-        "baseScore": 7.1,
-        "vector": "LOCAL",
-        "complexity": "HIGH",
-        "authentication": "LOW",
-        "confidentialityImpact": "LOW",
-        "integrityImpact": "HIGH",
-        "availabilityImpact": "HIGH"
+        "cve_code": 'CVE-2023-31741',
+        "service_id": None,
+        "score": 7.1,
+        "access_vector": "LOCAL",
+        "access_complexity": "HIGH",
+        "authentication_requirement": "LOW",
+        "confidentiality_impact": "LOW",
+        "integrity_impact": "HIGH",
+        "availability_impact": "HIGH",
+        "service": None,
     }
 
     thirdVulnDict = {
-        "cve": 'CVE-2023-31750',
-        "baseScore": 6.0,
-        "vector": "LOCAL",
-        "complexity": "HIGH",
-        "authentication": "HIGH",
-        "confidentialityImpact": "HIGH",
-        "integrityImpact": "HIGH",
-        "availabilityImpact": "LOW"
+        "cve_code": 'CVE-2023-31750',
+        "service_id": None,
+        "score": 6.0,
+        "access_vector": "LOCAL",
+        "access_complexity": "HIGH",
+        "authentication_requirement": "HIGH",
+        "confidentiality_impact": "HIGH",
+        "integrity_impact": "HIGH",
+        "availability_impact": "LOW",
+        "service": None,
     }
 
     cvesDictFromFirstQuery = {
