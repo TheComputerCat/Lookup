@@ -29,7 +29,7 @@ def getCvesDictFromJson(query, cveVersion):
     dict = {}
     for cve in query:
         vuln = trimVulnerabilityInfo(cve['cve'], cveVersion)
-        dict |= {vuln['cve']: vuln}
+        dict |= {vuln['cve_code']: vuln}
     return dict
 
 
@@ -39,14 +39,16 @@ def trimVulnerabilityInfo(cve, version):
         return
     cveScoring = cveScoreFromVersion[0]['cvssData']
     return {
-        "cve": getCveId(cve),
-        "baseScore": getBaseScore(cveScoring),
-        "vector": getAccessVectorScore(cveScoring),
-        "complexity": getAccessComplexityScore(cveScoring),
-        "authentication": getAuthenticationRequirement(cveScoring),
-        "confidentialityImpact": getConfidentialityImpact(cveScoring),
-        "integrityImpact": getIntegrityImpact(cveScoring),
-        "availabilityImpact": getAvailabilityImpact(cveScoring),
+        "cve_code": getCveId(cve),
+        "service_id": None,
+        "score": getBaseScore(cveScoring),
+        "access_vector": getAccessVectorScore(cveScoring),
+        "access_complexity": getAccessComplexityScore(cveScoring),
+        "authentication_requirement": getAuthenticationRequirement(cveScoring),
+        "confidentiality_impact": getConfidentialityImpact(cveScoring),
+        "integrity_impact": getIntegrityImpact(cveScoring),
+        "availability_impact": getAvailabilityImpact(cveScoring),
+        "service": None,
     }
 
 def getAttribute(element, attribute):
