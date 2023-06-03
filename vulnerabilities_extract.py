@@ -1,5 +1,11 @@
 THIRD_VERSION = "3.1"
 
+def getCvesDictFromJson(query, cveVersion):
+    dict = {}
+    for cve in query:
+        vuln = trimVulnerabilityInfo(cve['cve'], cveVersion)
+        dict |= {vuln['cve']: vuln}
+    return dict
 def trimVulnerabilityInfo(cve, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
     if cveScoreFromVersion == None:
