@@ -324,6 +324,8 @@ class TestDatabase(unittest.TestCase):
                 "cpe23": [
                     "cpe:2.3:a:openbsd:openssh:7.6"
                 ],
+                "transport": "tcp",
+                "timestamp": "2023-05-23T09:52:49.509917",
             }
         ]
     }""")
@@ -340,6 +342,8 @@ class TestDatabase(unittest.TestCase):
                 "cpe23": [
                     "cpe:2.3:a:openbsd:openssh:7.6"
                 ],
+                "transport": "tcp",
+                "timestamp": "2023-05-23T09:52:49.509917",
             },
             {
                 "product": "nginx",
@@ -348,6 +352,8 @@ class TestDatabase(unittest.TestCase):
                 "cpe23": [
                     "cpe:2.3:a:igor_sysoev:nginx:1.9.4"
                 ],
+                "transport": "tcp",
+                "timestamp": "2023-05-23T09:52:49.509917",
             }
         ]
     }""")
@@ -369,8 +375,8 @@ class TestDatabase(unittest.TestCase):
         host_extract.completeServiceTable()
         self.assertServiceTableIsCorrect(session)
 
-        # host_extract.completeHostServiceTable()
-        # self.assertHostServiceTableIsCorrect(session)
+        host_extract.completeHostServiceTable()
+        self.assertHostServiceTableIsCorrect(session)
 
         session.close()
 
