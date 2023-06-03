@@ -113,14 +113,14 @@ class Vulnerability(Base):
     __tablename__ = "VULNERABILITES"
 
     cve_code: Mapped[str] = mapped_column(String(100), primary_key=True)
-    service_id: Mapped[str] = mapped_column(ForeignKey("SERVICES.id"), nullable=False)
+    service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=False)
     score: Mapped[float] = mapped_column(Float, nullable=False)
-    access_vector: Mapped[str] = mapped_column(String(1), nullable=False)
-    access_complexity: Mapped[str] = mapped_column(String(1), nullable=False)
-    authentication_requirement: Mapped[str] = mapped_column(String(1), nullable=False)
-    confidentiality_impact: Mapped[str] = mapped_column(String(1), nullable=False)
-    integrity_impact: Mapped[str] = mapped_column(String(1), nullable=False)
-    availability_impact: Mapped[str] = mapped_column(String(1), nullable=False)
+    access_vector: Mapped[str] = mapped_column(String(10), nullable=False)
+    access_complexity: Mapped[str] = mapped_column(String(10), nullable=False)
+    authentication_requirement: Mapped[str] = mapped_column(String(10), nullable=False)
+    confidentiality_impact: Mapped[str] = mapped_column(String(10), nullable=False)
+    integrity_impact: Mapped[str] = mapped_column(String(10), nullable=False)
+    availability_impact: Mapped[str] = mapped_column(String(10), nullable=False)
 
     service: Mapped[Service] = relationship(back_populates="vulnerabilities")
 
