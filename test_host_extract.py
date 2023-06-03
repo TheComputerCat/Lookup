@@ -336,7 +336,7 @@ class TestDatabase(unittest.TestCase):
         "isp": "bbb"
     }""")
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
-    def test_completeHostTable(self):
+    def test_completeTables(self):
         host_extract.setAddressDataDirPath("./data/host-data/")
         query_manager.createTables()
 
