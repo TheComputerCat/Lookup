@@ -31,7 +31,7 @@ class Organization(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=True)
 
-    main_domain: Mapped[List["MainDomain"]] = relationship(back_populates="organization")
+    main_domains: Mapped[List["MainDomain"]] = relationship(back_populates="organization")
 
 class MainDomain(Base):
     __tablename__ = "MAIN_DOMAINS"
@@ -40,8 +40,8 @@ class MainDomain(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     organization_id: Mapped[int] = mapped_column(ForeignKey("ORGANIZATIONS.id"), nullable=True)
 
-    organization: Mapped[Organization] = relationship(back_populates="main_domain")
-    domains_info: Mapped[List["MainDomain"]] = relationship(back_populates="main_domain")
+    organization: Mapped[Organization] = relationship(back_populates="main_domains")
+    domains_info: Mapped[List["DomainInfo"]] = relationship(back_populates="main_domain")
 
 class DomainInfo(Base):
     __tablename__ = "DOMAINS_INFO"
