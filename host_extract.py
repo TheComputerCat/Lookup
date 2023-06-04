@@ -107,11 +107,17 @@ def getAllHostInfoDicts():
         allHostRows
     )
 
+def getHostRows():
+    return map(
+        getHostRowFromHostInfoDict,
+        getAllHostInfoDicts()
+    )
+
 def completeHostTable():
     session = getDBSession()
 
-    for row in getAllHostInfoDicts():
-        createHostRowOrCompleteInfo(getHostRowFromHostInfoDict(row), session)
+    for hostRow in getHostRows():
+        createHostRowOrCompleteInfo(hostRow, session)
     
     session.commit()
     session.close()
