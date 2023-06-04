@@ -116,7 +116,7 @@ def completeHostTable():
     session.commit()
     session.close()
 
-def getServiceRows(session):
+def getNewServiceRows(session):
     for dict in getAllHostInfoDicts():
         for serviceDict in dict["services"]:
             serviceRow = getServiceRowFromServiceDict(serviceDict)
@@ -131,7 +131,7 @@ def getServiceRows(session):
 def completeServiceTable():
     session = getDBSession()
 
-    for serviceRow in getServiceRows(session):
+    for serviceRow in getNewServiceRows(session):
         session.add(Service(**serviceRow))
 
     session.commit()
