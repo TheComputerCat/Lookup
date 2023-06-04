@@ -41,6 +41,7 @@ def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath
             vulnerabilities = json.dumps(getVulnerabilitiesOf(code))
             name = f'{vulnerabilitiesDirectoryPath}/{code}_{getTimeString()}'
             writeStringToFile(name, vulnerabilities, True)
+            time.sleep(6);
         except Exception as e:
             log(e, printing=True)
     file.close()
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
 
     if len(args) != 2:
-        raise Exception("""Se necesitan tres argumentos:
+        raise Exception("""Se necesitan dos argumentos:
 1. la ruta al archivo con la lista de codigos CPE,
 2. La ruta al directorio donde se guardará la información correspondiente""")
 
