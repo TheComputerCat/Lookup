@@ -19,13 +19,9 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-import sys
-
 from typing import (
     List,
-    Optional,
 )
-
 
 class Base(DeclarativeBase):
     pass
