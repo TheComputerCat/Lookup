@@ -18,11 +18,12 @@ def log(message, logPath="./log", debug=False, printing=False, testing=True):
     except Exception as e:
         print(e)
 
-def tryTo(fun: Callable, default):
+def tryTo(fun: Callable, default, log=False):
     try:
         return fun()
     except Exception as e:
-        log(e)
+        if log:
+            log(e)
         return default
 
 def getFilePathsInDirectory(directoryPath):
