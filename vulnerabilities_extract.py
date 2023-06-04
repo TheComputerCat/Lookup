@@ -17,10 +17,10 @@ SECOND_VERSION = "2.0"
 THIRD_VERSION = "3.1"
 
 
-def completeVulnerabilityTable(vulnDirPath):
+def completeVulnerabilityTable(vulnDirPath, cveVersion):
     session = getDBSession()
-    cveList = getCvesDictFromAllFilesInDir(vulnDirPath)
-    for cve_code in cveList.values():
+    cveList = getCvesDictFromAllFilesInDir(vulnDirPath, cveVersion)
+    for cve_code in cveList:
         saveCve(cve_code, session)
 
     session.commit()
@@ -37,7 +37,8 @@ def getCvesDictFromAllFilesInDir(vulnDirPath, cveVersion):
     directory = getFilePathsInDirectory(vulnDirPath)
     cveList = []
     for filePath in directory:
-        cpeCode = filePath.split("/")[-1]
+        file = filePath.split("/")[-1]
+        cpeCode = file.rsplit("_", 1)[0]
         queryString = getStringFromFile(filePath)
 
         newList = getCvesDictFromJson(json.loads(queryString), cpeCode, cveVersion)
@@ -57,6 +58,7 @@ def getCvesDictFromJson(query, cpeCode, cveVersion):
 def trimVulnerabilityInfo(cve, cpeCode, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
     if cveScoreFromVersion is None:
+        print("doesn't exit metric in this version for cve {} in cpe {}".format(getAttribute(cve, "id"), cpeCode))
         return
 
     cveScoring = cveScoreFromVersion[0]['cvssData']

@@ -23,8 +23,8 @@ listQuery2 = json.loads(query2)
 firstCpe = "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"
 secondCpe = "cpe:2.3:o:microsoft:windows_10:1607"
 
-firstCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"
-secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607"
+firstCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*_-2023:06:03-17:03:05"
+secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607_-2023:06:03-17:02:57"
 
 
 def searchMock():
@@ -34,6 +34,8 @@ def searchMock():
                 self.id = 0
             elif cpe == secondCpe:
                 self.id = 1
+            else:
+                raise Exception("cpe {} doesnt exist".format(cpe))
 
     return lambda a, b: ServiceMock(b["cpe_code"])
 
