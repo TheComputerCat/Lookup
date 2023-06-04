@@ -44,7 +44,6 @@ def getHostServiceDict(port_element, host_address, host_timestamp):
     unique_service_object = getService(service_element)
     return {
           'address': host_address,
-          'service_id': getServiceId(service_element),
           'source': 'nmap',
           'protocol': getProtocol(port_element),
           'timestamp': host_timestamp,
@@ -86,19 +85,18 @@ def getUniqueServiceDict(service_element):
 def getServiceName(service_element):
     return service_element.attrib.get('name')
 
-def getServiceId(service_element):
-    service_dict = getUniqueServiceDict(service_element)
-    service_id = getServiceIdIfExist(service_dict)
-    if service_id is None:
-        service_id = getIdOfNewServiceInDB(service_dict)
-    return service_id
+def getServiceId(service_object):
+    print(service_object)
+    return service_object.id
 
 def getService(service_element):
     service_dict = getUniqueServiceDict(service_element)
     found_service_object = getServiceIfExist(service_dict)
+    print('found',found_service_object)
     if found_service_object is None:
         service_object = Service(**service_dict)
         insertNewServiceInDB(service_object)
+        print('service created', service_object)
         return service_object
     return found_service_object
 

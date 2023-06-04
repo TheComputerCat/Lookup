@@ -13,14 +13,22 @@ from model import (
 
 from common import (
     createFixture,
-    writeStringToFile,
     setUpWithATextFile,
     tearDownWithATextFile,
-    getStringFromFile
 )
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
+
+def setUpDatabase(postgres):
+    postgres.start()
+    query_manager.getDBEngine = lambda: create_engine(postgres.get_connection_url())
+    query_manager.createTables()
+
+def tearDownDatabase(postgres):
+    postgres.stop()
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
-withDataBase = createFixture(lambda :query_manager.setConfigFile('data_base_config.ini') , lambda: None)
+withTestDataBase = createFixture(setUpDatabase, tearDownDatabase)
 
 class TestHelpers(unittest.TestCase):
     XMLContentExample = r"""<?xml version="1.0" encoding="UTF-8"?>
@@ -44,10 +52,9 @@ class TestHelpers(unittest.TestCase):
         result_host = host_extract_nmap.getHostElementFromXML('./data/host1')
         self.assertEqual(result_host.tag,'host')
 
-    
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @patch('host_extract_nmap.getServiceIdIfExist', new_callable=Mock, return_value=0)
-    def test_getHostServiceDict_without_ids(self,getServiceIdIfExist):
+    @patch('host_extract_nmap.getServiceIfExist', new_callable=Mock, return_value=Service(**{'id' : 25, 'name' : 'https',}))
+    def test_getHostServiceDict_without_ids(self,getServiceIfExist):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         expected_dict = {
             'address': '8.8.8.8',
@@ -64,12 +71,13 @@ class TestHelpers(unittest.TestCase):
 
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withDataBase()
-    def test_getHostServiceDict_with_id(self):
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_getHostServiceDict_with_service(self):
+        session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         for port_element in host_element.iter('port'):
             host_service_dict = host_extract_nmap.getHostServiceDict(port_element,'8.8.8.8',datetime.datetime.now())
-            self.assertIsNotNone(host_service_dict['service_id'])
+            self.assertIsNotNone(host_service_dict['service'])
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_getUniqueServiceDict(self):
@@ -88,32 +96,27 @@ class TestHelpers(unittest.TestCase):
             expected_dict = unique_services[index]
             self.assertDictEqual(host_extract_nmap.getUniqueServiceDict(port_element.find('service')),expected_dict)  
 
-    @withDataBase()
-    def test_getServiceIdIfExist(self):
-        
-        service_dict = {
-          'name': 'sql',
-          'version': '10.1'
-        }
-        self.assertEqual(host_extract_nmap.getServiceIdIfExist(service_dict),None)
-
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withDataBase()
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
     def test_insertNewServiceInDB(self):
+        session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         for port_element in host_element.iter('port'):
             service_dict = host_extract_nmap.getUniqueServiceDict(port_element.find('service'))
             self.assertIsNotNone(host_extract_nmap.getIdOfNewServiceInDB(service_dict))
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withDataBase()
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
     def test_getAllHostServices(self):
+        session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         print(host_element)
         host_services = host_extract_nmap.getAllHostServices(host_element)
         for host_service in host_services:
             self.assertEqual(type(host_service),HostService)
-
+            self.assertEqual(host_service.address,host_extract_nmap.getAddress(host_element))
+            self.assertEqual(host_service.protocol,'tcp')
+            self.assertEqual(host_service.source,'nmap')
 
 if __name__ == "__main__":
     unittest.main()
