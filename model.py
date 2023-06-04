@@ -4,11 +4,6 @@ from datetime import (
     datetime,
 )
 
-from query_manager import (
-    setConfigFile,
-    createTables,
-)
-
 from sqlalchemy import (
     DateTime,
     Float,
@@ -201,13 +196,3 @@ def ModelsEqCreator(aClass, exceptions=[]):
 
 def ModelsRepCreator(aClass, exceptions=[]):
     return common.repCreator(aClass, exceptions=['registry', 'metadata'] + exceptions)
-
-if __name__ == "__main__":
-    args = sys.argv[1:]
-
-    if len(args) < 1:
-        raise Exception("""Este archivo crea las tablas en la base de datos. Necesita un argumento:
-    - La ruta al archivo de credenciales para acceder a la base de datos.""")
-
-    setConfigFile(common.formatFilePath(args[0]))
-    createTables()

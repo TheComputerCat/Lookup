@@ -112,3 +112,17 @@ def getOrCreate(classObject, object):
             insert(deepcopy(object), session)
             instance = query(session, object)
             return instance
+def getAllFomClass(classObject):
+    with getDBSession() as session:
+        query = session.query(classObject).all()
+        return query
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+
+    if len(args) < 1:
+        raise Exception("""Este archivo crea las tablas en la base de datos. Necesita un argumento:
+    - La ruta al archivo de credenciales para acceder a la base de datos.""")
+
+    setConfigFile(common.formatFilePath(args[0]))
+    createTables()
