@@ -31,7 +31,6 @@ def saveCve(cve, session):
     vulnObject = Vulnerability(**cve)
 
     session.add(vulnObject)
-    #completeObjectInfo(vulnObject, cve)
     session.commit()
 
 def getCvesDictFromAllFilesInDir(vulnDirPath):
@@ -66,9 +65,6 @@ def trimVulnerabilityInfo(cve, cpeCode, version):
     if getVersion(cveScoring) == THIRD_VERSION:
         return getV31Dict(cveScoring, cve, service)
 
-def getAttribute(element, attribute):
-    return element.get(attribute)
-
 def getVersion(cveScoring):
     return getAttribute(cveScoring, 'version')
 
@@ -97,3 +93,6 @@ def getV31Dict(cveScoring, cve, service):
         "integrity_impact": getAttribute(cveScoring, 'integrityImpact'),
         "availability_impact": getAttribute(cveScoring, 'availabilityImpact'),
     }
+
+def getAttribute(element, attribute):
+    return element.get(attribute)
