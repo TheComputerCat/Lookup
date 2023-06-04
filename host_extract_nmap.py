@@ -1,24 +1,29 @@
 from common import (
-    tryTo,
     formatDirPath,
-    getStringFromFile,
-    formatFilePath
+    formatFilePath,
+    log
 )
 
 from model import (
     HostService,
-    Service
+    Service,
+    Host
 )
 
 import query_manager
-
 import os
 import datetime
 import re
+import sys
 
 import xml.etree.ElementTree as XML
 
+ADDRESS_DATA_DIR_PATH = None
 
+def setAddressDataDirPath(path):
+    global ADDRESS_DATA_DIR_PATH
+    ADDRESS_DATA_DIR_PATH = path
+    
 def getHostElementFromXML(xml_path: str):
 
     xml_file = formatFilePath(xml_path)
@@ -86,17 +91,14 @@ def getServiceName(service_element):
     return service_element.attrib.get('name')
 
 def getServiceId(service_object):
-    print(service_object)
     return service_object.id
 
 def getService(service_element):
     service_dict = getUniqueServiceDict(service_element)
     found_service_object = getServiceIfExist(service_dict)
-    print('found',found_service_object)
     if found_service_object is None:
         service_object = Service(**service_dict)
         insertNewServiceInDB(service_object)
-        print('service created', service_object)
         return service_object
     return found_service_object
 
@@ -109,14 +111,40 @@ def getServiceVersion(service_info):
 def getHostDictFromXML(xml_path: str):
     host_element = getHostElementFromXML(xml_path)
     services_in_host = getAllHostServices(host_element)
-    query_manager.insertMany(services_in_host)
     return {
         'address':getAddress(host_element),
         'services_in_host': services_in_host,
     }
 
+def completeTables(xml_path):
+    host_dict = getHostDictFromXML(xml_path)
+    print(host_dict)
+    query_manager.insert(Host(**host_dict))
+    query_manager.insertMany(host_dict['services_in_host'])
+
+def setConfigFile(configFilePath):
+    global CONFIG_FILE_PATH
+    try:
+        if not os.path.exists(configFilePath):
+            raise Exception(f'{configFilePath} file do not exist')
+        CONFIG_FILE_PATH = configFilePath
+    except Exception as e:
+        log(e, debug=True, printing=True) 
+
 def getAddress(host_element):
     return host_element.find('address').attrib['addr']
 
 if __name__ == "__main__":
-    print(getHostElementFromXML('./data_2/example'))
+    args = sys.argv[1:]
+
+    if len(args) < 2:
+        raise Exception("""Se necesitan dos argumentos:
+    1. la ruta al archivo con las credenciales de la base de datos,
+    2. La ruta al directorio con la información de hosts de Shodan.""")
+
+    configFile = formatFilePath(args[0])
+    dataDirPath = formatDirPath(args[1])
+
+    setConfigFile(configFile)
+    setAddressDataDirPath(dataDirPath)
+

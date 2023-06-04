@@ -8,7 +8,8 @@ import datetime
 import query_manager
 from model import (
     HostService,
-    Service
+    Service,
+    Host
 )
 
 from common import (
@@ -110,13 +111,31 @@ class TestHelpers(unittest.TestCase):
     def test_getAllHostServices(self):
         session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-        print(host_element)
         host_services = host_extract_nmap.getAllHostServices(host_element)
         for host_service in host_services:
             self.assertEqual(type(host_service),HostService)
             self.assertEqual(host_service.address,host_extract_nmap.getAddress(host_element))
             self.assertEqual(host_service.protocol,'tcp')
             self.assertEqual(host_service.source,'nmap')
+
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @patch('host_extract_nmap.getAllHostServices', new_callable=Mock, return_value=[Service(**{'id' : 25, 'name' : 'https',})])
+    def test_getHostDictFromXML(self,getAllHostServices):
+        host_dict = host_extract_nmap.getHostDictFromXML('./data/host1')
+        self.assertEqual(host_dict['address'],'012.345.678.901')
+
+    hostDictExample = {
+        'address': '012.345.678.901',
+        'services_in_host': [Service(**{'id' : 25, 'name' : 'https',}),Service(**{'id' : 26, 'name' : 'ftp',})]
+    }
+
+    @patch('host_extract_nmap.getHostDictFromXML', new_callable=Mock, return_value= hostDictExample )
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_completeTables(self,getHostDictFromXML):
+
+        session = query_manager.getDBSession()
+        host_extract_nmap.completeTables('./data/host1')
+        session.query(Host).all()
 
 if __name__ == "__main__":
     unittest.main()
