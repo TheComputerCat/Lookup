@@ -113,29 +113,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             ['CVE-2023-31740', vulnerabilities_extract.getCveId(self.firstCVE)],
             ['CVE-2023-31741', vulnerabilities_extract.getCveId(self.secondCVE)],
 
-            [7.2, vulnerabilities_extract.getBaseScore(self.firstVulnData)],
-            [7.1, vulnerabilities_extract.getBaseScore(self.secondVulnData)],
-
-            ["NETWORK", vulnerabilities_extract.getAccessVectorScore(self.firstVulnData)],
-            ["LOCAL", vulnerabilities_extract.getAccessVectorScore(self.secondVulnData)],
-
-            ["LOW", vulnerabilities_extract.getAccessComplexityScore(self.firstVulnData)],
-            ["HIGH", vulnerabilities_extract.getAccessComplexityScore(self.secondVulnData)],
-
-            ["HIGH", vulnerabilities_extract.getAuthenticationRequirement(self.firstVulnData)],
-            ["LOW", vulnerabilities_extract.getAuthenticationRequirement(self.secondVulnData)],
-            ["HIGH", vulnerabilities_extract.getAuthenticationRequirement(self.firstVulnData)],
-            ["LOW", vulnerabilities_extract.getAuthenticationRequirement(self.secondVulnData)],
-
-            ["HIGH", vulnerabilities_extract.getConfidentialityImpact(self.firstVulnData)],
-            ["LOW", vulnerabilities_extract.getConfidentialityImpact(self.secondVulnData)],
-
-            ["MEDIUM", vulnerabilities_extract.getIntegrityImpact(self.firstVulnData)],
-            ["HIGH", vulnerabilities_extract.getIntegrityImpact(self.secondVulnData)],
-
-            ["LOW", vulnerabilities_extract.getAvailabilityImpact(self.firstVulnData)],
-            ["HIGH", vulnerabilities_extract.getAvailabilityImpact(self.secondVulnData)],
-
             ["3.1", vulnerabilities_extract.getVersion(self.firstVulnData)],
             ["3.1", vulnerabilities_extract.getVersion(self.secondVulnData)],
 
