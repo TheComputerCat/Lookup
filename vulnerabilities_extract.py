@@ -34,22 +34,22 @@ def saveCve(cve, session):
     session.commit()
 
 def getCvesDictFromAllFilesInDir(vulnDirPath):
-    dir = getFilePathsInDirectory(vulnDirPath)
-    dict = {}
-    for filePath in dir:
+    directory = getFilePathsInDirectory(vulnDirPath)
+    cveList = []
+    for filePath in directory:
         cpeCode = filePath.split("/")[-1]
         queryString = getStringFromFile(filePath)
-        a = getCvesDictFromJson(json.loads(queryString), cpeCode, 'cvssMetricV31')
-        dict |= a
-    return dict
+        newList = getCvesDictFromJson(json.loads(queryString), cpeCode, 'cvssMetricV31')
+        cveList.extend(newList)
+    return cveList
 
 
 def getCvesDictFromJson(query, cpeCode, cveVersion):
-    dict = {}
+    list = []
     for cve in query:
         vuln = trimVulnerabilityInfo(cve['cve'], cpeCode, cveVersion)
-        dict |= {vuln['cve_code']: vuln}
-    return dict
+        list.append(vuln)
+    return list
 
 
 def trimVulnerabilityInfo(cve, cpeCode, version):

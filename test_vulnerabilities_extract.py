@@ -82,16 +82,16 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "availability_impact": "LOW",
     }
 
-    cvesDictFromFirstQuery = {
-        'CVE-2023-31740': firstVulnDict,
-        'CVE-2023-31741': secondVulnDict,
-    }
+    cvesDictFromFirstQuery = [
+        firstVulnDict,
+        secondVulnDict,
+    ]
 
-    allCves = {
-        'CVE-2023-31740': firstVulnDict,
-        'CVE-2023-31741': secondVulnDict,
-        'CVE-2023-31750': thirdVulnDict,
-    }
+    allCves = [
+        firstVulnDict,
+        secondVulnDict,
+        thirdVulnDict,
+    ]
 
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_Helpers(self, dbMock):
