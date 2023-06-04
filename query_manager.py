@@ -9,6 +9,7 @@ from common import (
     log
 )
 from model import *
+from copy import deepcopy
 
 CONFIG_FILE_PATH = None
 
@@ -51,15 +52,16 @@ def createTables():
     engine = getDBEngine()
     Base.metadata.create_all(engine)
 
-def insert(TableObject):
-    with getDBSession() as session:
-        try:
-            session.add(TableObject)
-            session.commit()
-        except Exception as e:
-            log(e, debug=True, printing=True) 
-        finally:
-            session.rollback()
+def insert(TableObject, session=None):
+    if not session:
+        session = getDBSession()
+    try:
+        session.add(TableObject)
+        session.commit()
+    except Exception as e:
+        log(e, debug=True, printing=True) 
+    finally:
+        session.rollback()
 
 def insertMany(TableObjects):
     with getDBSession() as session:
@@ -81,3 +83,32 @@ def searchInTable(classObject, dict):
             log(e, debug=True, printing=True) 
         finally:
             session.rollback()
+
+def queryHost(session, object):
+    return session.query(Host).where(Host.address == object.address).one_or_none()
+
+def queryMainDomain(session, object):
+    return session.query(MainDomain).where(MainDomain.name == object.name).one_or_none()
+
+def queryDomainInfo(session, object):
+    return session.query(DomainInfo).where(DomainInfo.domain == object.domain).one_or_none()
+
+QUERIES = {
+    Host: queryHost,
+    MainDomain: queryMainDomain,
+    DomainInfo: queryDomainInfo
+}
+
+def getQuery(classObject):
+    return QUERIES[classObject]
+
+def getOrCreate(classObject, object):
+    with getDBSession() as session:
+        query = getQuery(classObject)
+        instance = query(session, object)
+        if instance:
+            return instance
+        else:
+            insert(deepcopy(object), session)
+            instance = query(session, object)
+            return instance

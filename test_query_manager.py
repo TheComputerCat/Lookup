@@ -12,11 +12,14 @@ from common import (
     setUpWithATextFile,
     tearDownWithATextFile
 )
+
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
+import model as model
     
 withAFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 
 class TestSetters(unittest.TestCase):
-
     def test_setConfigFile_withAUnexistentFile(self):
         """
             Given a path to a unexistent file, a exception must be raised.
@@ -94,6 +97,95 @@ class TestTablesCreation(unittest.TestCase):
 
         query_manager.createTables()
         mockCreateAll.assert_called_once_with('anEngineObject')
+
+
+def setUpDatabase(postgres, pathConfig):
+    postgres.start()
+    query_manager.setConfigFile(pathConfig)
+    query_manager.createTables()
+
+
+def tearDownDatabase(postgres):
+    postgres.stop()
+
+withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
+
+class TestGetOrCreate(unittest.TestCase):
+    pathConfig = './myConfig.ini'
+    postgresContainer = PostgresContainer("postgres:latest")
+    credentials ="""
+        [default]
+        host = localhost
+        port = 5432
+        database = postgres
+        [credentials]
+        username = postgresusr
+        password = complex_password
+        """
+
+    def getDBEngineStub(postgresContainer):
+        def _():
+            return create_engine(postgresContainer.get_connection_url())
+        return _
+    
+    @withAFile(pathToTextFile = pathConfig, content=credentials)
+    @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @withTestDatabase(postgres=postgresContainer, pathConfig=pathConfig)
+    def test_getOrCreate_tablesNotFilled(self, mockCreateEngine):
+        """
+            Given a database with the tables specified in the model created, and no rows.
+            When getOrCreate is called.
+            Then the new object is inserted and returned.
+        """
+        host1 = model.Host(address='8.8.8.8')
+        createdHost = query_manager.getOrCreate(model.Host, host1)
+        self.assertEqual(createdHost, model.Host(address='8.8.8.8'))
+
+        mainDomain1 = model.MainDomain(name='somedomain.org')
+        createdMainDomain = query_manager.getOrCreate(model.MainDomain, mainDomain1)
+        self.assertEqual(createdMainDomain, model.MainDomain(id=1, name='somedomain.org'))
+
+        domainInfo1 = model.DomainInfo(domain='someSubdomain.org', subdomain=False, main_domain_id=1)
+        createdDomainInfo = query_manager.getOrCreate(model.DomainInfo, domainInfo1)
+        self.assertEqual(createdDomainInfo, model.DomainInfo(id=1, domain='someSubdomain.org', subdomain=False, main_domain_id=1))
+
+    def withSomeColumnsSetUp():
+        host1 = model.Host(address='8.8.8.8')
+        query_manager.insert(host1)
+        mainDomain1 = model.MainDomain(name='somedomain.org')
+        query_manager.insert(mainDomain1)
+        domainInfo1 = model.DomainInfo(domain='someSubdomain.org', subdomain=False, main_domain_id=1)
+        query_manager.insert(domainInfo1)
+        host2 = model.Host(address='4.4.4.4')
+        query_manager.insert(host2)
+        mainDomain2 = model.MainDomain(name='someotherdomain.org')
+        query_manager.insert(mainDomain2)
+        domainInfo2 = model.DomainInfo(domain='someotherSubdomain.org', subdomain=False, main_domain_id=1)
+        query_manager.insert(domainInfo2)
+
+    withSomeColumnsInserted = createFixture(withSomeColumnsSetUp, None)
+
+    @withAFile(pathToTextFile = pathConfig, content=credentials)
+    @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @withTestDatabase(postgres=postgresContainer, pathConfig=pathConfig)
+    @withSomeColumnsInserted()
+    def test_getOrCreate_tablesNotFilled(self, mockCreateEngine):
+        """
+            Given a database with the tables specified in the model created, and some rows inserted.
+            When getOrCreate is called.
+            Then the new object is inserted and returned.
+        """
+        host2 = model.Host(address='4.4.4.4')
+        createdHost = query_manager.getOrCreate(model.Host, host2)
+        self.assertEqual(createdHost, model.Host(address='4.4.4.4'))
+
+        mainDomain2 = model.MainDomain(name='someotherdomain.org')
+        createdMainDomain = query_manager.getOrCreate(model.MainDomain, mainDomain2)
+        self.assertEqual(createdMainDomain, model.MainDomain(id=2, name='someotherdomain.org'))
+
+        domainInfo2 = model.DomainInfo(domain='someotherSubdomain.org', subdomain=False, main_domain_id=1)
+        createdDomainInfo = query_manager.getOrCreate(model.DomainInfo, domainInfo2)
+        self.assertEqual(createdDomainInfo, model.DomainInfo(id=2, domain='someotherSubdomain.org', subdomain=False, main_domain_id=1))
 
 if __name__ == '__main__':
     unittest.main()
