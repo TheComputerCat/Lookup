@@ -57,12 +57,11 @@ def getCvesDictFromJson(query, cpeCode, cveVersion):
 
 def trimVulnerabilityInfo(cve, cpeCode, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
+    service = searchInTable(Service, {"cpe_code": cpeCode})
     if cveScoreFromVersion is None:
-        print("doesn't exit metric in this version for cve {} in cpe {}".format(getAttribute(cve, "id"), cpeCode))
-        return
+        return emptyVDict(cve, service)
 
     cveScoring = cveScoreFromVersion[0]['cvssData']
-    service = searchInTable(Service, {"cpe_code": cpeCode})
 
     if getVersion(cveScoring) == SECOND_VERSION:
         return getV2Dict(cveScoring, cve, service)
@@ -71,6 +70,19 @@ def trimVulnerabilityInfo(cve, cpeCode, version):
 
 def getVersion(cveScoring):
     return getAttribute(cveScoring, 'version')
+
+def emptyVDict(cve, service):
+    return {
+            "cve_code": getAttribute(cve, 'id'),
+            "service_id": service.id,
+            "score": None,
+            "access_vector": None,
+            "access_complexity": None,
+            "authentication_requirement": None,
+            "confidentiality_impact": None,
+            "integrity_impact": None,
+            "availability_impact": None,
+        }
 
 def getV2Dict(cveScoring, cve, service):
     return {

@@ -86,6 +86,30 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "availability_impact": "HIGH",
     }
 
+    firstVulnDictV2 = {
+        "cve_code": 'CVE-2023-31740',
+        "service_id": 0,
+        "score": None,
+        "access_vector": None,
+        "access_complexity": None,
+        "authentication_requirement": None,
+        "confidentiality_impact": None,
+        "integrity_impact": None,
+        "availability_impact": None,
+    }
+
+    secondVulnDictV2 = {
+        "cve_code": 'CVE-2023-31741',
+        "service_id": 0,
+        "score": None,
+        "access_vector": None,
+        "access_complexity": None,
+        "authentication_requirement": None,
+        "confidentiality_impact": None,
+        "integrity_impact": None,
+        "availability_impact": None,
+    }
+
     thirdVulnDictV2 = {
         "cve_code": 'CVE-2023-31741',
         "service_id": 1,
@@ -98,15 +122,15 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "availability_impact": "COMPLETE",
     }
 
+    allCvesForV2 = [
+        thirdVulnDictV2,
+        firstVulnDictV2,
+        secondVulnDictV2,
+    ]
+
     cvesDictFromFirstQuery = [
         firstVulnDict,
         secondVulnDict,
-    ]
-
-    allCves = [
-        firstVulnDict,
-        secondVulnDict,
-        thirdVulnDictV31,
     ]
 
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
@@ -122,7 +146,7 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             [self.secondVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.secondCVE, firstCpe, 'cvssMetricV31')],
             [self.thirdVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV31')],
             [self.thirdVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV2')],
-            [None, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV2')],
+            [self.firstVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV2')],
 
             [self.cvesDictFromFirstQuery, vulnerabilities_extract.getCvesDictFromJson(listQuery1, firstCpe, 'cvssMetricV31')],
         ]
@@ -143,19 +167,25 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     withAVulnDir = createFixture(setXUp, tearXDown)
 
+    allCvesForV31 = [
+        firstVulnDict,
+        secondVulnDict,
+        thirdVulnDictV31,
+    ]
+
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_completeVulnerabilityTable(self, dbMock):
         actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny", 'cvssMetricV31')
 
-        self.assertEqual(actual, self.allCves)
+        self.assertEqual(actual, self.allCvesForV31)
 
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_completeVulnerabilityTable(self, dbMock):
         actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny", 'cvssMetricV2')
 
-        self.assertEqual(actual, [self.thirdVulnDictV2])
+        self.assertEqual(actual, self.allCvesForV2)
 
 
 if __name__ == "__main__":
