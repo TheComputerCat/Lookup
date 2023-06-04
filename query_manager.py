@@ -53,15 +53,19 @@ def createTables():
     Base.metadata.create_all(engine)
 
 def insert(TableObject, session=None):
+    closeSession = False
     if not session:
         session = getDBSession()
+        closeSession = True
     try:
         session.add(TableObject)
         session.commit()
     except Exception as e:
         log(e, debug=True, printing=True) 
-    finally:
         session.rollback()
+    finally:
+        if closeSession:
+            session.close()
 
 def insertMany(TableObjects):
     with getDBSession() as session:
@@ -107,9 +111,10 @@ def getOrCreate(classObject, object):
             insert(deepcopy(object), session)
             instance = query(session, object)
             return instance
-def getAllFomClass(classObject):
+def getAllFromClass(classObject):
     with getDBSession() as session:
         query = session.query(classObject).all()
+        session.close()
         return query
 
 if __name__ == "__main__":
