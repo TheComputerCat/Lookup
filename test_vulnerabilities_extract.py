@@ -144,9 +144,16 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_completeVulnerabilityTable(self, dbMock):
-        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny")
+        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny", 'cvssMetricV31')
 
         self.assertEqual(actual, self.allCves)
+
+    @withAVulnDir()
+    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    def test_completeVulnerabilityTable(self, dbMock):
+        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny", 'cvssMetricV2')
+
+        self.assertEqual(actual, [self.thirdVulnDictV2])
 
 
 if __name__ == "__main__":

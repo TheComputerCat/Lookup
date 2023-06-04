@@ -33,13 +33,14 @@ def saveCve(cve, session):
     session.add(vulnObject)
     session.commit()
 
-def getCvesDictFromAllFilesInDir(vulnDirPath):
+def getCvesDictFromAllFilesInDir(vulnDirPath, cveVersion):
     directory = getFilePathsInDirectory(vulnDirPath)
     cveList = []
     for filePath in directory:
         cpeCode = filePath.split("/")[-1]
         queryString = getStringFromFile(filePath)
-        newList = getCvesDictFromJson(json.loads(queryString), cpeCode, 'cvssMetricV31')
+
+        newList = getCvesDictFromJson(json.loads(queryString), cpeCode, cveVersion)
         cveList.extend(newList)
     return cveList
 
@@ -48,7 +49,8 @@ def getCvesDictFromJson(query, cpeCode, cveVersion):
     list = []
     for cve in query:
         vuln = trimVulnerabilityInfo(cve['cve'], cpeCode, cveVersion)
-        list.append(vuln)
+        if vuln is not None:
+            list.append(vuln)
     return list
 
 
