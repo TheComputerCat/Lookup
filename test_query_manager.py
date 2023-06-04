@@ -169,7 +169,7 @@ class TestGetOrCreate(unittest.TestCase):
     @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withTestDatabase(postgres=postgresContainer, pathConfig=pathConfig)
     @withSomeColumnsInserted()
-    def test_getOrCreate_tablesNotFilled(self, mockCreateEngine):
+    def test_getOrCreate_tablesFilled(self, mockCreateEngine):
         """
             Given a database with the tables specified in the model created, and some rows inserted.
             When getOrCreate is called.
