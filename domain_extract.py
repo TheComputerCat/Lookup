@@ -13,6 +13,7 @@ import json as JSON
 from os import listdir
 from os.path import isfile, join
 import model as model
+import query_manager
 
 
 def getJsonFromFile(path):
@@ -132,8 +133,6 @@ def extractDataFromFolder(path):
     filesInFolder = (join(path, f) for f in listdir(path) if isfile(join(path, f)))
     return list(map(extractDataFromFile, filesInFolder))
 
-#############################################################################################
-
 def ARecordObject(AJson):
     return model.ARecord(ip_address=AJson['value'], timestamp=getTimeFromString(AJson['last_seen']))
 
@@ -174,4 +173,50 @@ def convertToOrmObjects(json):
         jsonWithObjects['subdomains'][record] = recordsSubdomainFromList(RECORDS_OBJECTS[record], json['subdomains'][record])
 
     return jsonWithObjects
+
+def insertDataFromObject(jsonWithObjects):
+    mainDomain = jsonWithObjects['main_domain']
+    domainInfo = jsonWithObjects['main_domain_info']
+
+    mainDomain = query_manager.getOrCreate(model.MainDomain, mainDomain)
+    domainInfo.main_domain_id = mainDomain.id
+    domainInfo = query_manager.getOrCreate(model.DomainInfo, domainInfo)
+
+    for MX in jsonWithObjects['main']['MX']:
+        MX.parent_domain_info_id = domainInfo.id
+        query_manager.insert(MX)  
+    
+    for TXT in jsonWithObjects['main']['TXT']:
+        TXT.parent_domain_info_id = domainInfo.id
+        query_manager.insert(TXT)
+
+    for A in jsonWithObjects['main']['A']:
+        host = query_manager.getOrCreate(model.Host, model.Host(address=A.ip_address))
+        A.parent_domain_info_id = domainInfo.id
+        query_manager.insert(A)
+
+    ###################
+
+    for MXSub in jsonWithObjects['subdomains']['MX']:
+        subdomain = MXSub['subdomain']
+        subdomain.main_domain_id = mainDomain.id
+        domainInfoSub = query_manager.getOrCreate(model.DomainInfo, subdomain)
+        MXSub['info'].parent_domain_info_id = domainInfoSub.id
+        query_manager.insert(MXSub['info'])  
+    
+    for TXTSub in jsonWithObjects['subdomains']['TXT']:
+        subdomain = TXTSub['subdomain']
+        subdomain.main_domain_id = mainDomain.id
+        domainInfoSub = query_manager.getOrCreate(model.DomainInfo, subdomain)
+        TXTSub['info'].parent_domain_info_id = domainInfoSub.id
+        query_manager.insert(TXTSub['info'])
+
+    for ASub in jsonWithObjects['subdomains']['A']:
+        subdomain = ASub['subdomain']
+        subdomain.main_domain_id = mainDomain.id
+        domainInfoSub = query_manager.getOrCreate(model.DomainInfo, subdomain)
+        host = query_manager.getOrCreate(model.Host, model.Host(address=ASub['info'].ip_address))
+        ASub['info'].parent_domain_info_id = domainInfoSub.id
+        query_manager.insert(ASub['info'])    
+
 
