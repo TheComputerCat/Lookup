@@ -13,6 +13,7 @@ from model import (
     Service,
 )
 
+SECOND_VERSION = "2.0"
 THIRD_VERSION = "3.1"
 
 
@@ -82,28 +83,40 @@ def getVersion(cveScoring):
     return getAttribute(cveScoring, 'version')
 
 def getBaseScore(cveScoring):
-    if getVersion(cveScoring) == THIRD_VERSION:
-        return getAttribute(cveScoring, 'baseScore')
+    return getAttribute(cveScoring, 'baseScore')
 
 def getAccessVectorScore(cveScoring):
     if getVersion(cveScoring) == THIRD_VERSION:
         return getAttribute(cveScoring, 'attackVector')
+    if getVersion(cveScoring) == SECOND_VERSION:
+        return getAttribute(cveScoring, 'accessVector')
 
 def getAccessComplexityScore(cveScoring):
     if getVersion(cveScoring) == THIRD_VERSION:
         return getAttribute(cveScoring, 'attackComplexity')
+    if getVersion(cveScoring) == SECOND_VERSION:
+        return getAttribute(cveScoring, 'accessComplexity')
 
 def getAuthenticationRequirement(cveScoring):
     if getVersion(cveScoring) == THIRD_VERSION:
         return getAttribute(cveScoring, 'privilegesRequired')
+    if getVersion(cveScoring) == SECOND_VERSION:
+        return getAttribute(cveScoring, 'authentication')
 
 def getConfidentialityImpact(cveScoring):
     if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'confidentialityImpact')
+    if getVersion(cveScoring) == SECOND_VERSION:
         return getAttribute(cveScoring, 'confidentialityImpact')
 
 def getIntegrityImpact(cveScoring):
     if getVersion(cveScoring) == THIRD_VERSION:
         return getAttribute(cveScoring, 'integrityImpact')
+    if getVersion(cveScoring) == SECOND_VERSION:
+        return getAttribute(cveScoring, 'integrityImpact')
 
 def getAvailabilityImpact(cveScoring):
-    return getAttribute(cveScoring, 'availabilityImpact')
+    if getVersion(cveScoring) == THIRD_VERSION:
+        return getAttribute(cveScoring, 'availabilityImpact')
+    if getVersion(cveScoring) == SECOND_VERSION:
+        return getAttribute(cveScoring, 'availabilityImpact')
