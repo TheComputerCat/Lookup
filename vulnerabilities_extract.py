@@ -1,4 +1,7 @@
 import json
+
+import query_manager
+import random
 from query_manager import getDBSession
 from common import (
     getFilePathsInDirectory,
@@ -24,6 +27,7 @@ def completeVulnerabilityTable(vulnDirPath):
 
 def saveCve(cve, session):
     vulnObject = Vulnerability(**cve)
+
     session.add(vulnObject)
     #completeObjectInfo(vulnObject, cve)
     session.commit()
@@ -32,33 +36,33 @@ def getCvesDictFromAllFilesInDir(vulnDirPath):
     dir = getFilePathsInDirectory(vulnDirPath)
     dict = {}
     for filePath in dir:
+        cpeCode = filePath.split("/")[-1]
         queryString = getStringFromFile(filePath)
-        dict |= getCvesDictFromJson(json.loads(queryString), 'cvssMetricV31')
+        a = getCvesDictFromJson(json.loads(queryString), cpeCode, 'cvssMetricV31')
+        dict |= a
     return dict
 
 
-def getCvesDictFromJson(query, cveVersion):
+def getCvesDictFromJson(query, cpeCode, cveVersion):
     dict = {}
     for cve in query:
-        vuln = trimVulnerabilityInfo(cve['cve'], cveVersion)
+        vuln = trimVulnerabilityInfo(cve['cve'], cpeCode, cveVersion)
         dict |= {vuln['cve_code']: vuln}
     return dict
 
 
-def trimVulnerabilityInfo(cve, version):
+def trimVulnerabilityInfo(cve, cpeCode, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
-    if cveScoreFromVersion == None:
+    if cveScoreFromVersion is None:
         return
     cveScoring = cveScoreFromVersion[0]['cvssData']
 
-    service = {
-        "id": 0,
-        "name": "hello",
-        "cpe_code": "bye"
-    }
+
+    service = query_manager.searchInTable(Service, {"cpe_code": cpeCode})
     return {
+        "id": random.randint(0, 10),
         "cve_code": getCveId(cve),
-        "service_id": 0,
+        "service_id": service.id,
         "score": getBaseScore(cveScoring),
         "access_vector": getAccessVectorScore(cveScoring),
         "access_complexity": getAccessComplexityScore(cveScoring),
@@ -66,7 +70,6 @@ def trimVulnerabilityInfo(cve, version):
         "confidentiality_impact": getConfidentialityImpact(cveScoring),
         "integrity_impact": getIntegrityImpact(cveScoring),
         "availability_impact": getAvailabilityImpact(cveScoring),
-        "service": Service(name="hi", cpe_code= "bye"),
     }
 
 def getAttribute(element, attribute):
