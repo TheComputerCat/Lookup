@@ -24,27 +24,18 @@ def getAddressListFromFile(path):
 
 
 def getNmapCommands(address: str, addressDataDirPath: str):
-    TCPCommand = ["nmap", "-sTV", "-top-ports", "2000", "--version-light", "-vv", "-oX", 
+    yield ["nmap", "-sTV", "-top-ports", "2000", "--version-light", "-vv", "-oX", 
                   f"{addressDataDirPath}{asHexString(address)}-tcp{getTimeString()}", address]
-    UDPCommand = ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX",
+    yield ["nmap", "-sUV", "-top-ports", "200" , "--version-light", "-vv", "-oX",
                   f"{addressDataDirPath}{asHexString(address)}-udp{getTimeString()}", address]
-    
-    return TCPCommand, UDPCommand
 
 def getNmapInfoOf(address: str, addressDataDirPath: str):
-    TCPCommand, UDPCommand = getNmapCommands(address, addressDataDirPath)
-    
-    TCPResult = subprocess.run(TCPCommand, capture_output=True, text=True)
-    yield {
-        "stdout": TCPResult.stdout,
-        "stderr": TCPResult.stderr,
-    }
-
-    UDPResult = subprocess.run(UDPCommand, capture_output=True, text=True)
-    yield {
-        "stdout": UDPResult.stdout,
-        "stderr": UDPResult.stderr,
-    }
+    for command in getNmapCommands(address, addressDataDirPath):
+        result = subprocess.run(command, capture_output=True, text=True)
+        yield {
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
 
 def doNmapAndSaveStd(address: str, addressDataDirPath: str):
     NmapResultGenerator = getNmapInfoOf(address, addressDataDirPath)
