@@ -62,27 +62,21 @@ def trimVulnerabilityInfo(cve, cpeCode, version):
     service = searchInTable(Service, {"cpe_code": cpeCode})
 
     if getVersion(cveScoring) == SECOND_VERSION:
-        return getV2Metrics(cveScoring, cve, service)
+        return getV2Dict(cveScoring, cve, service)
     if getVersion(cveScoring) == THIRD_VERSION:
-        return getV31Metrics(cveScoring, cve, service)
+        return getV31Dict(cveScoring, cve, service)
 
 def getAttribute(element, attribute):
     return element.get(attribute)
 
-def getCveId(cve):
-    return getAttribute(cve, 'id')
-
 def getVersion(cveScoring):
     return getAttribute(cveScoring, 'version')
 
-def getBaseScore(cveScoring):
-    return getAttribute(cveScoring, 'baseScore')
-
-def getV2Metrics(cveScoring, cve, service):
+def getV2Dict(cveScoring, cve, service):
     return {
-            "cve_code": getCveId(cve),
+            "cve_code": getAttribute(cve, 'id'),
             "service_id": service.id,
-            "score": getBaseScore(cveScoring),
+            "score": getAttribute(cveScoring, 'baseScore'),
             "access_vector": getAttribute(cveScoring, 'accessVector'),
             "access_complexity": getAttribute(cveScoring, 'accessComplexity'),
             "authentication_requirement": getAttribute(cveScoring, 'authentication'),
@@ -91,11 +85,11 @@ def getV2Metrics(cveScoring, cve, service):
             "availability_impact": getAttribute(cveScoring, 'availabilityImpact'),
         }
 
-def getV31Metrics(cveScoring, cve, service):
+def getV31Dict(cveScoring, cve, service):
     return {
-        "cve_code": getCveId(cve),
+        "cve_code": getAttribute(cve, 'id'),
         "service_id": service.id,
-        "score": getBaseScore(cveScoring),
+        "score": getAttribute(cveScoring, 'baseScore'),
         "access_vector": getAttribute(cveScoring, 'attackVector'),
         "access_complexity": getAttribute(cveScoring, 'attackComplexity'),
         "authentication_requirement": getAttribute(cveScoring, 'privilegesRequired'),

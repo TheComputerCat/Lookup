@@ -110,9 +110,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_Helpers(self, dbMock):
         test_cases = [
-            ['CVE-2023-31740', vulnerabilities_extract.getCveId(self.firstCVE)],
-            ['CVE-2023-31741', vulnerabilities_extract.getCveId(self.secondCVE)],
-
             ["3.1", vulnerabilities_extract.getVersion(self.firstVulnData)],
             ["3.1", vulnerabilities_extract.getVersion(self.secondVulnData)],
 
