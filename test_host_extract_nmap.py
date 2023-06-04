@@ -20,6 +20,7 @@ from common import (
 )
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
+withDataBase = createFixture(lambda :query_manager.setConfigFile('data_base_config.ini') , lambda: None)
 
 class TestHelpers(unittest.TestCase):
     XMLContentExample = r"""<?xml version="1.0" encoding="UTF-8"?>
@@ -29,6 +30,7 @@ class TestHelpers(unittest.TestCase):
 <hostnames>
 <hostname name="pepe.com" type="PTR"/>
 </hostnames>
+<address addr='012.345.678.901'/>
 <ports>
 <port protocol="tcp" portid="21"><state state="filtered"/><service name="ftp" method="table" conf="3"/></port>
 <port protocol="tcp" portid="80"><state state="filtered"/><service name="http" method="table" conf="3"/></port>
@@ -51,26 +53,23 @@ class TestHelpers(unittest.TestCase):
             'address': '8.8.8.8',
             'service_id': 0,
             'source': 'nmap',
+            'protocol': 'tcp',
             'timestamp': datetime.datetime.now()
             }
         for port_element in host_element.iter('port'):
-            host_service_dict = host_extract_nmap.getHostServiceDict(port_element.find('service'),'8.8.8.8',datetime.datetime.now())
+            host_service_dict = host_extract_nmap.getHostServiceDict(port_element,'8.8.8.8',datetime.datetime.now())
             self.assertEqual(host_service_dict['address'],expected_dict['address'])
             self.assertEqual(host_service_dict['source'],expected_dict['source'])
+            self.assertEqual(host_service_dict['protocol'],expected_dict['protocol'])
 
-    # @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    # def test_getHostServiceDict_with_id(self):
-    #     host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-    #     expected_dict = {
-    #         'address': '8.8.8.8',
-    #         'service_id': 0,
-    #         'source': 'nmap',
-    #         'timestamp': datetime.datetime.now()
-    #         }
-    #     for port_element in host_element.iter('port'):
-    #         host_service_dict = host_extract_nmap.getHostServiceDict(port_element.find('service'),'8.8.8.8',datetime.datetime.now())
-    #         self.assertEqual(host_service_dict['address'],expected_dict['address'])
-    #         self.assertEqual(host_service_dict['source'],expected_dict['source'])
+
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withDataBase()
+    def test_getHostServiceDict_with_id(self):
+        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
+        for port_element in host_element.iter('port'):
+            host_service_dict = host_extract_nmap.getHostServiceDict(port_element,'8.8.8.8',datetime.datetime.now())
+            self.assertIsNotNone(host_service_dict['service_id'])
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_getUniqueServiceDict(self):
@@ -89,22 +88,31 @@ class TestHelpers(unittest.TestCase):
             expected_dict = unique_services[index]
             self.assertDictEqual(host_extract_nmap.getUniqueServiceDict(port_element.find('service')),expected_dict)  
 
-    # def test_getServiceIdIfExist(self):
-    #     query_manager.setConfigFile('data_base_config.ini')
-    #     service_dict = {
-    #       'name': 'sql',
-    #       'version': '10.1'
-    #     }
-    #     self.assertEqual(host_extract_nmap.getServiceIdIfExist(service_dict),None)
+    @withDataBase()
+    def test_getServiceIdIfExist(self):
+        
+        service_dict = {
+          'name': 'sql',
+          'version': '10.1'
+        }
+        self.assertEqual(host_extract_nmap.getServiceIdIfExist(service_dict),None)
+
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withDataBase()
     def test_insertNewServiceInDB(self):
-        query_manager.setConfigFile('data_base_config.ini')
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         for port_element in host_element.iter('port'):
-            service_element = port_element.find('service')
-            service_dict = host_extract_nmap.getUniqueServiceDict(service_element)
-            host_extract_nmap.insertNewServiceInDB(service_dict)
+            service_dict = host_extract_nmap.getUniqueServiceDict(port_element.find('service'))
+            self.assertIsNotNone(host_extract_nmap.getIdOfNewServiceInDB(service_dict))
 
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withDataBase()
+    def test_getAllHostServices(self):
+        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
+        print(host_element)
+        host_services = host_extract_nmap.getAllHostServices(host_element)
+        for host_service in host_services:
+            self.assertEqual(type(host_service),HostService)
 
 
 if __name__ == "__main__":
