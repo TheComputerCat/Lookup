@@ -19,11 +19,25 @@ query2 = '[{"cve": {"id": "CVE-2023-31750", "sourceIdentifier": "cve@mitre.org",
 listQuery1 = json.loads(query1)
 listQuery2 = json.loads(query2)
 
-firstCpe = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"
-secondCpe = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607"
+firstCpe = "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"
+secondCpe = "cpe:2.3:o:microsoft:windows_10:1607"
+
+firstCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"
+secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607"
+
+
+def searchMock():
+    class ServiceMock:
+        def __init__(self, cpe):
+            if cpe == firstCpe:
+                self.id = 0
+            elif cpe == secondCpe:
+                self.id = 1
+
+    return lambda a, b: ServiceMock(b["cpe_code"])
+
 
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
-
     firstCVE = listQuery1[0]['cve']
     secondCVE = listQuery1[1]['cve']
     thirdCVE = listQuery2[0]['cve']
@@ -34,7 +48,7 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     firstVulnDict = {
         "cve_code": 'CVE-2023-31740',
-        "service_id": None,
+        "service_id": 0,
         "score": 7.2,
         "access_vector": "NETWORK",
         "access_complexity": "LOW",
@@ -42,12 +56,11 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "confidentiality_impact": "HIGH",
         "integrity_impact": "MEDIUM",
         "availability_impact": "LOW",
-        "service": None,
     }
 
     secondVulnDict = {
         "cve_code": 'CVE-2023-31741',
-        "service_id": None,
+        "service_id": 0,
         "score": 7.1,
         "access_vector": "LOCAL",
         "access_complexity": "HIGH",
@@ -55,12 +68,11 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "confidentiality_impact": "LOW",
         "integrity_impact": "HIGH",
         "availability_impact": "HIGH",
-        "service": None,
     }
 
     thirdVulnDict = {
         "cve_code": 'CVE-2023-31750',
-        "service_id": None,
+        "service_id": 1,
         "score": 6.0,
         "access_vector": "LOCAL",
         "access_complexity": "HIGH",
@@ -68,7 +80,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "confidentiality_impact": "HIGH",
         "integrity_impact": "HIGH",
         "availability_impact": "LOW",
-        "service": None,
     }
 
     cvesDictFromFirstQuery = {
@@ -82,7 +93,8 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         'CVE-2023-31750': thirdVulnDict,
     }
 
-    def test_Helpers(self):
+    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    def test_Helpers(self, dbMock):
         test_cases = [
             ['CVE-2023-31740', vulnerabilities_extract.getCveId(self.firstCVE)],
             ['CVE-2023-31741', vulnerabilities_extract.getCveId(self.secondCVE)],
@@ -116,33 +128,33 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             [None, vulnerabilities_extract.getAttribute(self.firstVulnData, "hello")],
             [7.2, vulnerabilities_extract.getAttribute(self.firstVulnData, "baseScore")],
 
-            [self.firstVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, 'cvssMetricV31')],
-            [self.secondVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.secondCVE, 'cvssMetricV31')],
-            [self.thirdVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, 'cvssMetricV31')],
-            [None, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, 'cvssMetricV2')],
+            [self.firstVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV31')],
+            [self.secondVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.secondCVE, firstCpe, 'cvssMetricV31')],
+            [self.thirdVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV31')],
+            [None, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV2')],
 
-            [self.cvesDictFromFirstQuery, vulnerabilities_extract.getCvesDictFromJson(listQuery1, 'cvssMetricV31')],
+            [self.cvesDictFromFirstQuery, vulnerabilities_extract.getCvesDictFromJson(listQuery1, firstCpe,'cvssMetricV31')],
         ]
 
         for result, expected_result in test_cases:
             self.assertEqual(result, expected_result)
+
     def setXUp(a=None):
         os.makedirs("data/vulny")
-        f = common.writeStringToFile(firstCpe, query1)
-        g = common.writeStringToFile(secondCpe, query2)
-        open(secondCpe).close()
+        f = common.writeStringToFile(firstCpePath, query1)
+        g = common.writeStringToFile(secondCpePath, query2)
+        open(secondCpePath).close()
 
     def tearXDown(a=None):
-        os.remove(firstCpe)
-        os.remove(secondCpe)
+        os.remove(firstCpePath)
+        os.remove(secondCpePath)
         os.rmdir("data/vulny")
 
     withAVulnDir = createFixture(setXUp, tearXDown)
 
     @withAVulnDir()
-    def test_completeVulnerabilityTable(self):
-
-        vulnerabilities_extract.getDBSession = MagicMock()
+    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    def test_completeVulnerabilityTable(self, dbMock):
         actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny")
 
         self.assertEqual(actual, self.allCves)

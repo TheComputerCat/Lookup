@@ -1,6 +1,9 @@
 import json
 import query_manager
-from query_manager import getDBSession
+from query_manager import (
+    getDBSession,
+    searchInTable,
+)
 from common import (
     getFilePathsInDirectory,
     getStringFromFile,
@@ -53,9 +56,10 @@ def trimVulnerabilityInfo(cve, cpeCode, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
     if cveScoreFromVersion is None:
         return
-    cveScoring = cveScoreFromVersion[0]['cvssData']
 
-    service = query_manager.searchInTable(Service, {"cpe_code": cpeCode})
+    cveScoring = cveScoreFromVersion[0]['cvssData']
+    service = searchInTable(Service, {"cpe_code": cpeCode})
+
     return {
         "cve_code": getCveId(cve),
         "service_id": service.id,
