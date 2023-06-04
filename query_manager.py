@@ -75,14 +75,9 @@ def insertMany(TableObjects):
 
 def searchInTable(classObject, dict):
     with getDBSession() as session:
-        try:
-           found = session.query(classObject).filter_by(**dict).one()
-           session.expunge_all()
-           return found
-        except (Exception,exc) as e:
-            log(e, debug=True, printing=True) 
-        finally:
-            session.rollback()
+        found = session.query(classObject).filter_by(**dict).first()
+        session.expunge_all()
+        return found
 
 def queryHost(session, object):
     return session.query(Host).where(Host.address == object.address).one_or_none()
