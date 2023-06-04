@@ -47,7 +47,7 @@ class TestGetDomainList(unittest.TestCase):
         self.assertEqual(res, ["google.com", "facebook.com"])
 
 class TestGetShodanInfoDomain(unittest.TestCase):
-    @withATextFile(pathToTextFile='./shodan_api_key', content='798djfhj2208FFFEEDC4')
+    @withATextFile(pathToTextFile='./shodan_api_key', content='  798djfhj2208FFFEEDC4\n')
     @patch('shodan.Shodan', new_callable=Mock)
     def test_getShodanInfoOf_domainWithMultipleDataPages(self, shodanMock):
         """

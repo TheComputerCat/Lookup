@@ -39,7 +39,7 @@ def getDomainListFromPath(path: str):
     return domainList
     
 def getShodanInfoOf(domain: str, APIkeyFilePath: str):
-    key = getStringFromFile(APIkeyFilePath)
+    key = getStringFromFile(APIkeyFilePath).strip()
 
     api = shodan.Shodan(key)
     areMorePages = True
