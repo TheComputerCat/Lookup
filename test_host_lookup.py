@@ -78,7 +78,7 @@ class Test(unittest.TestCase):
 class saveShodanInfoOfTest(unittest.TestCase):
     time.sleep = MagicMock()
 
-    @patch("builtins.open", new_callable=mock_open, read_data="798djfhj2208FFFEEDC4")
+    @patch("builtins.open", new_callable=mock_open, read_data="  798djfhj2208FFFEEDC4\n")
     def test_create_an_api_instance(self, mockFile):
         shodan.Shodan = Mock()
 

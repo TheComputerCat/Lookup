@@ -67,7 +67,7 @@ def saveNmapInfoFromAddressFile(addressListFilePath, addressDataDir):
     pool.join()
 
 def getShodanApi(APIkeyFilePath: str):
-    shodan_key = getStringFromFile(APIkeyFilePath)
+    shodan_key = getStringFromFile(APIkeyFilePath).strip()
     api = shodan.Shodan(shodan_key)
     return api
 
