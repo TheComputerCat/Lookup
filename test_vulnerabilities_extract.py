@@ -2,16 +2,25 @@ import os
 import vulnerabilities_extract
 import json
 import unittest
+import model
+
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
+import query_manager
+
 from unittest.mock import (
     patch,
     MagicMock,
 )
 from common import (
-    setUpWithATextFile,
-    tearDownWithATextFile,
     writeStringToFile,
     createFixture,
 )
+from query_manager import (
+    Service,
+    Vulnerability,
+)
+
 
 query1 = '[{"cve": {"id": "CVE-2023-31740", "sourceIdentifier": "cve@mitre.org", "published": "2023-05-23T01:15:10.003", "lastModified": "2023-05-30T19:17:44.447", "vulnStatus": "Analyzed", "descriptions": [{"lang": "en", "value": "There privileges."}], "metrics": {"cvssMetricV31": [{"source": "nvd@nist.gov", "type": "Primary", "cvssData": {"version": "3.1", "vectorString": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H", "attackVector": "NETWORK", "attackComplexity": "LOW", "privilegesRequired": "HIGH", "userInteraction": "NONE", "scope": "UNCHANGED", "confidentialityImpact": "HIGH", "integrityImpact": "MEDIUM", "availabilityImpact": "LOW", "baseScore": 7.2, "baseSeverity": "HIGH"}, "exploitabilityScore": 1.2, "impactScore": 5.9}]}, "weaknesses": [{"source": "nvd@nist.gov", "type": "Primary", "description": [{"lang": "en", "value": "CWE-77"}]}], "configurations": [{"operator": "AND", "nodes": [{"operator": "OR", "negate": false, "cpeMatch": [{"vulnerable": true, "criteria": "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*", "matchCriteriaId": "FE947E51-AD41-462E-B0B6-69A21F7D670A"}]}, {"operator": "OR", "negate": false, "cpeMatch": [{"vulnerable": false, "criteria": "cpe:2.3:h:linksys:e2000:-:*:*:*:*:*:*:*", "matchCriteriaId": "8052B407-172A-4A6B-983C-074F0FD1F8DB"}]}]}], "references": [{"url": "http://linksys.com", "source": "cve@mitre.org", "tags": ["Product"]}, {"url": "https://github.com/D2y6p/CVE/blob/main/Linksys/CVE-2023-31740/Linksys_E2000_RCE.pdf", "source": "cve@mitre.org", "tags": ["Exploit", "Mitigation", "Third Party Advisory"]}]}}, {"cve": {"id": "CVE-2023-31741", "sourceIdentifier": "cve@mitre.org", "published": "2023-05-23T01:15:10.047", "lastModified": "2023-05-31T00:26:35.690", "vulnStatus": "Analyzed", "descriptions": [{"lang": "en", "value": "blah blah."}], "metrics": {"cvssMetricV31": [{"source": "nvd@nist.gov", "type": "Primary", "cvssData": {"version": "3.1", "vectorString": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H", "attackVector": "LOCAL", "attackComplexity": "HIGH", "privilegesRequired": "LOW", "userInteraction": "NONE", "scope": "UNCHANGED", "confidentialityImpact": "LOW", "integrityImpact": "HIGH", "availabilityImpact": "HIGH", "baseScore": 7.1, "baseSeverity": "HIGH"}, "exploitabilityScore": 1.2, "impactScore": 5.9}]}, "weaknesses": [{"source": "nvd@nist.gov", "type": "Primary", "description": [{"lang": "en", "value": "CWE-77"}]}], "configurations": [{"operator": "AND", "nodes": [{"operator": "OR", "negate": false, "cpeMatch": [{"vulnerable": true, "criteria": "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*", "matchCriteriaId": "FE947E51-AD41-462E-B0B6-69A21F7D670A"}]}, {"operator": "OR", "negate": false, "cpeMatch": [{"vulnerable": false, "criteria": "cpe:2.3:h:linksys:e2000:-:*:*:*:*:*:*:*", "matchCriteriaId": "8052B407-172A-4A6B-983C-074F0FD1F8DB"}]}]}], "references": [{"url": "http://linksys.com", "source": "cve@mitre.org", "tags": ["Product"]}, {"url": "https://github.com/D2y6p/CVE/blob/main/Linksys/CVE-2023-31741/Linksys_E2000_RCE_2.pdf", "source": "cve@mitre.org", "tags": ["Exploit", "Mitigation", "Third Party Advisory"]}]}}]'
 query2 = '[{"cve": {"id": "CVE-2023-31741", "sourceIdentifier": "cve@mitre.org", "published": "2023-05-23T01:15:10.047", "lastModified": "2023-05-31T00:26:35.690", "vulnStatus": "Analyzed", "descriptions": [{"lang": "en", "value": "blah blah."}], "metrics": {"cvssMetricV2": [{"source": "nvd@nist.gov", "type": "Primary", "cvssData": {"version": "2.0", "vectorString": "AV:N/AC:H/Au:N/C:C/I:C/A:C", "accessVector": "NETWORK", "accessComplexity": "HIGH", "authentication": "NONE", "confidentialityImpact": "COMPLETE", "integrityImpact": "COMPLETE", "availabilityImpact": "COMPLETE", "baseScore": 7.6}, "baseSeverity": "HIGH", "exploitabilityScore": 4.9, "impactScore": 10.0, "acInsufInfo": false, "obtainAllPrivilege": false, "obtainUserPrivilege": false, "obtainOtherPrivilege": false, "userInteractionRequired": true}],"cvssMetricV31": [{"source": "nvd@nist.gov", "type": "Primary", "cvssData": {"version": "3.1", "vectorString": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H", "attackVector": "LOCAL", "attackComplexity": "HIGH", "privilegesRequired": "LOW", "userInteraction": "NONE", "scope": "UNCHANGED", "confidentialityImpact": "LOW", "integrityImpact": "HIGH", "availabilityImpact": "HIGH", "baseScore": 7.1, "baseSeverity": "HIGH"}, "exploitabilityScore": 1.2, "impactScore": 5.9}]}, "weaknesses": [{"source": "nvd@nist.gov", "type": "Primary", "description": [{"lang": "en", "value": "CWE-77"}]}], "configurations": [{"operator": "AND", "nodes": [{"operator": "OR", "negate": false, "cpeMatch": [{"vulnerable": true, "criteria": "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*", "matchCriteriaId": "FE947E51-AD41-462E-B0B6-69A21F7D670A"}]}, {"operator": "OR", "negate": false, "cpeMatch": [{"vulnerable": false, "criteria": "cpe:2.3:h:linksys:e2000:-:*:*:*:*:*:*:*", "matchCriteriaId": "8052B407-172A-4A6B-983C-074F0FD1F8DB"}]}]}], "references": [{"url": "http://linksys.com", "source": "cve@mitre.org", "tags": ["Product"]}, {"url": "https://github.com/D2y6p/CVE/blob/main/Linksys/CVE-2023-31741/Linksys_E2000_RCE_2.pdf", "source": "cve@mitre.org", "tags": ["Exploit", "Mitigation", "Third Party Advisory"]}]}}]'
@@ -25,6 +34,7 @@ secondCpe = "cpe:2.3:o:microsoft:windows_10:1607"
 firstCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*_-2023:06:03-17:03:05"
 secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607_-2023:06:03-17:02:57"
 
+temporalVulnerabilityDir = "data/vulny"
 
 def searchMock():
     class ServiceMock:
@@ -39,7 +49,7 @@ def searchMock():
     return lambda a, b: ServiceMock(b["cpe_code"])
 
 def setUpVulnDirectory():
-    os.makedirs("data/vulny")
+    os.makedirs(temporalVulnerabilityDir)
     f = writeStringToFile(firstCpePath, query1)
     g = writeStringToFile(secondCpePath, query2)
     open(secondCpePath).close()
@@ -47,7 +57,10 @@ def setUpVulnDirectory():
 def teardownVulnDirectory():
     os.remove(firstCpePath)
     os.remove(secondCpePath)
-    os.rmdir("data/vulny")
+    os.rmdir(temporalVulnerabilityDir)
+
+withAVulnDir = createFixture(setUpVulnDirectory, teardownVulnDirectory)
+
 
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     firstCVE = listQuery1[0]['cve']
@@ -163,9 +176,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         for result, expected_result in test_cases:
             self.assertEqual(result, expected_result)
 
-
-    withAVulnDir = createFixture(setUpVulnDirectory, teardownVulnDirectory)
-
     allCvesForV31 = [
         firstVulnDictV31,
         secondVulnDictV31,
@@ -175,17 +185,105 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_completeVulnerabilityTable(self, dbMock):
-        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny", 'cvssMetricV31')
+        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV31')
 
         self.assertEqual(actual, self.allCvesForV31)
 
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_completeVulnerabilityTable(self, dbMock):
-        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir("data/vulny", 'cvssMetricV2')
+        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV2')
 
         self.assertEqual(actual, self.allCvesForV2)
 
+def setUpServicesTable():
+    session = query_manager.getDBSession()
+    service1 = {"id": 0, "name": "linksys", "version": "1.0.06", "cpe_code": "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"}
+    service2 = {"id": 1, "name": "microsoft", "version": "10", "cpe_code": "cpe:2.3:o:microsoft:windows_10:1607"}
+    session.add(Service(**service1))
+    session.add(Service(**service2))
+    session.commit()
+    session.close()
+
+def setUpDatabase(postgres):
+    postgres.start()
+    global actualGetDBEngine
+    actualGetDBEngine = query_manager.getDBEngine
+    query_manager.getDBEngine = lambda: create_engine(postgres.get_connection_url())
+
+def tearDownDatabase(postgres):
+    query_manager.getDBEngine = actualGetDBEngine
+    postgres.stop()
+
+withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
+
+
+class TestDataBaseInteraction(unittest.TestCase):
+    firstVulnDictV31 = {
+        "id": 2,
+        "cve_code": 'CVE-2023-31740',
+        "service_id": 0,
+        "score": 7.2,
+        "access_vector": "NETWORK",
+        "access_complexity": "LOW",
+        "authentication_requirement": "HIGH",
+        "confidentiality_impact": "HIGH",
+        "integrity_impact": "MEDIUM",
+        "availability_impact": "LOW",
+    }
+
+    secondVulnDictV31 = {
+        "id": 3,
+        "cve_code": 'CVE-2023-31741',
+        "service_id": 0,
+        "score": 7.1,
+        "access_vector": "LOCAL",
+        "access_complexity": "HIGH",
+        "authentication_requirement": "LOW",
+        "confidentiality_impact": "LOW",
+        "integrity_impact": "HIGH",
+        "availability_impact": "HIGH",
+    }
+
+    thirdVulnDictV31 = {
+        "id": 1,
+        "service_id": 1,
+        "cve_code": 'CVE-2023-31741',
+        "score": 7.1,
+        "access_vector": "LOCAL",
+        "access_complexity": "HIGH",
+        "authentication_requirement": "LOW",
+        "confidentiality_impact": "LOW",
+        "integrity_impact": "HIGH",
+        "availability_impact": "HIGH",
+    }
+
+    def assertVulnTableIsCorrect(self, ):
+        session = query_manager.getDBSession()
+        allVuln = session.query(Vulnerability).all()
+        session.close()
+
+        x = vars(allVuln[0])
+        y = vars(allVuln[1])
+        z = vars(allVuln[2])
+
+        x.pop('_sa_instance_state')
+        y.pop('_sa_instance_state')
+        z.pop('_sa_instance_state')
+
+        self.assertDictEqual(x, self.thirdVulnDictV31)
+        self.assertDictEqual(z, self.secondVulnDictV31)
+        self.assertDictEqual(y, self.firstVulnDictV31)
+
+    @withAVulnDir()
+    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
+    def test_completeTables(self):
+        query_manager.createTables()
+        setUpServicesTable()
+
+        cvssVersion = "cvssMetricV31"
+        vulnerabilities_extract.completeVulnerabilityTable(temporalVulnerabilityDir, cvssVersion)
+        self.assertVulnTableIsCorrect()
 
 if __name__ == "__main__":
     unittest.main()
