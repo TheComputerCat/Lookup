@@ -91,7 +91,7 @@ def queryMainDomain(session, object):
     return session.query(MainDomain).where(MainDomain.name == object.name).one_or_none()
 
 def queryDomainInfo(session, object):
-    return session.query(DomainInfo).where(DomainInfo.domain == object.domain).one_or_none()
+    return session.query(DomainInfo).where(DomainInfo.domain == object.domain, DomainInfo.main_domain_id == object.main_domain_id).one_or_none()
 
 QUERIES = {
     Host: queryHost,

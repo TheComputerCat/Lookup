@@ -214,10 +214,12 @@ class testDataInsertion(unittest.TestCase):
     def withSomeColumnsSetUp():
         host1 = md.Host(address='8.8.8.8')
         query_manager.insert(host1)
-        mainDomain1 = md.MainDomain(name='domain.org')
+        mainDomain1 = md.MainDomain(name='somedomain.org')
         query_manager.insert(mainDomain1)
-        domainInfo1 = md.DomainInfo(domain='someSubdomain.org', subdomain=False, main_domain_id=1)
+        domainInfo1 = md.DomainInfo(domain='', subdomain=False, main_domain_id=1)
         query_manager.insert(domainInfo1)
+        domainInfo2 = md.DomainInfo(domain='someSubdomain.org', subdomain=True, main_domain_id=1)
+        query_manager.insert(domainInfo2)
 
     withSomeColumnsInserted = createFixture(withSomeColumnsSetUp, None)
 
@@ -239,37 +241,37 @@ class testDataInsertion(unittest.TestCase):
         allObjectsHost = query_manager.getAllFromClass(md.Host)
         allObjectsARecords = query_manager.getAllFromClass(md.ARecord)
 
-        self.assertEqual(len(allObjectsMainDomain), 1)
-        self.assertEqual(allObjectsMainDomain[0], md.MainDomain(id=1, name='domain.org', organization_id=None))
+        self.assertEqual(len(allObjectsMainDomain), 2)
+        self.assertEqual(allObjectsMainDomain[1], md.MainDomain(id=2, name='domain.org', organization_id=None))
 
-        self.assertEqual(len(allObjectsDomainInfo), 5)
-        self.assertEqual(allObjectsDomainInfo[1], md.DomainInfo(domain='', id=2, main_domain_id=1, subdomain=False))
-        self.assertEqual(allObjectsDomainInfo[2], md.DomainInfo(domain='sub1', id=3, main_domain_id=1, subdomain=True))
-        self.assertEqual(allObjectsDomainInfo[3], md.DomainInfo(domain='sub2', id=4, main_domain_id=1, subdomain=True))
-        self.assertEqual(allObjectsDomainInfo[4], md.DomainInfo(domain='_dmarc', id=5, main_domain_id=1, subdomain=True))
+        self.assertEqual(len(allObjectsDomainInfo), 6)
+        self.assertEqual(allObjectsDomainInfo[2], md.DomainInfo(domain='', id=3, main_domain_id=2, subdomain=False))
+        self.assertEqual(allObjectsDomainInfo[3], md.DomainInfo(domain='sub1', id=4, main_domain_id=2, subdomain=True))
+        self.assertEqual(allObjectsDomainInfo[4], md.DomainInfo(domain='sub2', id=5, main_domain_id=2, subdomain=True))
+        self.assertEqual(allObjectsDomainInfo[5], md.DomainInfo(domain='_dmarc', id=6, main_domain_id=2, subdomain=True))
 
         self.assertEqual(len(allObjectsMXRecords), 3)
         self.assertEqual(
             allObjectsMXRecords[0],
-            md.MXRecord(domain='mail.domain.org', id=1, parent_domain_info_id=2, timestamp=datetime(1991, 5, 23, 15, 17, 24)),  
+            md.MXRecord(domain='mail.domain.org', id=1, parent_domain_info_id=3, timestamp=datetime(1991, 5, 23, 15, 17, 24)),  
         )
         self.assertEqual(
             allObjectsMXRecords[1],
-            md.MXRecord(domain='mail2.domain.org', id=2, parent_domain_info_id=2, timestamp=datetime(1992, 5, 23, 15, 17, 24))
+            md.MXRecord(domain='mail2.domain.org', id=2, parent_domain_info_id=3, timestamp=datetime(1992, 5, 23, 15, 17, 24))
         )
         self.assertEqual(
             allObjectsMXRecords[2],
-            md.MXRecord(domain='sub2.domain.org', id=3, parent_domain_info_id=4, timestamp=datetime(1996, 5, 23, 15, 17, 24))
+            md.MXRecord(domain='sub2.domain.org', id=3, parent_domain_info_id=5, timestamp=datetime(1996, 5, 23, 15, 17, 24))
         )
 
         self.assertEqual(len(allObjectsTXTRecords), 2)
         self.assertEqual(
             allObjectsTXTRecords[0],
-            md.TXTRecord(content='v=spf1 a mx ip4:144.91.118.158 ip4:206.212.100.31 ~all', id=1, parent_domain_info_id=2, timestamp=datetime(2023, 5, 23, 15, 11, 10))
+            md.TXTRecord(content='v=spf1 a mx ip4:144.91.118.158 ip4:206.212.100.31 ~all', id=1, parent_domain_info_id=3, timestamp=datetime(2023, 5, 23, 15, 11, 10))
         )
         self.assertEqual(
             allObjectsTXTRecords[1],
-            md.TXTRecord(content='v=DMARC1; p=none', id=2, parent_domain_info_id=5, timestamp=datetime(1996, 5, 23, 15, 17, 24))
+            md.TXTRecord(content='v=DMARC1; p=none', id=2, parent_domain_info_id=6, timestamp=datetime(1996, 5, 23, 15, 17, 24))
         )
 
         self.assertEqual(len(allObjectsHost), 4)
@@ -289,15 +291,15 @@ class testDataInsertion(unittest.TestCase):
         self.assertEqual(len(allObjectsARecords), 3)
         self.assertEqual(
             allObjectsARecords[0],
-            md.ARecord(id=1, ip_address='192.168.1.1', parent_domain_info_id=2, timestamp=datetime(1991, 5, 17, 7, 53, 21)),
+            md.ARecord(id=1, ip_address='192.168.1.1', parent_domain_info_id=3, timestamp=datetime(1991, 5, 17, 7, 53, 21)),
         )
         self.assertEqual(
             allObjectsARecords[1],
-            md.ARecord(id=2, ip_address='172.132.16.77', parent_domain_info_id=2, timestamp=datetime(2011, 5, 17, 1, 26, 37))
+            md.ARecord(id=2, ip_address='172.132.16.77', parent_domain_info_id=3, timestamp=datetime(2011, 5, 17, 1, 26, 37))
         )
         self.assertEqual(
             allObjectsARecords[2],
-            md.ARecord(id=3, ip_address='192.0.0.1', parent_domain_info_id=3, timestamp=datetime(1996, 5, 23, 15, 17, 24))
+            md.ARecord(id=3, ip_address='192.0.0.1', parent_domain_info_id=4, timestamp=datetime(1996, 5, 23, 15, 17, 24))
         )
 def assertInsertionPerformedCorrectly(self):
     allObjectsMainDomain = query_manager.getAllFromClass(md.MainDomain)

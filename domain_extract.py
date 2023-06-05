@@ -27,7 +27,7 @@ def getJsonFromFile(path):
         json_ = JSON.load(f)
         f.close()
     except Exception as e:
-        log(e, printing=True, testing=False)
+        log(e, printing=True)
         return {}
     return json_
 
