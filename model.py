@@ -159,7 +159,7 @@ class Service(Base):
     vulnerabilities: Mapped[List["Vulnerability"]] = relationship(back_populates="service")
 
 class Vulnerability(Base):
-    __tablename__ = "VULNERABILITES"
+    __tablename__ = "VULNERABILITIES"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     cve_code: Mapped[str] = mapped_column(String(100))
