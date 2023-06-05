@@ -38,13 +38,13 @@ def searchMock():
 
     return lambda a, b: ServiceMock(b["cpe_code"])
 
-def setXUp():
+def setUpVulnDirectory():
     os.makedirs("data/vulny")
     f = writeStringToFile(firstCpePath, query1)
     g = writeStringToFile(secondCpePath, query2)
     open(secondCpePath).close()
 
-def tearXDown():
+def teardownVulnDirectory():
     os.remove(firstCpePath)
     os.remove(secondCpePath)
     os.rmdir("data/vulny")
@@ -164,7 +164,7 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             self.assertEqual(result, expected_result)
 
 
-    withAVulnDir = createFixture(setXUp, tearXDown)
+    withAVulnDir = createFixture(setUpVulnDirectory, teardownVulnDirectory)
 
     allCvesForV31 = [
         firstVulnDictV31,
