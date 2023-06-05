@@ -14,6 +14,11 @@ from os import listdir
 from os.path import isfile, join
 import model as model
 import query_manager
+from copy import deepcopy
+import query_manager
+
+import sys
+
 
 
 def getJsonFromFile(path):
@@ -22,7 +27,7 @@ def getJsonFromFile(path):
         json_ = JSON.load(f)
         f.close()
     except Exception as e:
-        log(e, printing=True)
+        log(e, printing=True, testing=False)
         return {}
     return json_
 
@@ -174,49 +179,79 @@ def convertToOrmObjects(json):
 
     return jsonWithObjects
 
+def getOrCreateDomainInfoObject(domainInfo, mainDomainObject):
+    domainInfo = deepcopy(domainInfo)
+    domainInfo.main_domain_id = mainDomainObject.id
+    return query_manager.getOrCreate(model.DomainInfo, domainInfo)
+
+def insertObjectWithId(object, idParent):
+    object.parent_domain_info_id = idParent
+    query_manager.insert(object)
+
+def insertRecordListMainDomain(recordList, idParent):
+    for record in recordList:
+        insertObjectWithId(record,  idParent)
+
+def insertHosts(aRecords):
+    for A in aRecords:
+        query_manager.getOrCreate(model.Host, model.Host(address=A.ip_address))
+
+def insertRecordListSubdomains(recordList, mainDomainObject):
+    for record in recordList:
+        domainInfo = getOrCreateDomainInfoObject(record['subdomain'], mainDomainObject)
+        insertObjectWithId(record['info'], domainInfo.id) 
+
+def insertInfoMainDomain(jsonWithObjects, mainDomainObject):
+    domainInfo = getOrCreateDomainInfoObject(jsonWithObjects['main_domain_info'], mainDomainObject)
+
+    insertHosts(jsonWithObjects['main']['A'])
+    for record in RECORDS:
+        insertRecordListMainDomain(jsonWithObjects['main'][record], domainInfo.id)
+
+def insertInfoSubdomains(jsonWithObjects, mainDomainObject):
+    insertHosts(map(lambda A: A['info'],jsonWithObjects['subdomains']['A']))
+    
+    for record in RECORDS:
+        insertRecordListSubdomains(jsonWithObjects['subdomains'][record], mainDomainObject)
+
 def insertDataFromObject(jsonWithObjects):
     mainDomain = jsonWithObjects['main_domain']
-    domainInfo = jsonWithObjects['main_domain_info']
-
     mainDomain = query_manager.getOrCreate(model.MainDomain, mainDomain)
-    domainInfo.main_domain_id = mainDomain.id
-    domainInfo = query_manager.getOrCreate(model.DomainInfo, domainInfo)
 
-    for MX in jsonWithObjects['main']['MX']:
-        MX.parent_domain_info_id = domainInfo.id
-        query_manager.insert(MX)  
+    insertInfoMainDomain(jsonWithObjects, mainDomain)    
+    insertInfoSubdomains(jsonWithObjects, mainDomain)
+
+def insertDataFromFolder(path):
+    dataListFromFolder = extractDataFromFolder(path)
+    for dataJson in dataListFromFolder:
+        insertDataFromObject(convertToOrmObjects(dataJson))
+
+def formatDirPath(dirPath):
+    if dirPath[-1] != '/':
+        return dirPath+'/'
     
-    for TXT in jsonWithObjects['main']['TXT']:
-        TXT.parent_domain_info_id = domainInfo.id
-        query_manager.insert(TXT)
+    return dirPath
 
-    for A in jsonWithObjects['main']['A']:
-        host = query_manager.getOrCreate(model.Host, model.Host(address=A.ip_address))
-        A.parent_domain_info_id = domainInfo.id
-        query_manager.insert(A)
-
-    ###################
-
-    for MXSub in jsonWithObjects['subdomains']['MX']:
-        subdomain = MXSub['subdomain']
-        subdomain.main_domain_id = mainDomain.id
-        domainInfoSub = query_manager.getOrCreate(model.DomainInfo, subdomain)
-        MXSub['info'].parent_domain_info_id = domainInfoSub.id
-        query_manager.insert(MXSub['info'])  
+def formatFilePath(filePath):
+    if filePath[-1] == '/':
+        return filePath[:-1]
     
-    for TXTSub in jsonWithObjects['subdomains']['TXT']:
-        subdomain = TXTSub['subdomain']
-        subdomain.main_domain_id = mainDomain.id
-        domainInfoSub = query_manager.getOrCreate(model.DomainInfo, subdomain)
-        TXTSub['info'].parent_domain_info_id = domainInfoSub.id
-        query_manager.insert(TXTSub['info'])
+    return filePath
 
-    for ASub in jsonWithObjects['subdomains']['A']:
-        subdomain = ASub['subdomain']
-        subdomain.main_domain_id = mainDomain.id
-        domainInfoSub = query_manager.getOrCreate(model.DomainInfo, subdomain)
-        host = query_manager.getOrCreate(model.Host, model.Host(address=ASub['info'].ip_address))
-        ASub['info'].parent_domain_info_id = domainInfoSub.id
-        query_manager.insert(ASub['info'])    
+if __name__ == "__main__":
+    args = sys.argv[1:]
+
+    if len(args) < 2:
+        raise Exception("""Se necesitan dos argumentos:
+    1. la ruta al archivo con las credenciales de la base de datos,
+    2. La ruta al directorio con la información de Shodan.""")
+
+    configFile = formatFilePath(args[0])
+    dataDirPath = formatDirPath(args[1])
+
+    query_manager.setConfigFile(configFile)
+
+    insertDataFromFolder(dataDirPath)
+
 
 

@@ -226,7 +226,7 @@ filteredShodanJson2 = {
                     21,
                     27,
                 ],
-                'value': 'sub1.domain.org',
+                'value': '192.0.0.2',
                 'last_seen': '1998-05-23T15:17:24.000000',
             }
         ],
