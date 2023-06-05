@@ -1,12 +1,15 @@
 import json
+import sys
 import query_manager
 from query_manager import (
     getDBSession,
     searchInTable,
+    setConfigFile,
 )
 from common import (
     getFilePathsInDirectory,
     getStringFromFile,
+    formatDirPath,
 )
 from model import (
     Vulnerability,
@@ -112,3 +115,20 @@ def getV31Dict(cveScoring, cve, service):
 
 def getAttribute(element, attribute):
     return element.get(attribute)
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+
+    if len(args) < 3:
+        raise Exception("""Se necesitan tres argumentos:
+    1. La ruta al archivo con las credenciales de la base de datos,
+    2. La ruta al directorio con la información de las vulnerabilidades,
+    3. La version de metrica de CVE a recolectar (cvssMetricV2 o cvssMetricV31).""")
+
+    configFile = args[0]
+    vulnDir = formatDirPath(args[1])
+    cvssVersion = args[2]
+
+    setConfigFile(configFile)
+    completeVulnerabilityTable(vulnDir, cvssVersion)
