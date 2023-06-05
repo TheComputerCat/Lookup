@@ -113,7 +113,6 @@ class TestHelpers(unittest.TestCase):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_services = host_extract_nmap.getAllHostServices(host_element)
         for host_service in host_services:
-            print(host_service)
             self.assertEqual(type(host_service),HostService)
             self.assertEqual(host_service.address,host_extract_nmap.getAddress(host_element))
             self.assertEqual(host_service.protocol,'tcp')
@@ -138,11 +137,23 @@ class TestHelpers(unittest.TestCase):
 
     @patch('host_extract_nmap.getHostDictFromXML', new_callable=Mock, return_value= hostDictExample )
     @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_completeTables(self,getHostDictFromXML):
-
         session = query_manager.getDBSession()
+        self.assertEqual(len(session.query(Host).all()),0)
+        self.assertEqual(len(session.query(Service).all()),0)
+        self.assertEqual(len(session.query(HostService).all()),0)
         host_extract_nmap.completeTables('./data/host1')
-        self.assertNotEqual(len(session.query(Host).all()),0)
+        self.assertEqual(len(session.query(Host).all()),1)
+        self.assertEqual(len(session.query(Service).all()),1)
+        self.assertEqual(len(session.query(HostService).all()),2)
+    
+    @withATextFile(pathToTextFile='./data1/12345abc-tcp-2023:05:25', content=XMLContentExample)
+    @withATextFile(pathToTextFile='./data1/12345abc-tcp-std-2023:05:30', content='fooled')
+    def test_isInfoFile(self):
+        self.assertTrue(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-2023:05:25','12345abc-tcp-2023:05:25'))
+        self.assertFalse(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-std-2023:05:30','12345abc-tcp-std-2023:05:30'))
+    
 
 if __name__ == "__main__":
     unittest.main()

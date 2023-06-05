@@ -1,7 +1,8 @@
 from common import (
     formatDirPath,
     formatFilePath,
-    log
+    log,
+    getStringFromFile
 )
 
 from model import (
@@ -38,7 +39,8 @@ def getAllHostServices(host_element):
         if ServiceIsUnknow(port_element):
             pass
         services.append(getHostServiceDict(port_element,host_address,host_timestamp))
-    return map(lambda service : HostService(**service),services)
+    services = list(map(lambda service : HostService(**service),services))
+    return services
 
 def ServiceIsUnknow(port_element):
     service_name = getServiceName(port_element.find('service'))
@@ -61,21 +63,11 @@ def getProtocol(port_element):
 def getTimeStamp(host_element):
     return datetime.datetime.fromtimestamp(int(host_element.attrib['starttime']))
 
-def getServiceIdIfExist(service_dict):
-    found_service = query_manager.searchInTable(Service,service_dict)
-    if not found_service:
-        return None
-    return found_service.id
-
 def getServiceIfExist(service_dict):
     found_service = query_manager.searchInTable(Service,service_dict)
     if not found_service:
         return None
     return found_service
-
-def getIdOfNewServiceInDB(service_dict):
-    query_manager.insert(Service(**service_dict))
-    return getServiceIdIfExist(service_dict)
 
 def insertNewServiceInDB(service_object):
     query_manager.insert(service_object)
@@ -98,7 +90,7 @@ def getService(service_element):
     found_service_object = getServiceIfExist(service_dict)
     if found_service_object is None:
         service_object = Service(**service_dict)
-        insertNewServiceInDB(service_object)
+        # insertNewServiceInDB(service_object)
         return service_object
     return found_service_object
 
@@ -118,8 +110,12 @@ def getHostDictFromXML(xml_path: str):
 
 def completeTables(xml_path):
     host_dict = getHostDictFromXML(xml_path)
-    query_manager.insert(Host(**host_dict))
-    query_manager.insertMany(host_dict['services_in_host'])
+    if not query_manager.searchInTable(Host,{'address' : host_dict['address'],}):
+        query_manager.insert(Host(**host_dict))
+        print('succesfull host insertion')
+    else:
+        print('host is already in db, inserting new services')
+        query_manager.insertMany(host_dict['services_in_host'])
 
 def setConfigFile(configFilePath):
     global CONFIG_FILE_PATH
@@ -137,11 +133,11 @@ def getFilePathsInDirectory(directoryPath):
     fixedDirPath = formatDirPath(directoryPath)
     return [
         fixedDirPath+fileName for fileName in os.listdir(fixedDirPath)
-        if os.path.isfile(fixedDirPath+fileName)
+        if isInfoFile(fixedDirPath+fileName,fileName)
     ]
 
 def isInfoFile(file_path,file_name):
-    return os.path.isfile(file_path) and file_name.find('std') == -1  
+    return os.path.isfile(file_path) and file_name.find('std') == -1 and (file_name.find('-udp-') != -1 or file_name.find('-tcp-') != -1)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -149,13 +145,19 @@ if __name__ == "__main__":
     if len(args) < 2:
         raise Exception("""Se necesitan dos argumentos:
     1. la ruta al archivo con las credenciales de la base de datos,
-    2. La ruta al directorio con la información de hosts de Shodan.""")
+    2. La ruta al directorio con la información de hosts de Nmap.""")
 
     configFile = formatFilePath(args[0])
     dataDirPath = formatDirPath(args[1])
 
-    setConfigFile(configFile)
+    query_manager.setConfigFile(configFile)
     setAddressDataDirPath(dataDirPath)
+
+    for file_path in getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH):
+        print(file_path)
+        completeTables(file_path)
+    # print(getStringFromFile('./data/nmap_data/332e31332e3230372e37-tcp-std-2023 05 25-00 52 33'))
+    # XML.parse('./data/nmap_data/332e31332e3230372e37-tcp-std-2023 05 25-00 52 33').getroot()
 
 
 
