@@ -317,13 +317,13 @@ class TestDatabase(unittest.TestCase):
 
         hostServices = session.query(HostService).all()
         self.assertEqual([
-            (hostService.address, hostService.service_id, hostService.source, hostService.protocol, hostService.timestamp)
+            (hostService.address, hostService.service_id, hostService.port, hostService.source, hostService.protocol, hostService.timestamp)
                 for hostService in hostServices
         ], [
-            ("0.0.0.0", 1, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509923")),
-            ("0.0.0.0", 2, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509950")),
-            ("0.0.0.0", 3, "shodan-host", "tcp", None),
-            ("8.8.8.8", 1, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509917")),
+            ("0.0.0.0", 1, 22, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509923")),
+            ("0.0.0.0", 2, 80, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509950")),
+            ("0.0.0.0", 3, 80, "shodan-host", "tcp", None),
+            ("8.8.8.8", 1, 22, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509917")),
         ])
 
     @withATextFile(pathToTextFile="./data/host-data/host1", content="""{

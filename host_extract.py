@@ -156,6 +156,7 @@ def getHostServiceRows(session):
                 "address": address,
                 "service": serviceObject,
                 "source": "shodan-host",
+                "port": getAttrFromDict(serviceDict, "port"),
                 "protocol": getAttrFromDict(serviceDict, "protocol"),
                 "timestamp": serviceDict["timestamp"],
             }

@@ -5,11 +5,12 @@ from datetime import (
 )
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Float,
     ForeignKey,
     String,
-    Boolean
+    Integer,
 )
 
 from sqlalchemy.orm import (
@@ -182,6 +183,7 @@ class HostService(Base):
     address: Mapped[str] = mapped_column(ForeignKey("HOSTS.address"), nullable=False)
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=True)
     source: Mapped[str] = mapped_column(String(100), nullable=False)
+    port: Mapped[int] = mapped_column(Integer, nullable=False)
     protocol: Mapped[str] = mapped_column(String(10), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
