@@ -113,6 +113,7 @@ class TestHelpers(unittest.TestCase):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_services = host_extract_nmap.getAllHostServices(host_element)
         for host_service in host_services:
+            print(host_service)
             self.assertEqual(type(host_service),HostService)
             self.assertEqual(host_service.address,host_extract_nmap.getAddress(host_element))
             self.assertEqual(host_service.protocol,'tcp')
@@ -124,9 +125,15 @@ class TestHelpers(unittest.TestCase):
         host_dict = host_extract_nmap.getHostDictFromXML('./data/host1')
         self.assertEqual(host_dict['address'],'012.345.678.901')
 
+    hostServiceExample = {'address': '012.345.678.901',
+            'source': 'nmap',
+            'protocol': 'tcp',
+            'timestamp': datetime.datetime.now(),
+            'service': Service(**{'name' : 'https',}),
+            }
     hostDictExample = {
         'address': '012.345.678.901',
-        'services_in_host': [Service(**{'id' : 25, 'name' : 'https',}),Service(**{'id' : 26, 'name' : 'ftp',})]
+        'services_in_host': [HostService(**hostServiceExample),HostService(**hostServiceExample)]
     }
 
     @patch('host_extract_nmap.getHostDictFromXML', new_callable=Mock, return_value= hostDictExample )
@@ -135,7 +142,7 @@ class TestHelpers(unittest.TestCase):
 
         session = query_manager.getDBSession()
         host_extract_nmap.completeTables('./data/host1')
-        session.query(Host).all()
+        self.assertNotEqual(len(session.query(Host).all()),0)
 
 if __name__ == "__main__":
     unittest.main()

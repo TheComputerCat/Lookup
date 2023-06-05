@@ -38,7 +38,7 @@ def getAllHostServices(host_element):
         if ServiceIsUnknow(port_element):
             pass
         services.append(getHostServiceDict(port_element,host_address,host_timestamp))
-    return map(lambda service :HostService(**service),services)
+    return map(lambda service : HostService(**service),services)
 
 def ServiceIsUnknow(port_element):
     service_name = getServiceName(port_element.find('service'))
@@ -118,7 +118,6 @@ def getHostDictFromXML(xml_path: str):
 
 def completeTables(xml_path):
     host_dict = getHostDictFromXML(xml_path)
-    print(host_dict)
     query_manager.insert(Host(**host_dict))
     query_manager.insertMany(host_dict['services_in_host'])
 
@@ -134,6 +133,16 @@ def setConfigFile(configFilePath):
 def getAddress(host_element):
     return host_element.find('address').attrib['addr']
 
+def getFilePathsInDirectory(directoryPath):
+    fixedDirPath = formatDirPath(directoryPath)
+    return [
+        fixedDirPath+fileName for fileName in os.listdir(fixedDirPath)
+        if os.path.isfile(fixedDirPath+fileName)
+    ]
+
+def isInfoFile(file_path,file_name):
+    return os.path.isfile(file_path) and file_name.find('std') == -1  
+
 if __name__ == "__main__":
     args = sys.argv[1:]
 
@@ -147,4 +156,7 @@ if __name__ == "__main__":
 
     setConfigFile(configFile)
     setAddressDataDirPath(dataDirPath)
+
+    for file in getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH):
+
 
