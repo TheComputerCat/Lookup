@@ -1,6 +1,4 @@
 import os
-
-import common
 import vulnerabilities_extract
 import json
 import unittest
@@ -40,6 +38,16 @@ def searchMock():
 
     return lambda a, b: ServiceMock(b["cpe_code"])
 
+def setXUp():
+    os.makedirs("data/vulny")
+    f = writeStringToFile(firstCpePath, query1)
+    g = writeStringToFile(secondCpePath, query2)
+    open(secondCpePath).close()
+
+def tearXDown():
+    os.remove(firstCpePath)
+    os.remove(secondCpePath)
+    os.rmdir("data/vulny")
 
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     firstCVE = listQuery1[0]['cve']
@@ -51,7 +59,7 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     thirdVulnDataV31 = thirdCVE['metrics']['cvssMetricV31'][0]['cvssData']
     thirdVulnDataV2 = thirdCVE['metrics']['cvssMetricV2'][0]['cvssData']
 
-    firstVulnDict = {
+    firstVulnDictV31 = {
         "cve_code": 'CVE-2023-31740',
         "service_id": 0,
         "score": 7.2,
@@ -63,7 +71,7 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         "availability_impact": "LOW",
     }
 
-    secondVulnDict = {
+    secondVulnDictV31 = {
         "cve_code": 'CVE-2023-31741',
         "service_id": 0,
         "score": 7.1,
@@ -130,8 +138,8 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     ]
 
     cvesDictFromFirstQuery = [
-        firstVulnDict,
-        secondVulnDict,
+        firstVulnDictV31,
+        secondVulnDictV31,
     ]
 
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
@@ -143,8 +151,8 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             [None, vulnerabilities_extract.getAttribute(self.firstVulnData, "hello")],
             [7.2, vulnerabilities_extract.getAttribute(self.firstVulnData, "baseScore")],
 
-            [self.firstVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV31')],
-            [self.secondVulnDict, vulnerabilities_extract.trimVulnerabilityInfo(self.secondCVE, firstCpe, 'cvssMetricV31')],
+            [self.firstVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV31')],
+            [self.secondVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.secondCVE, firstCpe, 'cvssMetricV31')],
             [self.thirdVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV31')],
             [self.thirdVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV2')],
             [self.firstVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV2')],
@@ -155,22 +163,12 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
         for result, expected_result in test_cases:
             self.assertEqual(result, expected_result)
 
-    def setXUp(a=None):
-        os.makedirs("data/vulny")
-        f = writeStringToFile(firstCpePath, query1)
-        g = writeStringToFile(secondCpePath, query2)
-        open(secondCpePath).close()
-
-    def tearXDown(a=None):
-        os.remove(firstCpePath)
-        os.remove(secondCpePath)
-        os.rmdir("data/vulny")
 
     withAVulnDir = createFixture(setXUp, tearXDown)
 
     allCvesForV31 = [
-        firstVulnDict,
-        secondVulnDict,
+        firstVulnDictV31,
+        secondVulnDictV31,
         thirdVulnDictV31,
     ]
 
