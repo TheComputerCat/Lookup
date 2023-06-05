@@ -263,17 +263,11 @@ class TestDataBaseInteraction(unittest.TestCase):
         allVuln = session.query(Vulnerability).all()
         session.close()
 
-        x = vars(allVuln[0])
-        y = vars(allVuln[1])
-        z = vars(allVuln[2])
+        list(map(lambda v: vars(v).pop('_sa_instance_state'), allVuln))
 
-        x.pop('_sa_instance_state')
-        y.pop('_sa_instance_state')
-        z.pop('_sa_instance_state')
-
-        self.assertDictEqual(x, self.thirdVulnDictV31)
-        self.assertDictEqual(z, self.secondVulnDictV31)
-        self.assertDictEqual(y, self.firstVulnDictV31)
+        self.assertDictEqual(vars(allVuln[0]), self.thirdVulnDictV31)
+        self.assertDictEqual(vars(allVuln[2]), self.secondVulnDictV31)
+        self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
 
     @withAVulnDir()
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
