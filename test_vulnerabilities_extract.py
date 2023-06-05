@@ -11,6 +11,7 @@ from unittest.mock import (
 from common import (
     setUpWithATextFile,
     tearDownWithATextFile,
+    writeStringToFile,
     createFixture,
 )
 
@@ -156,8 +157,8 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     def setXUp(a=None):
         os.makedirs("data/vulny")
-        f = common.writeStringToFile(firstCpePath, query1)
-        g = common.writeStringToFile(secondCpePath, query2)
+        f = writeStringToFile(firstCpePath, query1)
+        g = writeStringToFile(secondCpePath, query2)
         open(secondCpePath).close()
 
     def tearXDown(a=None):
