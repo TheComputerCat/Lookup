@@ -157,6 +157,5 @@ if __name__ == "__main__":
     setConfigFile(configFile)
     setAddressDataDirPath(dataDirPath)
 
-    for file in getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH):
 
 
