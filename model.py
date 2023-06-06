@@ -160,14 +160,14 @@ class Service(Base):
     services_with_vuln: Mapped[List["ServiceVulnerability"]] = relationship(back_populates="service")
 
 class ServiceVulnerability(Base):
-    __tablename__ = "SERVICE_VULNERABILITIES"
+    __tablename__ = "SERVICES_VULNERABILITIES"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=True)
     vulnerability_id: Mapped[int] = mapped_column(ForeignKey("VULNERABILITIES.id"), nullable=True)
 
     service: Mapped[Service] = relationship(back_populates="service")
-    vulnerabilities: Mapped[List["Vulnerability"]] = relationship(back_populates="cve_code")
+    vulnerability: Mapped[List["Vulnerability"]] = relationship(back_populates="cve_code")
 
 class Vulnerability(Base):
     __tablename__ = "VULNERABILITIES"
