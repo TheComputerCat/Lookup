@@ -31,14 +31,14 @@ def getHostElementFromXML(xml_path: str):
     root = XML.parse(xml_file).getroot()
     return root.find('host')
 
-def getAllHostServices(host_element):
+def getAllHostServices(host_element, host_object):
     services = []
     host_address = getAddress(host_element)
     host_timestamp = getTimeStamp(host_element)
     for port_element in host_element.iter('port'):
         if ServiceIsUnknow(port_element):
             pass
-        services.append(getHostServiceDict(port_element,host_address,host_timestamp))
+        services.append(getHostServiceDict(port_element, host_address, host_timestamp, host_object))
     services = list(map(lambda service : HostService(**service),services))
     return services
 
@@ -46,31 +46,34 @@ def ServiceIsUnknow(port_element):
     service_name = getServiceName(port_element.find('service'))
     return not service_name or service_name == 'unknown' 
 
-def getHostServiceDict(port_element, host_address, host_timestamp):
+def getHostServiceDict(port_element, host_address, host_timestamp, host_object):
     service_element = port_element.find('service')
-    unique_service_object = getService(service_element)
+    unique_service_object = getOrCreateService(service_element)
     return {
           'address': host_address,
           'source': 'nmap',
           'protocol': getProtocol(port_element),
+          'port': getPortNumber(port_element),
           'timestamp': host_timestamp,
           'service': unique_service_object,
+          'host': host_object,
     }
 
 def getProtocol(port_element):
-    return port_element.attrib['protocol']
+    return port_element.attrib.get('protocol')
+
+def getPortNumber(port_element):
+    return int(port_element.attrib.get('portid'))
 
 def getTimeStamp(host_element):
-    return datetime.datetime.fromtimestamp(int(host_element.attrib['starttime']))
+    return datetime.datetime.fromtimestamp(int(host_element.attrib.get('starttime')))
 
-def getServiceIfExist(service_dict):
-    found_service = query_manager.searchInTable(Service,service_dict)
-    if not found_service:
-        return None
-    return found_service
-
-def insertNewServiceInDB(service_object):
+def insertNewServiceInDB(service_dict):
+    if query_manager.searchInTable(Service,service_dict) is not None:
+        return
+    service_object = Service(**service_dict)
     query_manager.insert(service_object)
+    return service_object
 
 def getUniqueServiceDict(service_element):
     service_info = service_element.attrib.get('servicefp',"")
@@ -82,16 +85,11 @@ def getUniqueServiceDict(service_element):
 def getServiceName(service_element):
     return service_element.attrib.get('name')
 
-def getServiceId(service_object):
-    return service_object.id
-
-def getService(service_element):
+def getOrCreateService(service_element):
     service_dict = getUniqueServiceDict(service_element)
-    found_service_object = getServiceIfExist(service_dict)
-    if found_service_object is None:
-        service_object = Service(**service_dict)
-        # insertNewServiceInDB(service_object)
-        return service_object
+    found_service_object = query_manager.searchInTable(Service,service_dict)
+    if not found_service_object :
+        return insertNewServiceInDB(service_dict)
     return found_service_object
 
 def getServiceVersion(service_info):
@@ -100,22 +98,23 @@ def getServiceVersion(service_info):
         return search[0]
     return 
 
-def getHostDictFromXML(xml_path: str):
-    host_element = getHostElementFromXML(xml_path)
-    services_in_host = getAllHostServices(host_element)
+def getHostDictFromXMLHost(host_element):
     return {
         'address':getAddress(host_element),
-        'services_in_host': services_in_host,
     }
 
-def completeTables(xml_path):
-    host_dict = getHostDictFromXML(xml_path)
-    if not query_manager.searchInTable(Host,{'address' : host_dict['address'],}):
-        query_manager.insert(Host(**host_dict))
+def completeTables(xml_path: str):
+    host_element = getHostElementFromXML(xml_path)
+    host_dict = getHostDictFromXMLHost(host_element)
+    host_object = Host(**host_dict)
+    host_found_in_db = query_manager.searchInTable(Host,host_dict)
+    if not host_found_in_db:
+        query_manager.insert(host_object)
         print('succesfull host insertion')
     else:
+        host_object = host_found_in_db
         print('host is already in db, inserting new services')
-        query_manager.insertMany(host_dict['services_in_host'])
+    query_manager.insertMany(getAllHostServices(host_element,host_object))
 
 def setConfigFile(configFilePath):
     global CONFIG_FILE_PATH
@@ -154,10 +153,6 @@ if __name__ == "__main__":
     setAddressDataDirPath(dataDirPath)
 
     for file_path in getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH):
-        print(file_path)
         completeTables(file_path)
-    # print(getStringFromFile('./data/nmap_data/332e31332e3230372e37-tcp-std-2023 05 25-00 52 33'))
-    # XML.parse('./data/nmap_data/332e31332e3230372e37-tcp-std-2023 05 25-00 52 33').getroot()
-
 
 
