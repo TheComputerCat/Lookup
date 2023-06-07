@@ -186,9 +186,13 @@ def tearDownDatabase(postgres):
 withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
 
 
+def deleteFiels(v):
+    vars(v).pop('_sa_instance_state')
+    vars(v).pop('id')
+
+
 class TestDataBaseInteraction(unittest.TestCase):
     firstVulnDictV31 = {
-        "id": 2,
         "cve_code": 'CVE-2023-31740',
         "score": 7.2,
         "access_vector": "NETWORK",
@@ -200,7 +204,6 @@ class TestDataBaseInteraction(unittest.TestCase):
     }
 
     thirdVulnDictV31 = {
-        "id": 1,
         "cve_code": 'CVE-2023-31741',
         "score": 7.1,
         "access_vector": "LOCAL",
@@ -216,22 +219,22 @@ class TestDataBaseInteraction(unittest.TestCase):
         allVuln = session.query(Vulnerability).all()
         session.close()
 
-        list(map(lambda v: vars(v).pop('_sa_instance_state'), allVuln))
+        list(map(deleteFiels, allVuln))
 
         self.assertEqual(len(allVuln), 2)
         self.assertDictEqual(vars(allVuln[0]), self.thirdVulnDictV31)
         self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
 
-    relation1 = {'id': 2, 'service_id': 0, 'vulnerability_id': 2}
-    relation2 = {'id': 1, 'service_id': 1, 'vulnerability_id': 1}
-    relation3 = {'id': 3, 'service_id': 0, 'vulnerability_id': 1}
+    relation1 = {'service_id': 0, 'vulnerability_id': 2}
+    relation2 = {'service_id': 1, 'vulnerability_id': 1}
+    relation3 = {'service_id': 0, 'vulnerability_id': 1}
 
     def assertServicesVulnJoinTableIsCorrect(self):
         session = query_manager.getDBSession()
         allVulnService = session.query(ServiceVulnerability).all()
         session.close()
 
-        list(map(lambda v: vars(v).pop('_sa_instance_state'), allVulnService))
+        list(map(deleteFiels, allVulnService))
 
         self.assertEqual(len(allVulnService), 3)
         self.assertDictEqual(vars(allVulnService[0]), self.relation2)
