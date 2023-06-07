@@ -92,12 +92,6 @@ class TestVulnerabilityTable(unittest.TestCase):
     secondVulnDictV2 = setupVulnDict('CVE-2023-31741', None, None, None, None, None, None, None)
     thirdVulnDictV2 = setupVulnDict('CVE-2023-31741', 7.6, "NETWORK", "HIGH", "NONE", "COMPLETE", "COMPLETE", "COMPLETE")
 
-    allCvesForV2 = [
-        thirdVulnDictV2,
-        firstVulnDictV2,
-        secondVulnDictV2,
-    ]
-
     cvesDictFromFirstQuery = [
         firstVulnDictV31,
         secondVulnDictV31,
@@ -136,6 +130,12 @@ class TestVulnerabilityTable(unittest.TestCase):
         actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV31')
 
         self.assertEqual(actual, self.allCvesForV31)
+
+    allCvesForV2 = [
+        thirdVulnDictV2,
+        firstVulnDictV2,
+        secondVulnDictV2,
+    ]
 
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
