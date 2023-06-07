@@ -36,6 +36,12 @@ def saveCve(cve, session):
     session.add(vulnObject)
     session.commit()
 
+def getServiceVulnRelation(cpeCode, cveCode):
+    service = searchInTable(Service, {"cpe_code": cpeCode})
+    vuln = searchInTable(Vulnerability, {"cve_code": cveCode})
+
+    return {"service_id": service.id, "vulnerability_id": vuln.id}
+
 def getCvesDictFromAllFilesInDir(vulnDirPath, cveVersion):
     directory = getFilePathsInDirectory(vulnDirPath)
     cveList = []

@@ -39,16 +39,27 @@ secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607_-2023:06:03-17:0
 temporalVulnerabilityDir = "data/vulny"
 
 def searchMock():
-    class ServiceMock:
-        def __init__(self, cpe):
-            if cpe == firstCpe:
-                self.id = 0
-            elif cpe == secondCpe:
-                self.id = 1
-            else:
-                raise Exception("cpe {} doesnt exist".format(cpe))
+    class DatabaseObjectMock:
+        def __init__(self, table, dict):
+            if table == Service:
+                cpe_code = dict["cpe_code"]
+                if cpe_code == firstCpe:
+                    self.id = 0
+                elif cpe_code == secondCpe:
+                    self.id = 1
+                else:
+                    raise Exception("cpe {} doesnt exist in mocked DB".format(cpe_code))
 
-    return lambda a, b: ServiceMock(b["cpe_code"])
+            if table == Vulnerability:
+                cve_code = dict["cve_code"]
+                if cve_code == 'CVE-2023-31740':
+                    self.id = 0
+                elif cve_code == 'CVE-2023-31741':
+                    self.id = 1
+                else:
+                    raise Exception("cve {} doesnt exist in mocked DB".format(cve_code))
+
+    return lambda a, b: DatabaseObjectMock(a, b)
 
 def setUpVulnDirectory():
     os.makedirs(temporalVulnerabilityDir)
@@ -143,6 +154,14 @@ class TestVulnerabilityTable(unittest.TestCase):
         actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV2')
 
         self.assertEqual(actual, self.allCvesForV2)
+
+    @withAVulnDir()
+    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    def test_completeVulnerabilityTable(self, dbMock):
+        actual = vulnerabilities_extract.getServiceVulnRelation(firstCpe, 'CVE-2023-31741')
+        expected = {"service_id": 0, "vulnerability_id": 1}
+
+        self.assertEqual(actual, expected)
 
 def setUpServicesTable():
     session = query_manager.getDBSession()
