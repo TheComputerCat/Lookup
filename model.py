@@ -175,7 +175,7 @@ class Vulnerability(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     cve_code: Mapped[str] = mapped_column(String(100), nullable=False)
     score: Mapped[float] = mapped_column(Float, nullable=True)
-    access_vector: Mapped[str] = mapped_column(String(10), nullable=True)
+    access_vector: Mapped[str] = mapped_column(String(20), nullable=True)
     access_complexity: Mapped[str] = mapped_column(String(10), nullable=True)
     authentication_requirement: Mapped[str] = mapped_column(String(10), nullable=True)
     confidentiality_impact: Mapped[str] = mapped_column(String(10), nullable=True)
