@@ -3,6 +3,7 @@ import vulnerabilities_extract
 import json
 import unittest
 import model
+from vulnerabilities_extract import setupVulnDict
 
 from sqlalchemy import create_engine
 from testcontainers.postgres import PostgresContainer
@@ -19,6 +20,7 @@ from common import (
 from query_manager import (
     Service,
     Vulnerability,
+    ServiceVulnerability,
 )
 
 
@@ -83,60 +85,12 @@ class TestVulnerabilityTable(unittest.TestCase):
         "availability_impact": "LOW",
     }
 
-    secondVulnDictV31 = {
-        "cve_code": 'CVE-2023-31741',
-        "score": 7.1,
-        "access_vector": "LOCAL",
-        "access_complexity": "HIGH",
-        "authentication_requirement": "LOW",
-        "confidentiality_impact": "LOW",
-        "integrity_impact": "HIGH",
-        "availability_impact": "HIGH",
-    }
+    secondVulnDictV31 = setupVulnDict('CVE-2023-31741', 7.1, "LOCAL", "HIGH", "LOW", "LOW", "HIGH", "HIGH")
+    thirdVulnDictV31 = setupVulnDict('CVE-2023-31741', 7.1, "LOCAL", "HIGH", "LOW", "LOW", "HIGH", "HIGH")
 
-    thirdVulnDictV31 = {
-        "cve_code": 'CVE-2023-31741',
-        "score": 7.1,
-        "access_vector": "LOCAL",
-        "access_complexity": "HIGH",
-        "authentication_requirement": "LOW",
-        "confidentiality_impact": "LOW",
-        "integrity_impact": "HIGH",
-        "availability_impact": "HIGH",
-    }
-
-    firstVulnDictV2 = {
-        "cve_code": 'CVE-2023-31740',
-        "score": None,
-        "access_vector": None,
-        "access_complexity": None,
-        "authentication_requirement": None,
-        "confidentiality_impact": None,
-        "integrity_impact": None,
-        "availability_impact": None,
-    }
-
-    secondVulnDictV2 = {
-        "cve_code": 'CVE-2023-31741',
-        "score": None,
-        "access_vector": None,
-        "access_complexity": None,
-        "authentication_requirement": None,
-        "confidentiality_impact": None,
-        "integrity_impact": None,
-        "availability_impact": None,
-    }
-
-    thirdVulnDictV2 = {
-        "cve_code": 'CVE-2023-31741',
-        "score": 7.6,
-        "access_vector": "NETWORK",
-        "access_complexity": "HIGH",
-        "authentication_requirement": "NONE",
-        "confidentiality_impact": "COMPLETE",
-        "integrity_impact": "COMPLETE",
-        "availability_impact": "COMPLETE",
-    }
+    firstVulnDictV2 = setupVulnDict('CVE-2023-31740', None, None, None, None, None, None, None)
+    secondVulnDictV2 = setupVulnDict('CVE-2023-31741', None, None, None, None, None, None, None)
+    thirdVulnDictV2 = setupVulnDict('CVE-2023-31741', 7.6, "NETWORK", "HIGH", "NONE", "COMPLETE", "COMPLETE", "COMPLETE")
 
     allCvesForV2 = [
         thirdVulnDictV2,
