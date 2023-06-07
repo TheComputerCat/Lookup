@@ -10,6 +10,7 @@ from common import (
     getFilePathsInDirectory,
     getStringFromFile,
     formatDirPath,
+    log,
 )
 from model import (
     Vulnerability,
@@ -44,6 +45,8 @@ def saveVulnerability(vulnerability, session):
 def saveRelation(service, vulnerability, session):
     cve = vulnerability['cve_code']
     relation = getServiceVulnRelation(service, cve)
+    if relation is None:
+        return
     relationObject = ServiceVulnerability(**relation)
 
     session.add(relationObject)
@@ -52,6 +55,20 @@ def saveRelation(service, vulnerability, session):
 def getServiceVulnRelation(cpeCode, cveCode):
     service = searchInTable(Service, {"cpe_code": cpeCode})
     vuln = searchInTable(Vulnerability, {"cve_code": cveCode})
+
+    if service is None:
+        log(
+            "cannot link nonexistent service {} with vuln {}".format(cpeCode, cveCode),
+            printing=True
+        )
+        return
+
+    if vuln is None:
+        log(
+            "cannot link service {} with nonexistent vuln {}".format(cpeCode, cveCode),
+            printing=True
+        )
+        return
 
     return {"service_id": service.id, "vulnerability_id": vuln.id}
 

@@ -35,6 +35,7 @@ secondCpe = "cpe:2.3:o:microsoft:windows_10:1607"
 
 firstCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*_-2023:06:03-17:03:05"
 secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607_-2023:06:03-17:02:57"
+wrongCpePath = "data/vulny/cpe:2.32023:06:03-17:02:57"
 
 temporalVulnerabilityDir = "data/vulny"
 
@@ -63,9 +64,8 @@ def searchMock():
 
 def setUpVulnDirectory():
     os.makedirs(temporalVulnerabilityDir)
-    f = writeStringToFile(firstCpePath, query1)
-    g = writeStringToFile(secondCpePath, query2)
-    open(secondCpePath).close()
+    writeStringToFile(firstCpePath, query1)
+    writeStringToFile(secondCpePath, query2)
 
 def teardownVulnDirectory():
     os.remove(firstCpePath)
@@ -185,6 +185,13 @@ def tearDownDatabase(postgres):
 
 withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
 
+def setUpWrongFile():
+    writeStringToFile(wrongCpePath, "{}")
+
+def teardownWrongFile():
+    os.remove(wrongCpePath)
+
+withAWrongFile = createFixture(setUpWrongFile, teardownWrongFile)
 
 def deleteFiels(v):
     vars(v).pop('_sa_instance_state')
@@ -223,6 +230,7 @@ class TestDataBaseInteraction(unittest.TestCase):
         self.assertDictEqual(vars(allVulnService[2]), self.relation3)
 
     @withAVulnDir()
+    @withAWrongFile()
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
     def test_completeTables(self):
         query_manager.createTables()
