@@ -123,24 +123,22 @@ class TestVulnerabilityTable(unittest.TestCase):
             [self.firstVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV2')],
             [self.thirdVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV2')],
 
-            [self.cvesDictFromFirstQuery, vulnerabilities_extract.getCvesDictFromJson(listQuery1, firstCpe, 'cvssMetricV31')],
+            [self.cvesDictFromFirstQuery, vulnerabilities_extract.getVulnDictFromJson(listQuery1, firstCpe, 'cvssMetricV31')],
         ]
 
         for result, expected_result in test_cases:
             self.assertEqual(result, expected_result)
 
-    allCvesForV31 = [
-        firstVulnDictV31,
-        secondVulnDictV31,
-        thirdVulnDictV31,
-    ]
 
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
-    def test_completeVulnerabilityTable(self, dbMock):
-        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV31')
-
-        self.assertEqual(actual, self.allCvesForV31)
+    def test_getCvesDictFromAllFilesInDirV31(self, dbMock):
+        actual = vulnerabilities_extract.getVulnDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV31')
+        expected = {
+            firstCpe: [self.firstVulnDictV31, self.secondVulnDictV31],
+            secondCpe: [self.thirdVulnDictV31]
+        }
+        self.assertEqual(actual, expected)
 
     allCvesForV2 = [
         thirdVulnDictV2,
@@ -150,14 +148,17 @@ class TestVulnerabilityTable(unittest.TestCase):
 
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
-    def test_completeVulnerabilityTable(self, dbMock):
-        actual = vulnerabilities_extract.getCvesDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV2')
-
-        self.assertEqual(actual, self.allCvesForV2)
+    def test_getCvesDictFromAllFilesInDirV2(self, dbMock):
+        actual = vulnerabilities_extract.getVulnDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV2')
+        expected = {
+            firstCpe: [self.firstVulnDictV2, self.secondVulnDictV2],
+            secondCpe: [self.thirdVulnDictV2]
+        }
+        self.assertEqual(actual, expected)
 
     @withAVulnDir()
     @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
-    def test_completeVulnerabilityTable(self, dbMock):
+    def test_getServiceVulnRelation(self, dbMock):
         actual = vulnerabilities_extract.getServiceVulnRelation(firstCpe, 'CVE-2023-31741')
         expected = {"service_id": 0, "vulnerability_id": 1}
 

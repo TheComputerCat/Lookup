@@ -22,7 +22,7 @@ THIRD_VERSION = "3.1"
 
 def completeVulnerabilityTable(vulnDirPath, cveVersion):
     session = getDBSession()
-    cveList = getCvesDictFromAllFilesInDir(vulnDirPath, cveVersion)
+    cveList = getVulnDictFromAllFilesInDir(vulnDirPath, cveVersion)
     for cve_code in cveList:
         saveCve(cve_code, session)
 
@@ -42,20 +42,18 @@ def getServiceVulnRelation(cpeCode, cveCode):
 
     return {"service_id": service.id, "vulnerability_id": vuln.id}
 
-def getCvesDictFromAllFilesInDir(vulnDirPath, cveVersion):
+def getVulnDictFromAllFilesInDir(vulnDirPath, cveVersion):
     directory = getFilePathsInDirectory(vulnDirPath)
-    cveList = []
+    vulnOfService = {}
     for filePath in directory:
         file = filePath.split("/")[-1]
         cpeCode = file.rsplit("_", 1)[0]
         queryString = getStringFromFile(filePath)
 
-        newList = getCvesDictFromJson(json.loads(queryString), cpeCode, cveVersion)
-        cveList.extend(newList)
-    return cveList
+        vulnOfService[cpeCode] = getVulnDictFromJson(json.loads(queryString), cpeCode, cveVersion)
+    return vulnOfService
 
-
-def getCvesDictFromJson(query, cpeCode, cveVersion):
+def getVulnDictFromJson(query, cpeCode, cveVersion):
     list = []
     for cve in query:
         vuln = trimVulnerabilityInfo(cve['cve'], cpeCode, cveVersion)
