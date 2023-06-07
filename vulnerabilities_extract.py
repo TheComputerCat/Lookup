@@ -77,7 +77,6 @@ def getVersion(cveScoring):
 def emptyVDict(cve, service):
     return {
             "cve_code": getAttribute(cve, 'id'),
-            "service_id": service.id,
             "score": None,
             "access_vector": None,
             "access_complexity": None,
@@ -90,7 +89,6 @@ def emptyVDict(cve, service):
 def getV2Dict(cveScoring, cve, service):
     return {
             "cve_code": getAttribute(cve, 'id'),
-            "service_id": service.id,
             "score": getAttribute(cveScoring, 'baseScore'),
             "access_vector": getAttribute(cveScoring, 'accessVector'),
             "access_complexity": getAttribute(cveScoring, 'accessComplexity'),
@@ -103,7 +101,6 @@ def getV2Dict(cveScoring, cve, service):
 def getV31Dict(cveScoring, cve, service):
     return {
         "cve_code": getAttribute(cve, 'id'),
-        "service_id": service.id,
         "score": getAttribute(cveScoring, 'baseScore'),
         "access_vector": getAttribute(cveScoring, 'attackVector'),
         "access_complexity": getAttribute(cveScoring, 'attackComplexity'),

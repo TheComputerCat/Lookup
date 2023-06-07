@@ -74,7 +74,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     firstVulnDictV31 = {
         "cve_code": 'CVE-2023-31740',
-        "service_id": 0,
         "score": 7.2,
         "access_vector": "NETWORK",
         "access_complexity": "LOW",
@@ -86,7 +85,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     secondVulnDictV31 = {
         "cve_code": 'CVE-2023-31741',
-        "service_id": 0,
         "score": 7.1,
         "access_vector": "LOCAL",
         "access_complexity": "HIGH",
@@ -98,7 +96,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     thirdVulnDictV31 = {
         "cve_code": 'CVE-2023-31741',
-        "service_id": 1,
         "score": 7.1,
         "access_vector": "LOCAL",
         "access_complexity": "HIGH",
@@ -110,7 +107,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     firstVulnDictV2 = {
         "cve_code": 'CVE-2023-31740',
-        "service_id": 0,
         "score": None,
         "access_vector": None,
         "access_complexity": None,
@@ -122,7 +118,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     secondVulnDictV2 = {
         "cve_code": 'CVE-2023-31741',
-        "service_id": 0,
         "score": None,
         "access_vector": None,
         "access_complexity": None,
@@ -134,7 +129,6 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
 
     thirdVulnDictV2 = {
         "cve_code": 'CVE-2023-31741',
-        "service_id": 1,
         "score": 7.6,
         "access_vector": "NETWORK",
         "access_complexity": "HIGH",
@@ -222,7 +216,6 @@ class TestDataBaseInteraction(unittest.TestCase):
     firstVulnDictV31 = {
         "id": 2,
         "cve_code": 'CVE-2023-31740',
-        "service_id": 0,
         "score": 7.2,
         "access_vector": "NETWORK",
         "access_complexity": "LOW",
@@ -235,7 +228,6 @@ class TestDataBaseInteraction(unittest.TestCase):
     secondVulnDictV31 = {
         "id": 3,
         "cve_code": 'CVE-2023-31741',
-        "service_id": 0,
         "score": 7.1,
         "access_vector": "LOCAL",
         "access_complexity": "HIGH",
@@ -247,7 +239,6 @@ class TestDataBaseInteraction(unittest.TestCase):
 
     thirdVulnDictV31 = {
         "id": 1,
-        "service_id": 1,
         "cve_code": 'CVE-2023-31741',
         "score": 7.1,
         "access_vector": "LOCAL",
