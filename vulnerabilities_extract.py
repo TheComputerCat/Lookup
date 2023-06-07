@@ -22,16 +22,19 @@ THIRD_VERSION = "3.1"
 
 def completeVulnerabilityTable(vulnDirPath, cveVersion):
     session = getDBSession()
-    cveList = getVulnDictFromAllFilesInDir(vulnDirPath, cveVersion)
-    for cve_code in cveList:
-        saveCve(cve_code, session)
+    vulnerabilitiesPerService = getVulnDictFromAllFilesInDir(vulnDirPath, cveVersion)
+    for service, vulnerabilityList in vulnerabilitiesPerService.items():
+        for vulnerability in vulnerabilityList:
+            saveVulnerabilities(vulnerability, session)
+        #saveRelation
 
     session.commit()
     session.close()
 
 
-def saveCve(cve, session):
-    vulnObject = Vulnerability(**cve)
+def saveVulnerabilities(relation, session):
+
+    vulnObject = Vulnerability(**relation)
 
     session.add(vulnObject)
     session.commit()
