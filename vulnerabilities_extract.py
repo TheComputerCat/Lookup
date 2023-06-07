@@ -75,43 +75,46 @@ def getVersion(cveScoring):
     return getAttribute(cveScoring, 'version')
 
 def emptyVDict(cve, service):
-    return {
-            "cve_code": getAttribute(cve, 'id'),
-            "score": None,
-            "access_vector": None,
-            "access_complexity": None,
-            "authentication_requirement": None,
-            "confidentiality_impact": None,
-            "integrity_impact": None,
-            "availability_impact": None,
-        }
+    return setupVulnDict(getAttribute(cve, 'id'), None, None, None, None, None, None, None)
 
 def getV2Dict(cveScoring, cve, service):
-    return {
-            "cve_code": getAttribute(cve, 'id'),
-            "score": getAttribute(cveScoring, 'baseScore'),
-            "access_vector": getAttribute(cveScoring, 'accessVector'),
-            "access_complexity": getAttribute(cveScoring, 'accessComplexity'),
-            "authentication_requirement": getAttribute(cveScoring, 'authentication'),
-            "confidentiality_impact": getAttribute(cveScoring, 'confidentialityImpact'),
-            "integrity_impact": getAttribute(cveScoring, 'integrityImpact'),
-            "availability_impact": getAttribute(cveScoring, 'availabilityImpact'),
-        }
+    return setupVulnDict(
+            getAttribute(cve, 'id'),
+            getAttribute(cveScoring, 'baseScore'),
+            getAttribute(cveScoring, 'accessVector'),
+            getAttribute(cveScoring, 'accessComplexity'),
+            getAttribute(cveScoring, 'authentication'),
+            getAttribute(cveScoring, 'confidentialityImpact'),
+            getAttribute(cveScoring, 'integrityImpact'),
+            getAttribute(cveScoring, 'availabilityImpact'),
+        )
 
 def getV31Dict(cveScoring, cve, service):
-    return {
-        "cve_code": getAttribute(cve, 'id'),
-        "score": getAttribute(cveScoring, 'baseScore'),
-        "access_vector": getAttribute(cveScoring, 'attackVector'),
-        "access_complexity": getAttribute(cveScoring, 'attackComplexity'),
-        "authentication_requirement": getAttribute(cveScoring, 'privilegesRequired'),
-        "confidentiality_impact": getAttribute(cveScoring, 'confidentialityImpact'),
-        "integrity_impact": getAttribute(cveScoring, 'integrityImpact'),
-        "availability_impact": getAttribute(cveScoring, 'availabilityImpact'),
-    }
+    return setupVulnDict(
+        getAttribute(cve, 'id'),
+        getAttribute(cveScoring, 'baseScore'),
+        getAttribute(cveScoring, 'attackVector'),
+        getAttribute(cveScoring, 'attackComplexity'),
+        getAttribute(cveScoring, 'privilegesRequired'),
+        getAttribute(cveScoring, 'confidentialityImpact'),
+        getAttribute(cveScoring, 'integrityImpact'),
+        getAttribute(cveScoring, 'availabilityImpact')
+    )
 
 def getAttribute(element, attribute):
     return element.get(attribute)
+
+def setupVulnDict(cve_cove, score, access_vector, access_complexity, authentication_requirement, confidentiality_impact, integrity_impact, availability_impact):
+    return {
+        "cve_code": cve_cove,
+        "score": score,
+        "access_vector": access_vector,
+        "access_complexity": access_complexity,
+        "authentication_requirement": authentication_requirement,
+        "confidentiality_impact": confidentiality_impact,
+        "integrity_impact": integrity_impact,
+        "availability_impact": availability_impact,
+    }
 
 
 if __name__ == "__main__":
