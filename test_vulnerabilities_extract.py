@@ -235,15 +235,21 @@ class TestDataBaseInteraction(unittest.TestCase):
         self.assertDictEqual(vars(allVuln[2]), self.secondVulnDictV31)
         self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
 
+    relation1 = {'id': 2, 'service_id': 0, 'vulnerability_id': 2}
+    relation2 = {'id': 1, 'service_id': 1, 'vulnerability_id': 1}
+    relation3 = {'id': 3, 'service_id': 0, 'vulnerability_id': 1}
+
     def assertServicesVulnJoinTableIsCorrect(self):
         session = query_manager.getDBSession()
         allVulnService = session.query(ServiceVulnerability).all()
         session.close()
 
-        #list(map(lambda v: vars(v).pop('_sa_instance_state'), allVulnService))
+        list(map(lambda v: vars(v).pop('_sa_instance_state'), allVulnService))
 
         self.assertEqual(len(allVulnService), 3)
-        #self.assertDictEqual(vars(allVulnService[0]), self.thirdVulnDictV31)
+        self.assertDictEqual(vars(allVulnService[0]), self.relation2)
+        self.assertDictEqual(vars(allVulnService[1]), self.relation1)
+        self.assertDictEqual(vars(allVulnService[2]), self.relation3)
 
     @withAVulnDir()
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
