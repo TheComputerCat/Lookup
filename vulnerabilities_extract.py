@@ -33,7 +33,9 @@ def completeVulnerabilityTable(vulnDirPath, cveVersion):
     session.close()
 
 def saveVulnerability(vulnerability, session):
-
+    alreadyExists = searchInTable(Vulnerability, vulnerability)
+    if alreadyExists is not None:
+        return
     vulnObject = Vulnerability(**vulnerability)
 
     session.add(vulnObject)

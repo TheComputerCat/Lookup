@@ -199,18 +199,6 @@ class TestDataBaseInteraction(unittest.TestCase):
         "availability_impact": "LOW",
     }
 
-    secondVulnDictV31 = {
-        "id": 3,
-        "cve_code": 'CVE-2023-31741',
-        "score": 7.1,
-        "access_vector": "LOCAL",
-        "access_complexity": "HIGH",
-        "authentication_requirement": "LOW",
-        "confidentiality_impact": "LOW",
-        "integrity_impact": "HIGH",
-        "availability_impact": "HIGH",
-    }
-
     thirdVulnDictV31 = {
         "id": 1,
         "cve_code": 'CVE-2023-31741',
@@ -230,9 +218,8 @@ class TestDataBaseInteraction(unittest.TestCase):
 
         list(map(lambda v: vars(v).pop('_sa_instance_state'), allVuln))
 
-        self.assertEqual(len(allVuln), 3)
+        self.assertEqual(len(allVuln), 2)
         self.assertDictEqual(vars(allVuln[0]), self.thirdVulnDictV31)
-        self.assertDictEqual(vars(allVuln[2]), self.secondVulnDictV31)
         self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
 
     relation1 = {'id': 2, 'service_id': 0, 'vulnerability_id': 2}
