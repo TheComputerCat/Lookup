@@ -166,8 +166,8 @@ class ServiceVulnerability(Base):
     service_id: Mapped[int] = mapped_column(ForeignKey("SERVICES.id"), nullable=True)
     vulnerability_id: Mapped[int] = mapped_column(ForeignKey("VULNERABILITIES.id"), nullable=True)
 
-    service: Mapped[Service] = relationship(back_populates="service")
-    vulnerability: Mapped[List["Vulnerability"]] = relationship(back_populates="cve_code")
+    service: Mapped[Service] = relationship(back_populates="services_with_vuln")
+    vulnerability: Mapped[List["Vulnerability"]] = relationship(back_populates="service_vuln")
 
 class Vulnerability(Base):
     __tablename__ = "VULNERABILITIES"
@@ -182,7 +182,7 @@ class Vulnerability(Base):
     integrity_impact: Mapped[str] = mapped_column(String(10), nullable=True)
     availability_impact: Mapped[str] = mapped_column(String(10), nullable=True)
 
-    serviceVuln: Mapped[ServiceVulnerability] = relationship(back_populates="vulnerabilities")
+    service_vuln: Mapped[ServiceVulnerability] = relationship(back_populates="vulnerability")
 
 
 class HostService(Base):
