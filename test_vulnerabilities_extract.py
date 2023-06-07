@@ -62,7 +62,7 @@ def teardownVulnDirectory():
 withAVulnDir = createFixture(setUpVulnDirectory, teardownVulnDirectory)
 
 
-class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
+class TestVulnerabilityTable(unittest.TestCase):
     firstCVE = listQuery1[0]['cve']
     secondCVE = listQuery1[1]['cve']
     thirdCVE = listQuery2[0]['cve']
@@ -161,8 +161,8 @@ class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
             [self.firstVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV31')],
             [self.secondVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.secondCVE, firstCpe, 'cvssMetricV31')],
             [self.thirdVulnDictV31, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV31')],
-            [self.thirdVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV2')],
             [self.firstVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.firstCVE, firstCpe, 'cvssMetricV2')],
+            [self.thirdVulnDictV2, vulnerabilities_extract.trimVulnerabilityInfo(self.thirdCVE, secondCpe, 'cvssMetricV2')],
 
             [self.cvesDictFromFirstQuery, vulnerabilities_extract.getCvesDictFromJson(listQuery1, firstCpe, 'cvssMetricV31')],
         ]
@@ -249,13 +249,14 @@ class TestDataBaseInteraction(unittest.TestCase):
         "availability_impact": "HIGH",
     }
 
-    def assertVulnTableIsCorrect(self, ):
+    def assertVulnTableIsCorrect(self):
         session = query_manager.getDBSession()
         allVuln = session.query(Vulnerability).all()
         session.close()
 
         list(map(lambda v: vars(v).pop('_sa_instance_state'), allVuln))
 
+        self.assertEqual(len(allVuln), 3)
         self.assertDictEqual(vars(allVuln[0]), self.thirdVulnDictV31)
         self.assertDictEqual(vars(allVuln[2]), self.secondVulnDictV31)
         self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
