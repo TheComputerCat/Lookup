@@ -192,27 +192,8 @@ def deleteFiels(v):
 
 
 class TestDataBaseInteraction(unittest.TestCase):
-    firstVulnDictV31 = {
-        "cve_code": 'CVE-2023-31740',
-        "score": 7.2,
-        "access_vector": "NETWORK",
-        "access_complexity": "LOW",
-        "authentication_requirement": "HIGH",
-        "confidentiality_impact": "HIGH",
-        "integrity_impact": "MEDIUM",
-        "availability_impact": "LOW",
-    }
-
-    thirdVulnDictV31 = {
-        "cve_code": 'CVE-2023-31741',
-        "score": 7.1,
-        "access_vector": "LOCAL",
-        "access_complexity": "HIGH",
-        "authentication_requirement": "LOW",
-        "confidentiality_impact": "LOW",
-        "integrity_impact": "HIGH",
-        "availability_impact": "HIGH",
-    }
+    firstVulnDictV31 = setupVulnDict('CVE-2023-31740', 7.2, "NETWORK", "LOW", "HIGH", "HIGH", "MEDIUM", "LOW",)
+    secondVulnDictV31 = setupVulnDict('CVE-2023-31741', 7.1, "LOCAL", "HIGH", "LOW", "LOW", "HIGH", "HIGH", )
 
     def assertVulnTableIsCorrect(self):
         session = query_manager.getDBSession()
@@ -222,7 +203,7 @@ class TestDataBaseInteraction(unittest.TestCase):
         list(map(deleteFiels, allVuln))
 
         self.assertEqual(len(allVuln), 2)
-        self.assertDictEqual(vars(allVuln[0]), self.thirdVulnDictV31)
+        self.assertDictEqual(vars(allVuln[0]), self.secondVulnDictV31)
         self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
 
     relation1 = {'service_id': 0, 'vulnerability_id': 2}
