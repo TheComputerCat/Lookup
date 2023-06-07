@@ -235,6 +235,16 @@ class TestDataBaseInteraction(unittest.TestCase):
         self.assertDictEqual(vars(allVuln[2]), self.secondVulnDictV31)
         self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
 
+    def assertServicesVulnJoinTableIsCorrect(self):
+        session = query_manager.getDBSession()
+        allVulnService = session.query(ServiceVulnerability).all()
+        session.close()
+
+        #list(map(lambda v: vars(v).pop('_sa_instance_state'), allVulnService))
+
+        self.assertEqual(len(allVulnService), 3)
+        #self.assertDictEqual(vars(allVulnService[0]), self.thirdVulnDictV31)
+
     @withAVulnDir()
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
     def test_completeTables(self):
@@ -244,6 +254,7 @@ class TestDataBaseInteraction(unittest.TestCase):
         cvssVersion = "cvssMetricV31"
         vulnerabilities_extract.completeVulnerabilityTable(temporalVulnerabilityDir, cvssVersion)
         self.assertVulnTableIsCorrect()
+        self.assertServicesVulnJoinTableIsCorrect()
 
 if __name__ == "__main__":
     unittest.main()

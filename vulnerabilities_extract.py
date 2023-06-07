@@ -14,6 +14,7 @@ from common import (
 from model import (
     Vulnerability,
     Service,
+    ServiceVulnerability,
 )
 
 SECOND_VERSION = "2.0"
@@ -25,18 +26,25 @@ def completeVulnerabilityTable(vulnDirPath, cveVersion):
     vulnerabilitiesPerService = getVulnDictFromAllFilesInDir(vulnDirPath, cveVersion)
     for service, vulnerabilityList in vulnerabilitiesPerService.items():
         for vulnerability in vulnerabilityList:
-            saveVulnerabilities(vulnerability, session)
-        #saveRelation
+            saveVulnerability(vulnerability, session)
+            saveRelation(service, vulnerability, session)
 
     session.commit()
     session.close()
 
+def saveVulnerability(vulnerability, session):
 
-def saveVulnerabilities(relation, session):
-
-    vulnObject = Vulnerability(**relation)
+    vulnObject = Vulnerability(**vulnerability)
 
     session.add(vulnObject)
+    session.commit()
+
+def saveRelation(service, vulnerability, session):
+    cve = vulnerability['cve_code']
+    relation = getServiceVulnRelation(service, cve)
+    relationObject = ServiceVulnerability(**relation)
+
+    session.add(relationObject)
     session.commit()
 
 def getServiceVulnRelation(cpeCode, cveCode):
