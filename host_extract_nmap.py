@@ -2,7 +2,8 @@ from common import (
     formatDirPath,
     formatFilePath,
     log,
-    getStringFromFile
+    getStringFromFile,
+    tryTo
 )
 
 from model import (
@@ -36,19 +37,20 @@ def getAllHostServices(host_element, host_object):
     host_address = getAddress(host_element)
     host_timestamp = getTimeStamp(host_element)
     for port_element in host_element.iter('port'):
+        service_element = port_element.find('service')
         if ServiceIsUnknow(port_element):
-            pass
-        services.append(getHostServiceDict(port_element, host_address, host_timestamp, host_object))
+            continue
+        unique_service_object = getOrCreateService(service_element)
+        services.append(getHostServiceDict(port_element, host_address, host_timestamp, host_object, unique_service_object))
+    # services = filter(lambda host_service_dict : not query_manager.searchInTable(HostService,host_service_dict),services)
     services = list(map(lambda service : HostService(**service),services))
     return services
 
 def ServiceIsUnknow(port_element):
-    service_name = getServiceName(port_element.find('service'))
-    return not service_name or service_name == 'unknown' 
+    service_name = getServiceName(port_element.find('service')).strip().lower()
+    return (not service_name) or service_name == 'unknown' 
 
-def getHostServiceDict(port_element, host_address, host_timestamp, host_object):
-    service_element = port_element.find('service')
-    unique_service_object = getOrCreateService(service_element)
+def getHostServiceDict(port_element, host_address, host_timestamp, host_object,unique_service_object):
     return {
           'address': host_address,
           'source': 'nmap',
@@ -69,8 +71,6 @@ def getTimeStamp(host_element):
     return datetime.datetime.fromtimestamp(int(host_element.attrib.get('starttime')))
 
 def insertNewServiceInDB(service_dict):
-    if query_manager.searchInTable(Service,service_dict) is not None:
-        return
     service_object = Service(**service_dict)
     query_manager.insert(service_object)
     return service_object
@@ -89,6 +89,7 @@ def getOrCreateService(service_element):
     service_dict = getUniqueServiceDict(service_element)
     found_service_object = query_manager.searchInTable(Service,service_dict)
     if not found_service_object :
+        print('inserted', service_dict)
         return insertNewServiceInDB(service_dict)
     return found_service_object
 
@@ -104,6 +105,7 @@ def getHostDictFromXMLHost(host_element):
     }
 
 def completeTables(xml_path: str):
+    print('process for host in file :', xml_path, 'has started')
     host_element = getHostElementFromXML(xml_path)
     host_dict = getHostDictFromXMLHost(host_element)
     host_object = Host(**host_dict)
@@ -114,7 +116,9 @@ def completeTables(xml_path: str):
     else:
         host_object = host_found_in_db
         print('host is already in db, inserting new services')
-    query_manager.insertMany(getAllHostServices(host_element,host_object))
+    for host_service in  getAllHostServices(host_element,host_object):
+        query_manager.insert(host_service)
+    print('succesfull host services insertion')
 
 def setConfigFile(configFilePath):
     global CONFIG_FILE_PATH

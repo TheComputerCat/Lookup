@@ -67,7 +67,7 @@ class TestHelpers(unittest.TestCase):
             }
         host_object = Host(**{'address': '8.8.8.8'})
         for port_element in host_element.iter('port'):
-            host_service_dict = host_extract_nmap.getHostServiceDict(port_element,'8.8.8.8',datetime.datetime.now(),host_object)
+            host_service_dict = host_extract_nmap.getHostServiceDict(port_element, '8.8.8.8', datetime.datetime.now(), host_object, Service(**{ 'name': 'ftp', 'version': None}))
             self.assertEqual(host_service_dict['address'],expected_dict['address'])
             self.assertEqual(host_service_dict['source'],expected_dict['source'])
             self.assertEqual(host_service_dict['protocol'],expected_dict['protocol'])
@@ -80,7 +80,7 @@ class TestHelpers(unittest.TestCase):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_object = Host(**{'address': '8.8.8.8'})
         for port_element in host_element.iter('port'):
-            host_service_dict = host_extract_nmap.getHostServiceDict(port_element,'8.8.8.8',datetime.datetime.now(),host_object)
+            host_service_dict = host_extract_nmap.getHostServiceDict(port_element,'8.8.8.8',datetime.datetime.now(),host_object, Service(**{ 'name': 'ftp', 'version': None}))
             self.assertIsNotNone(host_service_dict['service'])
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
@@ -118,9 +118,7 @@ class TestHelpers(unittest.TestCase):
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         for port_element in host_element.iter('port'):
-            service_dict = host_extract_nmap.getUniqueServiceDict(port_element.find('service'))
-            print(service_dict)
-            host_extract_nmap.insertNewServiceInDB(service_dict)
+            host_extract_nmap.getOrCreateService(port_element.find('service'))
         self.assertEqual(len(session.query(Service).all()),3)
         session.close()
 
@@ -191,7 +189,6 @@ class TestAcceptance(unittest.TestCase):
         host_extract_nmap.completeTables('./data/host1')
         self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
-        print(query_manager.getAllFromClass(Service))
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
         session.close()
 
@@ -206,6 +203,16 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
+        session.close()
+
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_completeTables_real(self):
+        session = query_manager.getDBSession()
+        host_extract_nmap.completeTables('./data_2/332e31332e3230372e37-tcp-2023:05:25-00:51:56')
+        services_in_db = query_manager.getAllFromClass(Service)
+        self.assertGreater(len(services_in_db),10)
+        self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
+        services_names_in_db = list(map(lambda service : service.name, services_in_db))
         session.close()
     
 
