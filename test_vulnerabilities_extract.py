@@ -34,6 +34,7 @@ firstCpe = "cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*"
 secondCpe = "cpe:2.3:o:microsoft:windows_10:1607"
 
 firstCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*_-2023:06:03-17:03:05"
+repeatedCpePath = "data/vulny/cpe:2.3:o:linksys:e2000_firmware:1.0.06:*:*:*:*:*:*:*_-2023:06:04-12:03:05"
 secondCpePath = "data/vulny/cpe:2.3:o:microsoft:windows_10:1607_-2023:06:03-17:02:57"
 wrongCpePath = "data/vulny/cpe:2.32023:06:03-17:02:57"
 
@@ -193,6 +194,14 @@ def teardownWrongFile():
 
 withAWrongFile = createFixture(setUpWrongFile, teardownWrongFile)
 
+def setupRepeatedFile():
+    writeStringToFile(repeatedCpePath, query1)
+
+def teardownRepeatedFile():
+    os.remove(repeatedCpePath)
+
+withAFileRepeated = createFixture(setupRepeatedFile, teardownRepeatedFile)
+
 def deleteFiels(v):
     vars(v).pop('_sa_instance_state')
     vars(v).pop('id')
@@ -231,12 +240,14 @@ class TestDataBaseInteraction(unittest.TestCase):
 
     @withAVulnDir()
     @withAWrongFile()
+    @withAFileRepeated()
     @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
     def test_completeTables(self):
         query_manager.createTables()
         setUpServicesTable()
 
         cvssVersion = "cvssMetricV31"
+        vulnerabilities_extract.completeVulnerabilityTable(temporalVulnerabilityDir, cvssVersion)
         vulnerabilities_extract.completeVulnerabilityTable(temporalVulnerabilityDir, cvssVersion)
         self.assertVulnTableIsCorrect()
         self.assertServicesVulnJoinTableIsCorrect()

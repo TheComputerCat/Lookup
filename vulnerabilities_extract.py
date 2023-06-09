@@ -47,6 +47,9 @@ def saveRelation(service, vulnerability, session):
     relation = getServiceVulnRelation(service, cve)
     if relation is None:
         return
+    alreadyExists = searchInTable(ServiceVulnerability, relation)
+    if alreadyExists is not None:
+        return
     relationObject = ServiceVulnerability(**relation)
 
     session.add(relationObject)
