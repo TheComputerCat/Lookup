@@ -39,7 +39,7 @@ def getAllHostServices(host_element, host_object):
     for port_element in host_element.iter('port'):
         service_element = port_element.find('service')
         state = port_element.find('state').attrib.get('state')
-        if ServiceIsUnknow(port_element) or state == 'filtered':
+        if ServiceIsUnknow(port_element) or state != 'open':
             continue
         unique_service_object = getOrCreateService(service_element)
         services.append(getHostServiceDict(port_element, host_address, host_timestamp, host_object, unique_service_object))
