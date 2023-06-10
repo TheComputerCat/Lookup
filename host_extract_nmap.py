@@ -38,13 +38,23 @@ def getAllHostServices(host_element, host_object):
     host_timestamp = getTimeStamp(host_element)
     for port_element in host_element.iter('port'):
         service_element = port_element.find('service')
-        if ServiceIsUnknow(port_element):
+        state = port_element.find('state').attrib.get('state')
+        if ServiceIsUnknow(port_element) or state == 'filtered':
             continue
         unique_service_object = getOrCreateService(service_element)
         services.append(getHostServiceDict(port_element, host_address, host_timestamp, host_object, unique_service_object))
-    # services = filter(lambda host_service_dict : not query_manager.searchInTable(HostService,host_service_dict),services)
+        
+    services = filter(lambda host_service_dict : not query_manager.searchInTable(HostService,getSearchableHostServiceDict(host_service_dict)),services)
     services = list(map(lambda service : HostService(**service),services))
     return services
+   
+def getSearchableHostServiceDict(host_service_dict):
+    return {
+          'address': host_service_dict['address'],
+          'source': 'nmap',
+          'protocol': host_service_dict['protocol'],
+          'port': host_service_dict['port'],
+          }
 
 def ServiceIsUnknow(port_element):
     service_name = getServiceName(port_element.find('service')).strip().lower()
@@ -117,7 +127,7 @@ def completeTables(xml_path: str):
         host_object = host_found_in_db
         print('host is already in db, inserting new services')
     for host_service in  getAllHostServices(host_element,host_object):
-        query_manager.insert(host_service)
+            query_manager.insert(host_service)
     print('succesfull host services insertion')
 
 def setConfigFile(configFilePath):
