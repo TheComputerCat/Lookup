@@ -86,24 +86,42 @@ def insertNewServiceInDB(service_dict):
     return service_object
 
 def getUniqueServiceDict(service_element):
-    service_info = service_element.attrib.get('servicefp',"")
     return {
           'name': getServiceName(service_element),
-          'version': getServiceVersion(service_info)
+          'version': getServiceVersion(service_element),
+          'cpe_code': getServiceCPECode(service_element),
     }
 
+def getSearchableUniqueServiceDict(service_dict):
+    return {
+          'name': service_dict['name'],
+          'version': service_dict['version'],
+          }
+
 def getServiceName(service_element):
+    product_name = service_element.attrib.get('product')
+    if product_name:
+        return product_name
     return service_element.attrib.get('name')
+
+def getServiceCPECode(service_element):
+    cpe_element = service_element.find('cpe')
+    if cpe_element != None:
+        return cpe_element.text
 
 def getOrCreateService(service_element):
     service_dict = getUniqueServiceDict(service_element)
-    found_service_object = query_manager.searchInTable(Service,service_dict)
+    found_service_object = query_manager.searchInTable(Service,getSearchableUniqueServiceDict(service_dict))
     if not found_service_object :
         print('inserted', service_dict)
         return insertNewServiceInDB(service_dict)
     return found_service_object
 
-def getServiceVersion(service_info):
+def getServiceVersion(service_element):
+    product_version = service_element.attrib.get('version')
+    if product_version:
+        return product_version
+    service_info = service_element.attrib.get('servicefp',"")
     search = re.findall("(?<=V=)(.*)(?=%I)",service_info)
     if search:
         return search[0]
