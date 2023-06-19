@@ -2,7 +2,7 @@ import unittest
 import subprocess
 import os
 
-from common import (
+from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile,

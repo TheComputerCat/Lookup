@@ -1,18 +1,18 @@
 import unittest
-import host_extract_nmap
+import src.extract.host_extract_nmap as host_extract_nmap
 from unittest.mock import (
     patch,
     Mock,
 )
 import datetime
-import query_manager
-from model import (
+import src.common.query_manager as query_manager
+from src.common.model import (
     HostService,
     Service,
     Host
 )
 
-from common import (
+from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile,
@@ -55,7 +55,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(result_host.tag,'host')
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @patch('host_extract_nmap.getOrCreateService', new_callable=Mock, return_value=Service(**{'id' : 25, 'name' : 'https',}))
+    @patch('src.extract.host_extract_nmap.getOrCreateService', new_callable=Mock, return_value=Service(**{'id' : 25, 'name' : 'https',}))
     def test_getHostServiceDict_without_ids(self,getServiceIfExist):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         expected_dict = {
@@ -152,7 +152,7 @@ class TestHelpers(unittest.TestCase):
         session.close()
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @patch('host_extract_nmap.getAllHostServices', new_callable=Mock, return_value=[Service(**{'id' : 25, 'name' : 'https',})])
+    @patch('src.extract.host_extract_nmap.getAllHostServices', new_callable=Mock, return_value=[Service(**{'id' : 25, 'name' : 'https',})])
     def test_getHostDictFromXMLHost(self,getAllHostServices):
         host_dict = host_extract_nmap.getHostDictFromXMLHost(host_extract_nmap.getHostElementFromXML('./data/host1'))
         self.assertEqual(host_dict['address'],'012.345.678.901')
@@ -169,7 +169,7 @@ class TestAcceptance(unittest.TestCase):
         'address': '012.345.678.901',
     }
     
-    @patch('host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
+    @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
     @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_completeTables(self,getHostDictFromXMLHost):
@@ -180,7 +180,7 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
         session.close()
     
-    @patch('host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
+    @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
     @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_completeTables_whenServiceExist(self,getHostDictFromXMLHost):
@@ -192,7 +192,7 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
         session.close()
 
-    @patch('host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
+    @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
     @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_completeTables_whenHostAndServiceExist(self,getHostDictFromXMLHost):

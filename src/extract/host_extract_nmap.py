@@ -1,4 +1,4 @@
-from common import (
+from src.common.common import (
     formatDirPath,
     formatFilePath,
     log,
@@ -6,13 +6,13 @@ from common import (
     tryTo
 )
 
-from model import (
+from src.common.model import (
     HostService,
     Service,
     Host
 )
 
-import query_manager
+import src.common.query_manager as query_manager
 import os
 import datetime
 import re
