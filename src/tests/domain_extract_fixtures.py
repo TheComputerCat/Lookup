@@ -1,4 +1,4 @@
-import model as model
+import src.common.model as model
 from datetime import datetime
 shodanJson1 = {
     'domain': 'domain.org',

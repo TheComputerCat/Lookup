@@ -1,5 +1,5 @@
 import unittest
-import domain_extract
+import src.extract.domain_extract as domain_extract
 import json
 from datetime import datetime
 
@@ -8,7 +8,7 @@ from unittest.mock import (
     Mock,
 )
 
-from domain_extract_fixtures import (
+from src.tests.domain_extract_fixtures import (
     shodanJson1,
     shodanJson2,
     filteredShodanJson1,
@@ -17,16 +17,16 @@ from domain_extract_fixtures import (
     filteredShodanJson1WithObjects
 )
 
-from common import (
+from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile,
 )
 
-import model as md
+import src.common.model as md
 from testcontainers.postgres import PostgresContainer
 from sqlalchemy import create_engine
-import query_manager
+import src.common.query_manager as query_manager
 
 from copy import deepcopy
 
@@ -35,7 +35,7 @@ withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 class TestGetJson(unittest.TestCase):
     filePath = './data/domain_raw_data/file1'
     @withATextFile(pathToTextFile=filePath, content='{"someKey": "someValue"}')
-    @patch('domain_extract.open', new_callable=Mock, wraps=open)
+    @patch('src.extract.domain_extract.open', new_callable=Mock, wraps=open)
     def test_getJsonFromFile_withAExistingFile(self, spyOpen, content):
         """
             Read json from path
@@ -195,7 +195,7 @@ class testDataInsertion(unittest.TestCase):
             return create_engine(postgresContainer.get_connection_url())
         return _
     
-    @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withTestDatabase(postgres=postgresContainer)
     def test_insertDataFromObject_tablesNotFilled(self, mockCreateEngine):
         """
@@ -207,9 +207,6 @@ class testDataInsertion(unittest.TestCase):
         domain_extract.insertDataFromObject(deepcopy(filteredShodanJson1WithObjects))
 
         assertInsertionPerformedCorrectly(self)
-
-
-        
 
     def withSomeColumnsSetUp():
         host1 = md.Host(address='8.8.8.8')
@@ -223,7 +220,7 @@ class testDataInsertion(unittest.TestCase):
 
     withSomeColumnsInserted = createFixture(withSomeColumnsSetUp, None)
 
-    @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withTestDatabase(postgres=postgresContainer)
     @withSomeColumnsInserted()
     def test_insertDataFromObject_tablesFilled(self, mockCreateEngine):

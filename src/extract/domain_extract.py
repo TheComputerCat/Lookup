@@ -1,21 +1,19 @@
-from common import (
+from src.common.common import (
     log
 )
 from datetime import datetime
 import json as JSON
 from os import listdir
 from os.path import isfile, join
-import model as model
+import src.common.model as model
 
 
 from datetime import datetime
 import json as JSON
 from os import listdir
 from os.path import isfile, join
-import model as model
-import query_manager
+import src.common.query_manager as query_manager
 from copy import deepcopy
-import query_manager
 
 import sys
 

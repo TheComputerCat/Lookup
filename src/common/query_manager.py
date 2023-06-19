@@ -5,10 +5,10 @@ from sqlalchemy.orm import (
     Session
 )
 
-from common import (
+from src.common.common import (
     log
 )
-from model import *
+from src.common.model import *
 from copy import deepcopy
 import sys
 
