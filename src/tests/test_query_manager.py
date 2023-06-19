@@ -1,5 +1,5 @@
 import unittest
-import query_manager
+import src.common.query_manager as query_manager
 import json
 
 from unittest.mock import (
@@ -7,7 +7,7 @@ from unittest.mock import (
     Mock,
 )
 
-from common import (
+from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile
@@ -15,7 +15,7 @@ from common import (
 
 from sqlalchemy import create_engine
 from testcontainers.postgres import PostgresContainer
-import model as model
+import src.common.model as model
     
 withAFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 
@@ -60,8 +60,8 @@ class TestGetDBEngine(unittest.TestCase):
 
     @withAFile(pathToTextFile = pathToFile, content=fileContent)
     @withConfigPatSetTo(pathToConfig=pathToFile)
-    @patch('query_manager.create_engine', new_callable=Mock, wraps=query_manager.create_engine)
-    @patch('query_manager.getConfig', new_callable=Mock, wraps=query_manager.getConfig)
+    @patch('src.common.query_manager.create_engine', new_callable=Mock, wraps=query_manager.create_engine)
+    @patch('src.common.query_manager.getConfig', new_callable=Mock, wraps=query_manager.getConfig)
     def test_getDBEngine_withAExistentFile(self, spyGetConfig, spyCreate_engine):
         """
             Given a configuration path CONFIG_FILE_PATH set to that path, 
@@ -87,8 +87,8 @@ class TestGetDBEngine(unittest.TestCase):
         self.assertEqual(str(exception), 'CONFIG_FILE_PATH is not set')
 
 class TestTablesCreation(unittest.TestCase):
-    @patch('query_manager.getDBEngine', new_callable=Mock, return_value='anEngineObject')
-    @patch('query_manager.Base.metadata.create_all', new_callable=Mock)
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, return_value='anEngineObject')
+    @patch('src.common.query_manager.Base.metadata.create_all', new_callable=Mock)
     def test_createTables_createTablesFromScratch(self, mockCreateAll, mockGetDBEngine):
         """
             Given the model for the database, the correspondent tables
@@ -129,7 +129,7 @@ class TestGetOrCreate(unittest.TestCase):
         return _
     
     @withAFile(pathToTextFile = pathConfig, content=credentials)
-    @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withTestDatabase(postgres=postgresContainer, pathConfig=pathConfig)
     def test_getOrCreate_tablesNotFilled(self, mockCreateEngine):
         """
@@ -166,7 +166,7 @@ class TestGetOrCreate(unittest.TestCase):
     withSomeColumnsInserted = createFixture(withSomeColumnsSetUp, None)
 
     @withAFile(pathToTextFile = pathConfig, content=credentials)
-    @patch('query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withTestDatabase(postgres=postgresContainer, pathConfig=pathConfig)
     @withSomeColumnsInserted()
     def test_getOrCreate_tablesFilled(self, mockCreateEngine):
