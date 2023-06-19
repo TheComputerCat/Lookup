@@ -1,10 +1,10 @@
-from common import (
+from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile,
 )
 from datetime import datetime
-import host_extract
+import src.extract.host_extract as host_extract
 import json
 import unittest
 from unittest.mock import (
@@ -12,7 +12,7 @@ from unittest.mock import (
     patch,
 )
 
-from model import (
+from src.common.model import (
     Host,
     HostService,
     Service,
@@ -20,7 +20,7 @@ from model import (
 
 from sqlalchemy import create_engine
 from testcontainers.postgres import PostgresContainer
-import query_manager
+import src.common.query_manager as query_manager
 
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""
@@ -267,8 +267,8 @@ class TestDatabaseHelpers(unittest.TestCase):
         session.commit.assert_called_once()
 
   
-    @patch("host_extract.getFilePathsInDirectory", new_callable=Mock(return_value=lambda _: ["path1"]))
-    @patch("host_extract.getStringFromFile", new_callable=Mock(return_value=lambda _: """{"ip_str": "8.8.8.8","country_code": "US","org": "Google","isp": "Google","ports": [53],}"""))
+    @patch("src.extract.host_extract.getFilePathsInDirectory", new_callable=Mock(return_value=lambda _: ["path1"]))
+    @patch("src.extract.host_extract.getStringFromFile", new_callable=Mock(return_value=lambda _: """{"ip_str": "8.8.8.8","country_code": "US","org": "Google","isp": "Google","ports": [53],}"""))
     def test_getAllHostInfoDicts(self, getStringMock, fileListMock):
         result = host_extract.getAllHostInfoDicts()
         self.assertEqual([dict for dict in result], [eval("""{

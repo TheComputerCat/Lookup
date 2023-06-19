@@ -1,4 +1,4 @@
-from common import (
+from src.common.common import (
     formatDirPath,
     formatFilePath,
     getFilePathsInDirectory,
@@ -6,13 +6,13 @@ from common import (
     tryTo,
 )
 
-from model import (
+from src.common.model import (
     Host,
     HostService,
     Service,
 )
 
-from query_manager import (
+from src.common.query_manager import (
     setConfigFile,
     getDBSession,
 )
