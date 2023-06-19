@@ -1,18 +1,18 @@
 import json
 import sys
-import query_manager
-from query_manager import (
+import src.common.query_manager
+from src.common.query_manager import (
     getDBSession,
     searchInTable,
     setConfigFile,
 )
-from common import (
+from src.common.common import (
     getFilePathsInDirectory,
     getStringFromFile,
     formatDirPath,
     log,
 )
-from model import (
+from src.common.model import (
     Vulnerability,
     Service,
     ServiceVulnerability,

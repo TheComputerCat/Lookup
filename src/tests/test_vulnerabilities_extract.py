@@ -1,23 +1,23 @@
 import os
-import vulnerabilities_extract
+import src.extract.vulnerabilities_extract as vulnerabilities_extract
 import json
 import unittest
-import model
-from vulnerabilities_extract import setupVulnDict
+import src.common.model as model
+from src.extract.vulnerabilities_extract import setupVulnDict
 
 from sqlalchemy import create_engine
 from testcontainers.postgres import PostgresContainer
-import query_manager
+import src.common.query_manager as query_manager
 
 from unittest.mock import (
     patch,
     MagicMock,
 )
-from common import (
+from src.common.common import (
     writeStringToFile,
     createFixture,
 )
-from query_manager import (
+from src.common.query_manager import (
     Service,
     Vulnerability,
     ServiceVulnerability,
@@ -109,7 +109,7 @@ class TestVulnerabilityTable(unittest.TestCase):
         secondVulnDictV31,
     ]
 
-    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    @patch("src.extract.vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_Helpers(self, dbMock):
         test_cases = [
             ["3.1", vulnerabilities_extract.getVersion(self.firstVulnData)],
@@ -132,7 +132,7 @@ class TestVulnerabilityTable(unittest.TestCase):
 
 
     @withAVulnDir()
-    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    @patch("src.extract.vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_getCvesDictFromAllFilesInDirV31(self, dbMock):
         actual = vulnerabilities_extract.getVulnDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV31')
         expected = {
@@ -148,7 +148,7 @@ class TestVulnerabilityTable(unittest.TestCase):
     ]
 
     @withAVulnDir()
-    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    @patch("src.extract.vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_getCvesDictFromAllFilesInDirV2(self, dbMock):
         actual = vulnerabilities_extract.getVulnDictFromAllFilesInDir(temporalVulnerabilityDir, 'cvssMetricV2')
         expected = {
@@ -158,7 +158,7 @@ class TestVulnerabilityTable(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     @withAVulnDir()
-    @patch("vulnerabilities_extract.searchInTable", new_callable=searchMock)
+    @patch("src.extract.vulnerabilities_extract.searchInTable", new_callable=searchMock)
     def test_getServiceVulnRelation(self, dbMock):
         actual = vulnerabilities_extract.getServiceVulnRelation(firstCpe, 'CVE-2023-31741')
         expected = {"service_id": 0, "vulnerability_id": 1}
