@@ -2,7 +2,7 @@ import json
 import requests
 import sys
 import time
-from common import (
+from src.common.common import (
     formatFilePath,
     formatDirPath,
     getTimeString,

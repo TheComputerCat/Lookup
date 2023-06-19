@@ -1,6 +1,6 @@
 import builtins
 
-import vulnerabilities_lookup
+import src.lookup.vulnerabilities_lookup as vulnerabilities_lookup
 import json
 import unittest
 import time
@@ -9,7 +9,7 @@ from unittest.mock import (
     patch,
     call,
 )
-from common import (
+from src.common.common import (
     createFixture,
     writeStringToFile,
     setUpWithATextFile,
@@ -326,9 +326,9 @@ class Test(unittest.TestCase):
 
     @withATextFile(pathToTextFile=cpeCodesFilePath, content='{}\n{}'.format(cpeCode1, cpeCode2), delete_folder=False)
     @patch("time.sleep")
-    @patch('vulnerabilities_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)
-    @patch('vulnerabilities_lookup.writeStringToFile', new_callable=Mock)
-    @patch('vulnerabilities_lookup.getVulnerabilitiesOf', new_callable=Mock, return_value=expectedVulnerabilities)
+    @patch('src.lookup.vulnerabilities_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)
+    @patch('src.lookup.vulnerabilities_lookup.writeStringToFile', new_callable=Mock)
+    @patch('src.lookup.vulnerabilities_lookup.getVulnerabilitiesOf', new_callable=Mock, return_value=expectedVulnerabilities)
     def test_vulnerabilities_are_saved_correctly(self, mockVulnerabilitiesQuery, spyWriteOnFile, mockGetTimeString, mockTime):
 
         vulnerabilities_lookup.saveVulnerabilitiesOfProducts(self.cpeCodesFilePath, self.targetDirectory)
