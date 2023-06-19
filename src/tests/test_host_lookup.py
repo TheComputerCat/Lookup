@@ -1,4 +1,4 @@
-import host_lookup
+import src.lookup.host_lookup as host_lookup
 import unittest
 import shodan
 import time
@@ -10,12 +10,12 @@ from unittest.mock import (
     call,
 )
 
-from common import (
+from src.common.common import (
     asHexString,
 )
 
 class Test(unittest.TestCase):
-    @patch("host_lookup.getTimeString", new_callable=Mock(return_value=lambda:""))
+    @patch("src.lookup.host_lookup.getTimeString", new_callable=Mock(return_value=lambda:""))
     @patch("subprocess.run")
     def test_call_nmap_command_with_ipv4(self, runMock, _):
         generator = host_lookup.getNmapInfoOf("8.8.8.8", "./data/host_nmap_data/")
@@ -109,7 +109,7 @@ class saveShodanInfoOfTest(unittest.TestCase):
         ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    @patch("host_lookup.getTimeString", new_callable=lambda: lambda: "")
+    @patch("src.lookup.host_lookup.getTimeString", new_callable=lambda: lambda: "")
     def test_open_ip_file_for_each_ip(self, _, mockFile):
         shodan.Shodan = Mock()
 
@@ -124,7 +124,7 @@ class saveShodanInfoOfTest(unittest.TestCase):
         ])
 
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    @patch("host_lookup.getTimeString", new_callable=lambda: lambda: "")
+    @patch("src.lookup.host_lookup.getTimeString", new_callable=lambda: lambda: "")
     def test_open_ip_files_in_the_same_directory_as_ip_list_file(self, _, mockFile):
         shodan.Shodan = Mock()
 
