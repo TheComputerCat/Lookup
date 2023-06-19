@@ -1,26 +1,23 @@
 from collections.abc import Callable
 from typing import Any
 import unittest
-import domain_lookup
+import src.lookup.domain_lookup as domain_lookup
 import shodan
 import os
 import json
 
-from common import (
+from src.common.common import (
     asHexString,
+    createFixture,
+    writeStringToFile,
+    setUpWithATextFile,
+    tearDownWithATextFile,
 )
 
 from unittest.mock import (
     patch,
     call,
     Mock,
-)
-
-from common import (
-    createFixture,
-    writeStringToFile,
-    setUpWithATextFile,
-    tearDownWithATextFile,
 )
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
@@ -80,9 +77,9 @@ class TestSaveDomainInfo(unittest.TestCase):
         os.remove(f'{self.targetDirectory}{self.domainHexName}{self.fakeDate}')
         os.removedirs(self.targetDirectory)
         
-    @patch('domain_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)    
-    @patch('domain_lookup.writeStringToFile', new_callable=Mock, wraps=writeStringToFile)
-    @patch('domain_lookup.getShodanInfoOf', new_callable=Mock, return_value='{ip : 123456}')
+    @patch('src.lookup.domain_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)    
+    @patch('src.lookup.domain_lookup.writeStringToFile', new_callable=Mock, wraps=writeStringToFile)
+    @patch('src.lookup.domain_lookup.getShodanInfoOf', new_callable=Mock, return_value='{ip : 123456}')
     def test_saveDomainInfo(self, mockGetShodanInfoOf, spyWriteStringToFile, mockGetTimeString):
         """
         Given a domain, the information from Shodan is saved 
@@ -116,10 +113,10 @@ class TestSaveShodanInfoFromDomainFile(unittest.TestCase):
             os.remove(f'{self.targetDirectory}{domainHexName}{self.fakeDate}')
         os.removedirs(self.targetDirectory)
 
-    @patch('domain_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)   
-    @patch('domain_lookup.saveDomainInfo', new_callable=Mock, wraps=domain_lookup.saveDomainInfo)
-    @patch('domain_lookup.getShodanInfoOf', new_callable=Mock,side_effect=domainsInfo)
-    @patch('domain_lookup.getDomainListFromPath', new_callable=Mock, return_value = domains)
+    @patch('src.lookup.domain_lookup.getTimeString', new_callable=Mock, return_value=fakeDate)   
+    @patch('src.lookup.domain_lookup.saveDomainInfo', new_callable=Mock, wraps=domain_lookup.saveDomainInfo)
+    @patch('src.lookup.domain_lookup.getShodanInfoOf', new_callable=Mock,side_effect=domainsInfo)
+    @patch('src.lookup.domain_lookup.getDomainListFromPath', new_callable=Mock, return_value = domains)
     def test_saveShodanInfoFromDomainFile_multipleDomains(self, mockGetDomainListFromPath, mockGetShodanInfoOf, spySaveDomainInfo, mockGetTimeString):
         """
         Given file with 3 different domains, saveShodanInfoFromDomainFile is called with this path, a target directory
@@ -172,39 +169,6 @@ class TestGetIPAddressesFromShodanInfo(unittest.TestCase):
         domainIp = domain_lookup.getIPAddressesFromShodanInfo(pathToTextFile)
 
         self.assertEqual(domainIp, '74.125.142.81\n74.125.142.83\n')
-
-# class TestSaveIpList(unittest.TestCase):
-#     domainListPath = './data/domain_list'
-#     IPListFilePath = './data/ip_list'
-#     domains = ['domain1','domain2','domain3']
-#     domainsHex = ['646f6d61696e31', '646f6d61696e32', '646f6d61696e33']
-
-#     @classmethod
-#     def tearDownClass(self):
-#         os.remove(self.IPListFilePath)
-    
-#     @patch('domain_lookup.writeStringToFile', new_callable=Mock, wraps=writeStringToFile)
-#     @patch('domain_lookup.getDomainListFromPath', return_value=domains)
-#     @patch('domain_lookup.getIPAddressesFromShodanInfo', side_effect = ['74.125.142.80\n74.125.142.81','74.125.142.82','74.125.142.83'])
-#     def test_saveIpList(self, mockGetIPAddressesFromShodanInfo, mockGetDomainListFromPath, spyWriteStringToFile):
-
-#         domain_lookup.saveIpList(self.IPListFilePath, self.domainListPath)
-        
-#         mockGetDomainListFromPath.assert_called_once_with(self.domainListPath)
-
-#         self.assertEqual(mockGetIPAddressesFromShodanInfo.call_count,3)
-
-#         for domain in self.domains:
-#             with self.subTest(domain=domain):
-#                 mockGetIPAddressesFromShodanInfo.assert_has_calls([
-#                     call(domain)
-#                 ])
-
-#         spyWriteStringToFile.assert_called_once_with(
-#             self.IPListFilePath,
-#             '74.125.142.80\n74.125.142.81\n74.125.142.82\n74.125.142.83\n',
-#             overwrite=True
-#         )
 
 if __name__ == '__main__':
      unittest.main()

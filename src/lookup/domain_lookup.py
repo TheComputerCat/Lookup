@@ -1,4 +1,4 @@
-from common import (
+from src.common.common import (
     log,
     asHexString,
     getFilePathsInDirectory,
