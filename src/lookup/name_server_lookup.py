@@ -1,8 +1,8 @@
-from common import (
+from src.common.common import (
     log,
     getTimeString,
 )
-from domain_lookup import getIteratorFromCSV
+from src.lookup.domain_lookup import getIteratorFromCSV
 import re
 import subprocess
 from datetime import datetime

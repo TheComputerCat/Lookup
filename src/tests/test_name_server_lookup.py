@@ -1,6 +1,6 @@
 import subprocess
 import unittest
-import name_server_lookup
+import src.lookup.name_server_lookup as name_server_lookup
 import os
 from unittest.mock import (
     patch,
