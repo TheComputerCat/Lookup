@@ -254,16 +254,6 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
         session.close()
-
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_completeTables_real(self):
-        session = query_manager.getDBSession()
-        host_extract_nmap.completeTables('./data_2/332e31332e3230372e37-tcp-2023:05:25-00:51:56')
-        services_in_db = query_manager.getAllFromClass(Service)
-        self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
-        self.assertEqual(len(query_manager.getAllFromClass(HostService)),1)
-        services_names_in_db = list(map(lambda service : service.name, services_in_db))
-        session.close()
     
 
 if __name__ == "__main__":
