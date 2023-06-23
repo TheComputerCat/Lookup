@@ -139,16 +139,16 @@ class TestHelpers(unittest.TestCase):
             expected_dict = unique_services[index]
             self.assertDictEqual(host_extract_nmap.getUniqueServiceDict(port_element.find('service')),expected_dict)  
 
-    # @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    # @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    # def test_insertNewServiceInDB(self):
-    #     session = query_manager.getDBSession()
-    #     host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-    #     for port_element in host_element.iter('port'):
-    #         service_dict = host_extract_nmap.getUniqueServiceDict(port_element.find('service'))
-    #         host_extract_nmap.insertNewServiceInDB(service_dict)
-    #     self.assertEqual(len(session.query(Service).all()),3)
-    #     session.close()
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_insertNewServiceInDB(self):
+        session = query_manager.getDBSession()
+        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
+        for port_element in host_element.iter('port'):
+            service_dict = host_extract_nmap.getUniqueServiceDict(port_element.find('service'))
+            host_extract_nmap.insertNewServiceInDB(service_dict)
+        self.assertEqual(len(session.query(Service).all()),3)
+        session.close()
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentWithCPEExample)
     @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
@@ -161,45 +161,45 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(len(session.query(Service).all()),3)
         session.close()
 
-    # @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    # @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    # def test_insertNewServiceInDB_when_service_exist(self):
-    #     session = query_manager.getDBSession()
-    #     query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
-    #     host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-    #     for port_element in host_element.iter('port'):
-    #         host_extract_nmap.getOrCreateService(port_element.find('service'))
-    #     self.assertEqual(len(session.query(Service).all()),3)
-    #     session.close()
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_insertNewServiceInDB_when_service_exist(self):
+        session = query_manager.getDBSession()
+        query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
+        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
+        for port_element in host_element.iter('port'):
+            host_extract_nmap.getOrCreateService(port_element.find('service'))
+        self.assertEqual(len(session.query(Service).all()),3)
+        session.close()
 
-    # @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    # @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    # def test_insertHostServiceInDB_when_service_exist(self):
-    #     session = query_manager.getDBSession()
-    #     host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-    #     query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
-    #     host_object = Host(**{'address': '012.345.678.901'})
-    #     host_services = host_extract_nmap.getAllHostServices(host_element, host_object)
-    #     query_manager.insertMany(host_services)
-    #     self.assertEqual(len(session.query(Service).all()),3)
-    #     self.assertEqual(len(session.query(HostService).all()),3)
-    #     session.close()
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_insertHostServiceInDB_when_service_exist(self):
+        session = query_manager.getDBSession()
+        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
+        query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
+        host_object = Host(**{'address': '012.345.678.901'})
+        host_services = host_extract_nmap.getAllHostServices(host_element, host_object)
+        query_manager.insertMany(host_services)
+        self.assertEqual(len(session.query(Service).all()),3)
+        self.assertEqual(len(session.query(HostService).all()),3)
+        session.close()
     
 
-    # @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    # @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    # def test_getAllHostServices(self):
-    #     session = query_manager.getDBSession()
-    #     host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-    #     host_object = Host(**{'address': '012.345.678.901'})
-    #     host_services = host_extract_nmap.getAllHostServices(host_element, host_object)
-    #     for host_service in host_services:
-    #         self.assertEqual(type(host_service),HostService)
-    #         self.assertEqual(host_service.address,host_extract_nmap.getAddress(host_element))
-    #         self.assertEqual(host_service.protocol,'tcp')
-    #         self.assertEqual(host_service.source,'nmap')
-    #         self.assertIsNotNone(host_service.port)
-    #     session.close()
+    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    def test_getAllHostServices(self):
+        session = query_manager.getDBSession()
+        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
+        host_object = Host(**{'address': '012.345.678.901'})
+        host_services = host_extract_nmap.getAllHostServices(host_element, host_object)
+        for host_service in host_services:
+            self.assertEqual(type(host_service),HostService)
+            self.assertEqual(host_service.address,host_extract_nmap.getAddress(host_element))
+            self.assertEqual(host_service.protocol,'tcp')
+            self.assertEqual(host_service.source,'nmap')
+            self.assertIsNotNone(host_service.port)
+        session.close()
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     @patch('src.extract.host_extract_nmap.getAllHostServices', new_callable=Mock, return_value=[Service(**{'id' : 25, 'name' : 'https',})])
