@@ -76,18 +76,18 @@ class Test(unittest.TestCase):
         mockFile.assert_called_once_with("./data/ip_list", "r")
 
 class saveShodanInfoOfTest(unittest.TestCase):
-    time.sleep = MagicMock()
-
+    @patch("time.sleep", new_callable=Mock())
     @patch("builtins.open", new_callable=mock_open, read_data="  798djfhj2208FFFEEDC4\n")
-    def test_create_an_api_instance(self, mockFile):
+    def test_create_an_api_instance(self, mockFile, sleepMock):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "data/", "data/test_data/shodan_api_key")
 
         shodan.Shodan.assert_has_calls([call("798djfhj2208FFFEEDC4")])
 
+    @patch("time.sleep", new_callable=Mock())
     @patch("builtins.open", new_callable=mock_open)
-    def test_read_the_ip_list(self, mockFile):
+    def test_read_the_ip_list(self, mockFile, sleepMock):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "./data/ip_raw_data/", "data/test_data/shodan_api_key")
@@ -97,8 +97,9 @@ class saveShodanInfoOfTest(unittest.TestCase):
             call("data/test_data/ip_list", "r"),
         ])
 
+    @patch("time.sleep", new_callable=Mock())
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
-    def test_query_each_ip(self, mockFile):
+    def test_query_each_ip(self, mockFile, sleepMock):
         shodan.Shodan = Mock()
 
         _ = host_lookup.saveShodanInfoOf("data/test_data/ip_list", "./data/ip_raw_data/", "data/test_data/shodan_api_key")
@@ -108,9 +109,10 @@ class saveShodanInfoOfTest(unittest.TestCase):
             call().host('0.0.0.0'),
         ])
 
+    @patch("time.sleep", new_callable=Mock())
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
     @patch("src.lookup.host_lookup.getTimeString", new_callable=lambda: lambda: "")
-    def test_open_ip_file_for_each_ip(self, _, mockFile):
+    def test_open_ip_file_for_each_ip(self, _, mockFile, sleepMock):
         shodan.Shodan = Mock()
 
 
@@ -123,9 +125,10 @@ class saveShodanInfoOfTest(unittest.TestCase):
             call("data/test_data/ip_raw_data/302e302e302e30",'w'),
         ])
 
+    @patch("time.sleep", new_callable=Mock())
     @patch("builtins.open", new_callable=mock_open, read_data="8.8.8.8\n0.0.0.0")
     @patch("src.lookup.host_lookup.getTimeString", new_callable=lambda: lambda: "")
-    def test_open_ip_files_in_the_same_directory_as_ip_list_file(self, _, mockFile):
+    def test_open_ip_files_in_the_same_directory_as_ip_list_file(self, _, mockFile, sleepMock):
         shodan.Shodan = Mock()
 
         path = "hello/bye/"

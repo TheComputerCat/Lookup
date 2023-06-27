@@ -22,11 +22,13 @@ from testcontainers.postgres import PostgresContainer
 
 def setUpDatabase(postgres):
     postgres.start()
-    query_manager.getDBEngine = lambda: create_engine(postgres.get_connection_url())
     query_manager.createTables()
 
 def tearDownDatabase(postgres):
     postgres.stop()
+
+def getDBEngineStub(postgresContainer):
+    return lambda: create_engine(postgresContainer.get_connection_url())
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 withTestDataBase = createFixture(setUpDatabase, tearDownDatabase)
@@ -64,6 +66,7 @@ XMLContentWithCPEExample = r"""<?xml version="1.0" encoding="UTF-8"?>
 </nmaprun>"""
 
 class TestHelpers(unittest.TestCase):
+    postgresContainer = PostgresContainer("postgres:latest")
 
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
     def test_getHostElementFromXML(self):
@@ -88,10 +91,10 @@ class TestHelpers(unittest.TestCase):
             self.assertEqual(host_service_dict['source'],expected_dict['source'])
             self.assertEqual(host_service_dict['protocol'],expected_dict['protocol'])
 
-
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_getHostServiceDict_with_service(self):
+    @withTestDataBase(postgres=postgresContainer)
+    def test_getHostServiceDict_with_service(self, mockCreateEngine):
         session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_object = Host(**{'address': '8.8.8.8'})
@@ -139,9 +142,10 @@ class TestHelpers(unittest.TestCase):
             expected_dict = unique_services[index]
             self.assertDictEqual(host_extract_nmap.getUniqueServiceDict(port_element.find('service')),expected_dict)  
 
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_insertNewServiceInDB(self):
+    @withTestDataBase(postgres=postgresContainer)
+    def test_insertNewServiceInDB(self, mockCreateEngine):
         session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         for port_element in host_element.iter('port'):
@@ -150,9 +154,10 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(len(session.query(Service).all()),3)
         session.close()
 
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentWithCPEExample)
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_insertNewServiceWithCPEInDBWhenServiceExist(self):
+    @withTestDataBase(postgres=postgresContainer)
+    def test_insertNewServiceWithCPEInDBWhenServiceExist(self, mockCreateEngine):
         session = query_manager.getDBSession()
         query_manager.insert(Service(**{'name' : 'nginx', 'version': '1.9.4' ,}))
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
@@ -161,9 +166,10 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(len(session.query(Service).all()),3)
         session.close()
 
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_insertNewServiceInDB_when_service_exist(self):
+    @withTestDataBase(postgres=postgresContainer)
+    def test_insertNewServiceInDB_when_service_exist(self, mockCreateEngine):
         session = query_manager.getDBSession()
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
@@ -171,10 +177,11 @@ class TestHelpers(unittest.TestCase):
             host_extract_nmap.getOrCreateService(port_element.find('service'))
         self.assertEqual(len(session.query(Service).all()),3)
         session.close()
-
+    
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_insertHostServiceInDB_when_service_exist(self):
+    @withTestDataBase(postgres=postgresContainer)
+    def test_insertHostServiceInDB_when_service_exist(self, mockCreateEngine):
         session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
@@ -185,10 +192,10 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(len(session.query(HostService).all()),3)
         session.close()
     
-
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
-    def test_getAllHostServices(self):
+    @withTestDataBase(postgres=postgresContainer)
+    def test_getAllHostServices(self, mockCreateEngine):
         session = query_manager.getDBSession()
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_object = Host(**{'address': '012.345.678.901'})
@@ -213,16 +220,17 @@ class TestHelpers(unittest.TestCase):
         self.assertTrue(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-2023:05:25','12345abc-tcp-2023:05:25'))
         self.assertFalse(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-std-2023:05:30','12345abc-tcp-std-2023:05:30'))
 
-class TestAcceptance(unittest.TestCase): 
+class TestAcceptance(unittest.TestCase):
+    postgresContainer = PostgresContainer("postgres:latest")
 
     hostDictExample = {
         'address': '012.345.678.901',
     }
-    
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    @withTestDataBase(postgres=postgresContainer)
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    def test_completeTables(self,getHostDictFromXMLHost):
+    def test_completeTables(self,getHostDictFromXMLHost, mockCreateEngine):
         session = query_manager.getDBSession()
         host_extract_nmap.completeTables('./data/host1')
         self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
@@ -230,10 +238,11 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
         session.close()
     
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    @withTestDataBase(postgres=postgresContainer)
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    def test_completeTables_whenServiceExist(self,getHostDictFromXMLHost):
+    def test_completeTables_whenServiceExist(self,getHostDictFromXMLHost, mockCreateEngine):
         session = query_manager.getDBSession()
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None}))
         host_extract_nmap.completeTables('./data/host1')
@@ -242,10 +251,11 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
         session.close()
 
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
-    @withTestDataBase(postgres=PostgresContainer("postgres:latest"))
+    @withTestDataBase(postgres=postgresContainer)
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    def test_completeTables_whenHostAndServiceExist(self,getHostDictFromXMLHost):
+    def test_completeTables_whenHostAndServiceExist(self,getHostDictFromXMLHost, mockCreateEngine):
         session = query_manager.getDBSession()
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None}))
         query_manager.insert(Host(**{'address' : '012.345.678.901'}))

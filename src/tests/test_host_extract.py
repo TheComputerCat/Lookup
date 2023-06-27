@@ -284,7 +284,7 @@ withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 
 def setUpDatabase(postgres):
     postgres.start()
-    query_manager.getDBEngine = lambda: create_engine(postgres.get_connection_url())
+    query_manager.createTables()
 
 def tearDownDatabase(postgres):
     postgres.stop()
@@ -325,6 +325,13 @@ class TestDatabase(unittest.TestCase):
             ("0.0.0.0", 3, 80, "shodan-host", "tcp", None),
             ("8.8.8.8", 1, 22, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509917")),
         ])
+
+    postgresContainer = PostgresContainer("postgres:latest")    
+
+    def getDBEngineStub(postgresContainer):
+        def _():
+            return create_engine(postgresContainer.get_connection_url())
+        return _
 
     @withATextFile(pathToTextFile="./data/host-data/host1", content="""{
         "ip_str": "8.8.8.8",
@@ -382,10 +389,10 @@ class TestDatabase(unittest.TestCase):
         "org": "aaa",
         "isp": "bbb"
     }""")
-    @withTestDatabase(postgres=PostgresContainer("postgres:latest"))
-    def test_completeTables(self):
+    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
+    @withTestDatabase(postgres=postgresContainer)
+    def test_completeTables(self, mockCreateEngine):
         host_extract.setAddressDataDirPath("./data/host-data/")
-        query_manager.createTables()
         session = query_manager.getDBSession()
 
         host_extract.completeHostTable()

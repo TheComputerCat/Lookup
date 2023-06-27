@@ -191,9 +191,7 @@ class testDataInsertion(unittest.TestCase):
     postgresContainer = PostgresContainer("postgres:latest")
 
     def getDBEngineStub(postgresContainer):
-        def _():
-            return create_engine(postgresContainer.get_connection_url())
-        return _
+        return lambda: create_engine(postgresContainer.get_connection_url())
     
     @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withTestDatabase(postgres=postgresContainer)
