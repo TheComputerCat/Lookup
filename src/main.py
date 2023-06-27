@@ -17,7 +17,7 @@ import src.common.query_manager as query_manager
 def getShodanDomainDataFolder(DATA_DIR):
     return DATA_DIR + 'data_domain_shodan_raw/'
 
-def getAdressesListFilePath(DATA_DIR):
+def getAddressesListFilePath(DATA_DIR):
     return DATA_DIR + 'addresses.csv'
 
 def getShodanHostDataFolder(DATA_DIR):
@@ -28,11 +28,11 @@ def getNmapHostDataFolder(DATA_DIR):
 
 def domainLookup(DATA_DIR, DOMAIN_LIST_PATH, SHODAN_API_KEY):
     domain_lookup.saveShodanInfoFromDomainFile(DOMAIN_LIST_PATH, getShodanDomainDataFolder(DATA_DIR), SHODAN_API_KEY)
-    domain_lookup.saveIpList(getAdressesListFilePath(DATA_DIR), getShodanDomainDataFolder(DATA_DIR))
+    domain_lookup.saveIpList(getAddressesListFilePath(DATA_DIR), getShodanDomainDataFolder(DATA_DIR))
 
 def hostLookup(DATA_DIR, SHODAN_API_KEY):
-    host_lookup.saveShodanInfoOf(getAdressesListFilePath(DATA_DIR), getShodanHostDataFolder(DATA_DIR), SHODAN_API_KEY)
-    subprocess.run(['sudo', 'python3', '-m', 'src.lookup.host_lookup', 'nmap', getAdressesListFilePath(DATA_DIR), getNmapHostDataFolder(DATA_DIR)])
+    host_lookup.saveShodanInfoOf(getAddressesListFilePath(DATA_DIR), getShodanHostDataFolder(DATA_DIR), SHODAN_API_KEY)
+    subprocess.run(['sudo', 'python3', '-m', 'src.lookup.host_lookup', 'nmap', getAddressesListFilePath(DATA_DIR), getNmapHostDataFolder(DATA_DIR)])
 
 def domainExtract(DATA_DIR):
     domain_extract.insertDataFromFolder(getShodanDomainDataFolder(DATA_DIR))
