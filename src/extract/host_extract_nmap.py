@@ -182,6 +182,10 @@ def getFilePathsInDirectory(directoryPath):
 def isInfoFile(file_path,file_name):
     return os.path.isfile(file_path) and file_name.find('std') == -1 and (file_name.find('-udp-') != -1 or file_name.find('-tcp-') != -1)
 
+def completeTablesWithFilesFromPath(path):
+    for file_path in getFilePathsInDirectory(path):
+        completeTables(file_path)
+
 if __name__ == "__main__":
     args = sys.argv[1:]
 
@@ -196,7 +200,5 @@ if __name__ == "__main__":
     query_manager.setConfigFile(configFile)
     setAddressDataDirPath(dataDirPath)
 
-    for file_path in getFilePathsInDirectory(ADDRESS_DATA_DIR_PATH):
-        completeTables(file_path)
-
-
+    completeTablesWithFilesFromPath(ADDRESS_DATA_DIR_PATH)
+    
