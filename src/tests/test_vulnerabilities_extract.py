@@ -202,25 +202,26 @@ def teardownRepeatedFile():
 
 withAFileRepeated = createFixture(setupRepeatedFile, teardownRepeatedFile)
 
-def deleteFiels(v):
-    vars(v).pop('_sa_instance_state')
-    vars(v).pop('id')
-
 
 class TestDataBaseInteraction(unittest.TestCase):
     firstVulnDictV31 = setupVulnDict('CVE-2023-31740', 7.2, "NETWORK", "LOW", "HIGH", "HIGH", "MEDIUM", "LOW",)
     secondVulnDictV31 = setupVulnDict('CVE-2023-31741', 7.1, "LOCAL", "HIGH", "LOW", "LOW", "HIGH", "HIGH", )
 
+    def deleteFields(self, v):
+        vars(v).pop('_sa_instance_state')
+        vars(v).pop('id')
+
     def assertVulnTableIsCorrect(self):
         session = query_manager.getDBSession()
-        allVuln = session.query(Vulnerability).all()
+        vulnTable = session.query(Vulnerability).all()
         session.close()
 
-        list(map(deleteFiels, allVuln))
+        list(map(self.deleteFields, vulnTable))
+        vulnList = list(map(lambda x: vars(x), vulnTable))
 
-        self.assertEqual(len(allVuln), 2)
-        self.assertDictEqual(vars(allVuln[0]), self.secondVulnDictV31)
-        self.assertDictEqual(vars(allVuln[1]), self.firstVulnDictV31)
+        self.assertEqual(len(vulnList), 2)
+        self.assertTrue(self.firstVulnDictV31 in vulnList)
+        self.assertTrue(self.secondVulnDictV31 in vulnList)
 
     relation1 = {'service_id': 0, 'vulnerability_id': 1}
     relation2 = {'service_id': 0, 'vulnerability_id': 2}
@@ -231,7 +232,7 @@ class TestDataBaseInteraction(unittest.TestCase):
         allVulnService = session.query(ServiceVulnerability).all()
         session.close()
 
-        list(map(deleteFiels, allVulnService))
+        list(map(self.deleteFields, allVulnService))
 
         self.assertEqual(len(allVulnService), 3)
         self.assertDictEqual(vars(allVulnService[0]), self.relation3)
