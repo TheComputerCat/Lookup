@@ -223,9 +223,14 @@ class TestDataBaseInteraction(unittest.TestCase):
         self.assertTrue(self.firstVulnDictV31 in vulnList)
         self.assertTrue(self.secondVulnDictV31 in vulnList)
 
-    relation1 = {'service_id': 0, 'vulnerability_id': 1}
-    relation2 = {'service_id': 0, 'vulnerability_id': 2}
-    relation3 = {'service_id': 1, 'vulnerability_id': 1}
+    def getFirstVulnId(self):
+        session = query_manager.getDBSession()
+        vulnTable = session.query(Vulnerability).all()
+        session.close()
+
+        list(map(self.deleteFields, vulnTable))
+        vulnList = list(map(lambda x: vars(x), vulnTable))
+        return vulnList.index(self.firstVulnDictV31)
 
     def assertServicesVulnJoinTableIsCorrect(self):
         session = query_manager.getDBSession()
@@ -236,9 +241,9 @@ class TestDataBaseInteraction(unittest.TestCase):
         vulnServiceList = list(map(lambda x: vars(x), vulnServiceTable))
 
         self.assertEqual(len(vulnServiceTable), 3)
-        self.assertTrue(self.relation1 in vulnServiceList)
-        self.assertTrue(self.relation2 in vulnServiceList)
-        self.assertTrue(self.relation3 in vulnServiceList)
+        self.assertTrue({'service_id': 0, 'vulnerability_id': 1} in vulnServiceList)
+        self.assertTrue({'service_id': 0, 'vulnerability_id': 2} in vulnServiceList)
+        self.assertTrue({'service_id': 1, 'vulnerability_id': self.getFirstVulnId()} in vulnServiceList)
 
     @withAVulnDir()
     @withAWrongFile()
