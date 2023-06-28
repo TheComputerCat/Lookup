@@ -229,15 +229,16 @@ class TestDataBaseInteraction(unittest.TestCase):
 
     def assertServicesVulnJoinTableIsCorrect(self):
         session = query_manager.getDBSession()
-        allVulnService = session.query(ServiceVulnerability).all()
+        vulnServiceTable = session.query(ServiceVulnerability).all()
         session.close()
 
-        list(map(self.deleteFields, allVulnService))
+        list(map(self.deleteFields, vulnServiceTable))
+        vulnServiceList = list(map(lambda x: vars(x), vulnServiceTable))
 
-        self.assertEqual(len(allVulnService), 3)
-        self.assertDictEqual(vars(allVulnService[0]), self.relation3)
-        self.assertDictEqual(vars(allVulnService[1]), self.relation2)
-        self.assertDictEqual(vars(allVulnService[2]), self.relation1)
+        self.assertEqual(len(vulnServiceTable), 3)
+        self.assertTrue(self.relation1 in vulnServiceList)
+        self.assertTrue(self.relation2 in vulnServiceList)
+        self.assertTrue(self.relation3 in vulnServiceList)
 
     @withAVulnDir()
     @withAWrongFile()
