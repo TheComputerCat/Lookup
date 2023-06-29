@@ -1,6 +1,12 @@
 import unittest
 import src.extract.domain_extract as domain_extract
 import json
+import src.common.model as md
+import src.common.query_manager as query_manager
+
+from testcontainers.postgres import PostgresContainer
+from sqlalchemy import create_engine
+from copy import deepcopy
 from datetime import datetime
 
 from unittest.mock import (
@@ -22,13 +28,6 @@ from src.common.common import (
     setUpWithATextFile,
     tearDownWithATextFile,
 )
-
-import src.common.model as md
-from testcontainers.postgres import PostgresContainer
-from sqlalchemy import create_engine
-import src.common.query_manager as query_manager
-
-from copy import deepcopy
 
 withATextFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 
@@ -75,7 +74,6 @@ class TestGetData(unittest.TestCase):
         self.maxDiff = None
 
         self.assertDictEqual(filteredJsonResponse, filteredJoinedShodanJson1AndJson2)
-
 
 class TestExtractDataFromFolder(unittest.TestCase):
     pathFile1 = './data/domain_raw_data/file1'

@@ -1,15 +1,14 @@
-import src.lookup.host_lookup as host_lookup
 import unittest
 import shodan
 import time
+import src.lookup.host_lookup as host_lookup
+
 from unittest.mock import (
     patch,
-    MagicMock,
     mock_open,
     Mock,
     call,
 )
-
 from src.common.common import (
     asHexString,
 )

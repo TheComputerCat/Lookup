@@ -1,16 +1,19 @@
 import configparser
 import os
-from sqlalchemy import (create_engine, exc)
-from sqlalchemy.orm import (
-    Session
-)
+import sys
 
+from copy import deepcopy
+from sqlalchemy import (
+    create_engine,
+    exc,
+)
+from sqlalchemy.orm import (
+    Session,
+)
 from src.common.common import (
-    log
+    log,
 )
 from src.common.model import *
-from copy import deepcopy
-import sys
 
 CONFIG_FILE_PATH = None
 
@@ -112,6 +115,7 @@ def getOrCreate(classObject, object):
             insert(deepcopy(object), session)
             instance = query(session, object)
             return instance
+
 def getAllFromClass(classObject):
     with getDBSession() as session:
         query = session.query(classObject).all()

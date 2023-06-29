@@ -1,23 +1,13 @@
-from src.common.common import (
-    log
-)
-from datetime import datetime
 import json as JSON
-from os import listdir
-from os.path import isfile, join
-import src.common.model as model
-
-
-from datetime import datetime
-import json as JSON
-from os import listdir
-from os.path import isfile, join
-import src.common.query_manager as query_manager
-from copy import deepcopy
-
 import sys
+import src.common.model as model
+import src.common.query_manager as query_manager
 
-
+from datetime import datetime
+from copy import deepcopy
+from os import listdir
+from os.path import isfile, join
+from src.common.common import log
 
 def getJsonFromFile(path):
     try:

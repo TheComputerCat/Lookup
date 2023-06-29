@@ -1,26 +1,25 @@
+import json
+import unittest
+import src.extract.host_extract as host_extract
+import src.common.query_manager as query_manager
+
+from datetime import datetime
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
 from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile,
 )
-from datetime import datetime
-import src.extract.host_extract as host_extract
-import json
-import unittest
 from unittest.mock import (
     Mock,
     patch,
 )
-
 from src.common.model import (
     Host,
     HostService,
     Service,
 )
-
-from sqlalchemy import create_engine
-from testcontainers.postgres import PostgresContainer
-import src.common.query_manager as query_manager
 
 class TestExtractInfoFromRealShodanOutput(unittest.TestCase):
     dictFromJSON = json.loads("""

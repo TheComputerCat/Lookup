@@ -1,21 +1,18 @@
 import unittest
+import src.common.model as model
 import src.common.query_manager as query_manager
-import json
 
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
 from unittest.mock import (
     patch,
     Mock,
 )
-
 from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile
 )
-
-from sqlalchemy import create_engine
-from testcontainers.postgres import PostgresContainer
-import src.common.model as model
     
 withAFile = createFixture(setUpWithATextFile, tearDownWithATextFile)
 

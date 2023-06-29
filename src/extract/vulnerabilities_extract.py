@@ -1,6 +1,7 @@
 import json
 import sys
 import src.common.query_manager
+
 from src.common.query_manager import (
     getDBSession,
     searchInTable,
@@ -20,7 +21,6 @@ from src.common.model import (
 
 SECOND_VERSION = "2.0"
 THIRD_VERSION = "3.1"
-
 
 def completeVulnerabilityTable(vulnDirPath, cveVersion):
     session = getDBSession()
@@ -94,7 +94,6 @@ def getVulnDictFromJson(query, cpeCode, cveVersion):
             list.append(vuln)
     return list
 
-
 def trimVulnerabilityInfo(cve, cpeCode, version):
     cveScoreFromVersion = getAttribute(cve['metrics'], version)
     service = searchInTable(Service, {"cpe_code": cpeCode})
@@ -152,7 +151,6 @@ def setupVulnDict(cve_cove, score, access_vector, access_complexity, authenticat
         "integrity_impact": integrity_impact,
         "availability_impact": availability_impact,
     }
-
 
 if __name__ == "__main__":
     args = sys.argv[1:]

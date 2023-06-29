@@ -1,24 +1,22 @@
+import os
+import datetime
+import re
+import sys
+import xml.etree.ElementTree as XML
+import src.common.query_manager as query_manager
+
 from src.common.common import (
     formatDirPath,
     formatFilePath,
     log,
-    getStringFromFile,
-    tryTo
 )
 
 from src.common.model import (
     HostService,
     Service,
-    Host
+    Host,
 )
 
-import src.common.query_manager as query_manager
-import os
-import datetime
-import re
-import sys
-
-import xml.etree.ElementTree as XML
 
 ADDRESS_DATA_DIR_PATH = None
 

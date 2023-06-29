@@ -1,18 +1,16 @@
 import sys
 import subprocess
-
-from src.common.common import (
-    formatDirPath,
-    formatFilePath,
-)
-
 import src.lookup.domain_lookup as domain_lookup
 import src.lookup.host_lookup as host_lookup
 import src.extract.domain_extract as domain_extract
 import src.extract.host_extract as host_extract
 import src.extract.host_extract_nmap as host_extract_nmap
-
 import src.common.query_manager as query_manager
+
+from src.common.common import (
+    formatDirPath,
+    formatFilePath,
+)
 
 def getShodanDomainDataFolder(DATA_DIR):
     return DATA_DIR + 'data_domain_shodan_raw/'

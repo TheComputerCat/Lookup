@@ -2,21 +2,19 @@ import json
 import requests
 import sys
 import time
+
 from src.common.common import (
     formatFilePath,
     formatDirPath,
     getTimeString,
     writeStringToFile,
-    getStringFromFile,
     log,
 )
-
 
 def queryProduct(cpeCode, startIndex=0):
     url = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName={}&startIndex={}'.format(cpeCode, startIndex)
     request = requests.get(url)
     return request.json()
-
 
 def getVulnerabilitiesOf(cpeCode):
     print('Solicitando vulnerabilidades para {}'.format(cpeCode))
@@ -45,7 +43,6 @@ def saveVulnerabilitiesOfProducts(cpeCodesFilePath, vulnerabilitiesDirectoryPath
         except Exception as e:
             log(e, printing=True)
     file.close()
-
 
 if __name__ == "__main__":
     args = sys.argv[1:]

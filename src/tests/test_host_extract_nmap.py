@@ -1,24 +1,24 @@
 import unittest
+import datetime
+from sqlalchemy import create_engine
 import src.extract.host_extract_nmap as host_extract_nmap
+from testcontainers.postgres import PostgresContainer
+import src.common.query_manager as query_manager
+
 from unittest.mock import (
     patch,
     Mock,
 )
-import datetime
-import src.common.query_manager as query_manager
 from src.common.model import (
     HostService,
     Service,
     Host
 )
-
 from src.common.common import (
     createFixture,
     setUpWithATextFile,
     tearDownWithATextFile,
 )
-from sqlalchemy import create_engine
-from testcontainers.postgres import PostgresContainer
 
 def setUpDatabase(postgres):
     postgres.start()
@@ -264,7 +264,6 @@ class TestAcceptance(unittest.TestCase):
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
         session.close()
-    
 
 if __name__ == "__main__":
     unittest.main()

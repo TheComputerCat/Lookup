@@ -107,7 +107,7 @@ def tearDownWithATextFile(pathToTextFile, deleteFolder=True):
 
 def removeFile(pathToTextFile):
     os.remove(pathToTextFile)
-
+ 
 def getDictFromJSONFile(path: str):
     try:
         object = json.loads(getStringFromFile(path))

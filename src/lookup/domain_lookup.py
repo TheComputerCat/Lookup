@@ -1,3 +1,9 @@
+import csv
+import json
+import shodan
+import sys
+import traceback
+
 from src.common.common import (
     log,
     asHexString,
@@ -8,12 +14,6 @@ from src.common.common import (
     formatDirPath,
     getTimeString,
 )
-import csv
-import json
-import os
-import shodan
-import sys
-import traceback
 
 def getIteratorFromCSV(path: str, delimiter: str=","):
     try:

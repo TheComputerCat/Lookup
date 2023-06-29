@@ -1,3 +1,5 @@
+import sys
+
 from src.common.common import (
     formatDirPath,
     formatFilePath,
@@ -5,19 +7,15 @@ from src.common.common import (
     getStringFromFile,
     tryTo,
 )
-
 from src.common.model import (
     Host,
     HostService,
     Service,
 )
-
 from src.common.query_manager import (
     setConfigFile,
     getDBSession,
 )
-
-import sys
 
 ADDRESS_DATA_DIR_PATH = None
 
@@ -162,7 +160,6 @@ def getHostServiceRows(session):
             }
 
             yield row
-
 
 def completeHostServiceTable():
     session = getDBSession()

@@ -1,11 +1,11 @@
-from collections.abc import Callable
-from typing import Any
 import unittest
-import src.lookup.domain_lookup as domain_lookup
 import shodan
 import os
 import json
+import src.lookup.domain_lookup as domain_lookup
 
+from collections.abc import Callable
+from typing import Any
 from src.common.common import (
     asHexString,
     createFixture,
@@ -13,7 +13,6 @@ from src.common.common import (
     setUpWithATextFile,
     tearDownWithATextFile,
 )
-
 from unittest.mock import (
     patch,
     call,
@@ -64,7 +63,6 @@ class TestGetShodanInfoDomain(unittest.TestCase):
         ])
 
         self.assertEqual(infoOptained,json.dumps([{'more':True, 'ip': '168.176.196.13'},{'more':False, 'ip': '168.176.196.11'}]))
-
 
 class TestSaveDomainInfo(unittest.TestCase):
     domainName = 'domain1'

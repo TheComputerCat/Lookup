@@ -1,9 +1,7 @@
-import builtins
-
-import src.lookup.vulnerabilities_lookup as vulnerabilities_lookup
 import json
 import unittest
-import time
+import src.lookup.vulnerabilities_lookup as vulnerabilities_lookup\
+
 from unittest.mock import (
     Mock,
     patch,
@@ -310,7 +308,6 @@ class Test(unittest.TestCase):
 
         vulnerabilities_lookup.queryProduct.reset_mock()
 
-
 class Test(unittest.TestCase):
     targetDirectory = "./data/vulnerabilities_raw_data/"
     cpeCodesFilePath = "./data/cpeCodes"
@@ -352,7 +349,6 @@ class Test(unittest.TestCase):
                 True
             ),
         ])
-
 
 if __name__ == "__main__":
     unittest.main()

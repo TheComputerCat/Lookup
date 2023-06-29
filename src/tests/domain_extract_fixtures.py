@@ -1,5 +1,7 @@
 import src.common.model as model
+
 from datetime import datetime
+
 shodanJson1 = {
     'domain': 'domain.org',
     'tags': [
@@ -70,6 +72,7 @@ shodanJson1 = {
     ],
     'more': True,
 }
+
 filteredShodanJson1 = {
     'domain': 'domain.org',
     'main' :{
@@ -192,6 +195,7 @@ shodanJson2 = {
     ],
     'more': False,
 }
+
 filteredShodanJson2 = {
     'domain': 'domain.org',
     'main' :{

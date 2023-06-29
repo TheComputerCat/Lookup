@@ -111,7 +111,7 @@ class ARecord(Base):
     def __repr__(self):
         rep = ModelsRepCreator(ARecord, ['parent_domain_info', 'address'])
         return rep(self)
-
+    
 class MXRecord(Base):
     __tablename__ = "MX_RECORDS"
 
@@ -183,7 +183,6 @@ class Vulnerability(Base):
     availability_impact: Mapped[str] = mapped_column(String(10), nullable=True)
 
     service_vuln: Mapped[ServiceVulnerability] = relationship(back_populates="vulnerability")
-
 
 class HostService(Base):
     __tablename__ = "HOST_SERVICES"

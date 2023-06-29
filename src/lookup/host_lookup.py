@@ -6,6 +6,7 @@ import time
 import traceback
 import sys
 import os
+
 from src.common.common import (
     log,
     asHexString, 
@@ -21,7 +22,6 @@ def getAddressListFromFile(path):
     
     allAddresses = [address for address in addresses.split("\n") if address != ""]
     return list(dict.fromkeys(allAddresses))
-
 
 def getNmapCommands(address: str, addressDataDirPath: str):
     yield ["nmap", "-sTV", "-top-ports", "2000", "--version-light", "-vv", "-oX", 
