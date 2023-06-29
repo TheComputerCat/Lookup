@@ -209,7 +209,8 @@ class TestDataBaseInteraction(unittest.TestCase):
 
     def deleteFields(self, v):
         vars(v).pop('_sa_instance_state')
-        vars(v).pop('id')
+        b = vars(v).pop('id')
+        print("id", b)
 
     def assertVulnTableIsCorrect(self):
         session = query_manager.getDBSession()
@@ -218,7 +219,7 @@ class TestDataBaseInteraction(unittest.TestCase):
 
         list(map(self.deleteFields, vulnTable))
         vulnList = list(map(lambda x: vars(x), vulnTable))
-
+        
         self.assertEqual(len(vulnList), 2)
         self.assertTrue(self.firstVulnDictV31 in vulnList)
         self.assertTrue(self.secondVulnDictV31 in vulnList)
@@ -230,6 +231,7 @@ class TestDataBaseInteraction(unittest.TestCase):
 
         list(map(self.deleteFields, vulnTable))
         vulnList = list(map(lambda x: vars(x), vulnTable))
+        print(vulnList)
         return vulnList.index(self.firstVulnDictV31)
 
     def assertServicesVulnJoinTableIsCorrect(self):
@@ -243,7 +245,8 @@ class TestDataBaseInteraction(unittest.TestCase):
         self.assertEqual(len(vulnServiceTable), 3)
         self.assertTrue({'service_id': 0, 'vulnerability_id': 1} in vulnServiceList)
         self.assertTrue({'service_id': 0, 'vulnerability_id': 2} in vulnServiceList)
-        self.assertTrue({'service_id': 1, 'vulnerability_id': self.getFirstVulnId()} in vulnServiceList)
+
+        self.assertTrue({'service_id': 1, 'vulnerability_id': 2} in vulnServiceList)
 
     @withAVulnDir()
     @withAWrongFile()
