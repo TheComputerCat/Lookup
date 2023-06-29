@@ -210,7 +210,6 @@ class TestDataBaseInteraction(unittest.TestCase):
     def deleteFields(self, v):
         vars(v).pop('_sa_instance_state')
         b = vars(v).pop('id')
-        print("id", b)
 
     def assertVulnTableIsCorrect(self):
         session = query_manager.getDBSession()
@@ -231,7 +230,6 @@ class TestDataBaseInteraction(unittest.TestCase):
 
         list(map(self.deleteFields, vulnTable))
         vulnList = list(map(lambda x: vars(x), vulnTable))
-        print(vulnList)
         return vulnList.index(self.firstVulnDictV31)
 
     def assertServicesVulnJoinTableIsCorrect(self):
