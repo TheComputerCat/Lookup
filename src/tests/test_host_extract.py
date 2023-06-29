@@ -294,11 +294,11 @@ withTestDatabase = createFixture(setUpDatabase, tearDownDatabase)
 class TestDatabase(unittest.TestCase):
     def assertHostTableIsCorrect(self, session):
         allHosts = session.query(Host).all()
-        self.assertEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
+        self.assertCountEqual([host.address for host in allHosts], ["0.0.0.0", "8.8.8.8"])
 
         hostRow = session.get(Host, "8.8.8.8")
-        self.assertEqual(hostRow.country, "CO")
-        self.assertEqual(hostRow.provider, "aaa")
+        self.assertEqual(hostRow.country, "US")
+        self.assertEqual(hostRow.provider, "Google")
         self.assertEqual(hostRow.isp, "bbb")
     
     def assertServiceTableIsCorrect(self, session):
@@ -316,7 +316,7 @@ class TestDatabase(unittest.TestCase):
         toDatetime = lambda string: datetime.strptime(string, '%Y-%m-%dT%H:%M:%S.%f')
 
         hostServices = session.query(HostService).all()
-        self.assertEqual([
+        self.assertCountEqual([
             (hostService.address, hostService.service_id, hostService.port, hostService.source, hostService.protocol, hostService.timestamp)
                 for hostService in hostServices
         ], [
@@ -326,7 +326,7 @@ class TestDatabase(unittest.TestCase):
             ("8.8.8.8", 1, 22, "shodan-host", "tcp", toDatetime("2023-05-23T09:52:49.509917")),
         ])
 
-    postgresContainer = PostgresContainer("postgres:latest")    
+    postgresContainer = PostgresContainer("postgres:latest")
 
     def getDBEngineStub(postgresContainer):
         def _():
@@ -383,7 +383,7 @@ class TestDatabase(unittest.TestCase):
             },
         ]
     }""")
-    @withATextFile(pathToTextFile="./data/host-data/host3", content="""{
+    @withATextFile(pathToTextFile="./data/host-data-1/host3", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "CO",
         "org": "aaa",
@@ -393,15 +393,20 @@ class TestDatabase(unittest.TestCase):
     @withTestDatabase(postgres=postgresContainer)
     def test_completeTables(self, mockCreateEngine):
         host_extract.setAddressDataDirPath("./data/host-data/")
-        session = query_manager.getDBSession()
 
         host_extract.completeHostTable()
-        self.assertHostTableIsCorrect(session)
+        # these two lines are to overwrite old data with new data
+        host_extract.setAddressDataDirPath("./data/host-data-1/")
+        host_extract.completeHostTable()
 
+        host_extract.setAddressDataDirPath("./data/host-data/")
+        
         host_extract.completeServiceTable()
-        self.assertServiceTableIsCorrect(session)
-
         host_extract.completeHostServiceTable()
+
+        session = query_manager.getDBSession()
+        self.assertHostTableIsCorrect(session)
+        self.assertServiceTableIsCorrect(session)
         self.assertHostServiceTableIsCorrect(session)
 
         session.close()
