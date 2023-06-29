@@ -123,7 +123,7 @@ def extractDataFromFile(path):
     return filterFromJsonList(jsonList)
 
 def extractDataFromFolder(path):
-    filesInFolder = (join(path, f) for f in listdir(path) if isfile(join(path, f)))
+    filesInFolder = sorted(join(path, f) for f in listdir(path) if isfile(join(path, f)))
     return list(map(extractDataFromFile, filesInFolder))
 
 def ARecordObject(AJson):
