@@ -3,7 +3,7 @@
 En este repositorio se encuentran los scripts que se usaron para la investigación [Descripción de vulnerabilidades presentes en la
 infraestructura digital de Organizaciones de
 Sociedad Civil de la Comunidad Andina de
-Naciones] la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
+Naciones](url), específicamente en la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
 
 ## Requisitos de servicios
 
@@ -40,9 +40,9 @@ Cada paso tiene dos etapas:
 
 2. Los datos sin procesar son leídos para llenar la base de datos.
 
-Estos procesos se explicaran en mas detalle en la siguiente sección.
+Estos procesos se explicaran con más detalle en la siguiente sección.
 
-## ¿Cómo ejecutar los script?
+## ¿Cómo replicar el proceso?
 
 ### Creación de la base de datos
 
@@ -67,7 +67,7 @@ Si no cuenta con una instancia, puede desplegar una rápidamente por medio de [D
 Los campos `usuario` y `contraseña` deben coincidir con los que se encuentran en el archivo de configuración.
 ### Shodan API key
 
-Para la recolección de los datos es necesaria la API key de Shodan en texto plano. Esta puede ser ubicada en la la raíz del proyecto,
+Para la recolección de los datos es necesaria la API key de Shodan en texto plano. El archivo donde esté guardado puede estar ubicado en la raíz del proyecto.
 ### Escaneo de dominios
 
 Los datos con los que se comienza el proceso son dominios de los que se desea obtener información. Para cada uno hacemos una consulta a Shodan, donde se obtiene información general del dominio y sus subdominios. El script `domain_lookup.py` realiza esta tarea. Este script va a guardar todos los datos obtenidos como texto, y luego `domain_extract.py` llenará la base de datos con estos.
@@ -201,7 +201,7 @@ La base de datos sera creada y los archivos recolectados serán guardados en `da
 
  - SHODAN_API_KEY: ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
 
- - DB_CONFIG_FILE_PATH: ruta al archivo de configuración .ini de la base de datos.
+ - DB_CONFIG_FILE_PATH: ruta al archivo de configuración `.ini` de la base de datos.
 
 Para poder asignar estas variables se puede:
 
@@ -228,7 +228,7 @@ Y para lanzar un container interactivo,
     $ make run
 
 
-## Como correr tests
+## Como testear los scripts
 
 Este código cuenta con test realizados con el framework de test en python [Unittest](https://docs.python.org/3/library/unittest.html). Estando en la raíz del proyecto, los test se pueden correr de la siguiente manera:
 
