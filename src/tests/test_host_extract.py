@@ -247,6 +247,7 @@ class TestDatabaseHelpers(unittest.TestCase):
             self.assertEqual(row[key], getattr(obj, key))
         self.assertIsNone(obj.isp)
 
+    
     def test_createHostRow(self):
         session = unittest.mock.MagicMock()
         session.get = Mock(return_value=None)
@@ -383,7 +384,7 @@ class TestDatabase(unittest.TestCase):
             },
         ]
     }""")
-    @withATextFile(pathToTextFile="./data/host-data-1/host3", content="""{
+    @withATextFile(pathToTextFile="./data/host-data/host3", content="""{
         "ip_str": "8.8.8.8",
         "country_code": "CO",
         "org": "aaa",
@@ -394,17 +395,12 @@ class TestDatabase(unittest.TestCase):
     def test_completeTables(self, mockCreateEngine):
         host_extract.setAddressDataDirPath("./data/host-data/")
 
-        host_extract.completeHostTable()
-        # these two lines are to overwrite old data with new data
-        host_extract.setAddressDataDirPath("./data/host-data-1/")
-        host_extract.completeHostTable()
-
-        host_extract.setAddressDataDirPath("./data/host-data/")
-        
+        host_extract.completeHostTable()        
         host_extract.completeServiceTable()
         host_extract.completeHostServiceTable()
 
         session = query_manager.getDBSession()
+
         self.assertHostTableIsCorrect(session)
         self.assertServiceTableIsCorrect(session)
         self.assertHostServiceTableIsCorrect(session)

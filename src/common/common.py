@@ -30,7 +30,7 @@ def getFilePathsInDirectory(directoryPath):
     fixedDirPath = formatDirPath(directoryPath)
 
     return [
-        fixedDirPath+fileName for fileName in os.listdir(fixedDirPath)
+        fixedDirPath+fileName for fileName in sorted(os.listdir(fixedDirPath))
         if os.path.isfile(fixedDirPath+fileName)
     ]
 
