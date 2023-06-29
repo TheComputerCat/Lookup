@@ -1,6 +1,6 @@
 # Lookup
 
-En este repositorio se encuentran los scripts que se usaron para la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Ándina de Naciones.
+En este repositorio se encuentran los scripts que se usaron para la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
 
 ## Requisitos de servicios
 
@@ -13,21 +13,21 @@ Para utilizar los scripts existen los siguientes requisitos:
 
 3. Instalar [Nmap](https://nmap.org/).
 
-Adicionalmente utilizó el servicio de [Shodan](https://help.shodan.io/the-basics/what-is-shodan) que requieren una cuenta de usuario para el uso de sus API. Se requiere de una cuenta con membresía o membresía académica. La opción de membresía académica es gratuita para personas pertenecientes a instituciones educativas.
+Adicionalmente se utilizaron las API de [Shodan](https://help.shodan.io/the-basics/what-is-shodan) que requieren de una cuenta para su uso, la cuenta debe tener membresía o membresía académica. La opción de membresía académica es gratuita para personas pertenecientes a instituciones educativas.
 
-## ¿Cómo se almacena la información?
+## ¿Cómo se almacenan la información?
 
-Para almacenar la información se usa una base de datos [postgreSQL](https://www.postgresql.org/), cuyo esquema se encuentra en ```src/common/model.py```. Para la interacción con la base de datos se uso [SQLAlchemy](https://www.sqlalchemy.org/). En la recolección realizada se usó solo instancias locales
+Para almacenar la información se usa una base de datos [postgreSQL](https://www.postgresql.org/), cuyo esquema se encuentra en ```src/common/model.py```. Para la interacción con la base de datos se uso [SQLAlchemy](https://www.sqlalchemy.org/). En la recolección realizada se usaron solo instancias locales.
 
 ## Recolección y procesamiento de los datos
 
 El proceso de recolección de datos consiste en tres grandes pasos:
 
-1. Escaneo de dominios
+1. Escaneo de dominios.
 
-2. Escaneo de direcciones IP
+2. Escaneo de direcciones IP.
 
-4. Búsqueda de vulnerabilidades
+4. Búsqueda de vulnerabilidades.
 
 Cada paso tiene dos etapas:
 
@@ -35,7 +35,7 @@ Cada paso tiene dos etapas:
 
 2. Los datos sin procesar son leídos para llenar la base de datos.
 
-Estos procesos se explicaran en mas detalle en la siguiente sección;
+Estos procesos se explicaran en mas detalle en la siguiente sección.
 
 ## ¿Cómo ejecutar los script?
 
@@ -135,7 +135,7 @@ Ejecutando
     $ python vulnerabilities_lookup.py
 
 
-## Creacion rapida de la base de datos
+## Creación rápida de la base de datos
 Los scripts mencionados anteriormente se pueden ejecutar de manera independiente y tener un control total sobre las ubicaciones de los archivos recolectados.
 Sin embargo, puede construir la base de datos unicamente partir de un `.csv` de la siguiente manera:
 
@@ -145,7 +145,7 @@ Estando en la raíz del repositorio, y con ,
     $ cp [dominios.cvs] [ubicaciónRepositorio]/data
     $ make build
 
-La base de datos sera creada y los archivos recolectados seran guardados en `data/`. Si desea guardar los datos o especificar 
+La base de datos sera creada y los archivos recolectados serán guardados en `data/`. Si desea guardar los datos o especificar 
 
 
 DATA_DIR
@@ -158,7 +158,7 @@ DB_CONFIG_FILE_PATH
 
 ## Ejecutar en Docker
 
-Este codigo puede ser faclimente ejecutado por medio de [Docker](https://www.docker.com/). Puede encontrar el codigo utilizado para esto en `dev/`.
+Este código puede ser fácilmente ejecutado por medio de [Docker](https://www.docker.com/). Puede encontrar el código utilizado para esto en `dev/`.
 
 Para construir la imagen se debe ejecutar:
 
@@ -171,7 +171,7 @@ Y para lanzar un container interactivo,
 
 ## Como correr tests
 
-Este codigo cuenta con test realizados con el framework de test en python [Unittest](https://docs.python.org/3/library/unittest.html). Estando en la raíz del proyecto, los test se pueden correr de la siguiente manera:
+Este código cuenta con test realizados con el framework de test en python [Unittest](https://docs.python.org/3/library/unittest.html). Estando en la raíz del proyecto, los test se pueden correr de la siguiente manera:
 
 Un único archivo de tests:
 
