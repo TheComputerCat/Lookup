@@ -84,7 +84,7 @@ Los comandos a ejecutar serían (en el directorio raíz del repositorio):
 
 Para extraer los datos,
 
-    python domain_extract.py {db-credentials} {data-di}
+    python domain_extract.py {db-credentials} {data-dir}
 
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
@@ -107,7 +107,7 @@ Este script va a generar un archivo de texto de direcciones IP separadas por sal
 
 Cabe aclarar que puede usarse una lista cualquiera de direcciones IP, pues no hay requerimientos sobre su origen. Con una lista de direcciones IP se pueden realizar dos escaneos:
 
-### Escaneo con Shodan
+#### Escaneo con Shodan
 
 El escaneo con Shodan se realiza con el comando
 
@@ -121,7 +121,17 @@ python host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
 
 3. `shodan-key` es la ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
 
-### Escaneo con Nmap
+Para incluir la información obtenida en la base de datos, se debe ejecutar el comando:
+
+```
+python host_extract.py {db-credentials} {data-dir}
+```
+
+1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
+
+2. `data-dir` es la ruta al directorio del sistema donde se encuentran los datos.
+
+#### Escaneo con Nmap
 
 El escaneo con Nmap se realiza con el comando
 
@@ -133,14 +143,46 @@ python host_lookup.py nmap {ip-list} {data-dir} {shodan-key}
 
 2. `data-dir` es la ruta al directorio del sistema donde se desea guardar los datos obtenidos.
 
+Para incluir la información obtenida en la base de datos, se debe ejecutar el comando:
+
+```
+python host_extract_nmap.py {db-credentials} {data-dir}
+```
+
+1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
+
+2. `data-dir` es la ruta al directorio del sistema donde se encuentran los datos.
+
 ### Búsqueda de vulnerabilidades
 
-Ejecutando
+Para la búsqueda de vulnerabilidades se requiere de una lista de códigos CPE separados por saltos de línea. Para que la API que utilizamos retorne vulnerabilidades asociadas al CPE, es necesario que los códigos incluyan, al menos, información de la versión del software. De otro modo, no se retornará nada.
 
-    $ python vulnerabilities_lookup.py
+En este paso no implementamos una forma automática de obtener una lista - algunos códigos CPE se incluyen en la base de datos pero no hay un script para extraerlos y ponerlos en texto. Así, lo recomendable es completar la tabla `SERVICES` con los códigos CPE que faltan, y obtener la lista de ahí. Ya con la lista, para buscar las vulnerabilidades basta ejecutar el siguiente comando:
 
+```
+python vulnerabilities_lookup.py {cpe-file} {data-dir}
+```
+
+1. `{cpe-file}` es la ruta al archivo con códigos CPE separados por saltos de línea.
+
+2. `{data-dir}` es la ruta al directorio donde los datos se van a guardar.
+
+Para incluir los datos obtenidos en la base de datos hay que ejecutar el siguiente comando:
+
+```
+python vulnerabilities_extract.py {db-credentials} {data-dir} cvssMetricV2
+```
+
+1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
+
+2. `data-dir` es la ruta al directorio del sistema donde se encuentran los datos.
+
+3. `cvssMetricV2` especifica que se desean introducir los datos de la calificación CVSS 2.0 para las vulnerabilidades.
+
+El script puede recibir un tercer argumento distinto, `cvssMetricV31`, pero no hay una tabla en la base de datos para esta información.
 
 ## Creación rápida de la base de datos
+
 Los scripts mencionados anteriormente se pueden ejecutar de manera independiente y tener un control total sobre las ubicaciones de los archivos recolectados.
 Sin embargo, puede construir la base de datos unicamente partir de un `.csv` de la siguiente manera:
 
