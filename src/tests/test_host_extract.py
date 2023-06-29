@@ -248,7 +248,7 @@ class TestDatabaseHelpers(unittest.TestCase):
 
     
     def test_createHostRow(self):
-        session = unittest.mock.MagicMock()
+        session = unittest.mock.Mock()
         session.get = Mock(return_value=None)
         session.add = Mock()
         session.commit = Mock()
