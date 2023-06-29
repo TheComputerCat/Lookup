@@ -114,7 +114,6 @@ def getOrCreateService(service_element):
     service_dict = getUniqueServiceDict(service_element)
     found_service_object = query_manager.searchInTable(Service,getSearchableUniqueServiceDict(service_dict))
     if not found_service_object :
-        print('inserted', service_dict)
         return insertNewServiceInDB(service_dict)
     return found_service_object
 
@@ -134,21 +133,17 @@ def getHostDictFromXMLHost(host_element):
     }
 
 def completeTables(xml_path: str):
-    print('process for host in file :', xml_path, 'has started')
     host_element = getHostElementFromXML(xml_path)
     host_dict = getHostDictFromXMLHost(host_element)
     host_object = Host(**host_dict)
     host_found_in_db = query_manager.searchInTable(Host,host_dict)
     if not host_found_in_db:
         query_manager.insert(host_object)
-        print('succesfull host insertion')
     else:
         host_object = host_found_in_db
-        print('host is already in db, inserting new services')
     for host_service in  getAllHostServices(host_element,host_object):
             query_manager.insert(host_service)
             query_manager.insert(host_service)
-    print('succesfull host services insertion')
 
 def setConfigFile(configFilePath):
     global CONFIG_FILE_PATH
