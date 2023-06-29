@@ -95,12 +95,10 @@ class TestTablesCreation(unittest.TestCase):
         query_manager.createTables()
         mockCreateAll.assert_called_once_with('anEngineObject')
 
-
 def setUpDatabase(postgres, pathConfig):
     postgres.start()
     query_manager.setConfigFile(pathConfig)
     query_manager.createTables()
-
 
 def tearDownDatabase(postgres):
     postgres.stop()

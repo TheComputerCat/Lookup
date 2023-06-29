@@ -4,7 +4,6 @@ import os
 import json
 from collections.abc import Callable
 
-
 def log(message, logPath="./log", debug=False, printing=False, testing=True):
     if debug:
         raise message

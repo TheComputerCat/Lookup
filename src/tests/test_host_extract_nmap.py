@@ -1,10 +1,10 @@
 import unittest
 import datetime
-from sqlalchemy import create_engine
 import src.extract.host_extract_nmap as host_extract_nmap
-from testcontainers.postgres import PostgresContainer
 import src.common.query_manager as query_manager
 
+from sqlalchemy import create_engine
+from testcontainers.postgres import PostgresContainer
 from unittest.mock import (
     patch,
     Mock,

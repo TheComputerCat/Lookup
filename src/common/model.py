@@ -3,7 +3,6 @@ import src.common.common as common
 from datetime import (
     datetime,
 )
-
 from sqlalchemy import (
     Boolean,
     DateTime,
@@ -12,14 +11,12 @@ from sqlalchemy import (
     String,
     Integer,
 )
-
 from sqlalchemy.orm import (
     DeclarativeBase,
     mapped_column,
     Mapped,
     relationship,
 )
-
 from typing import (
     List,
 )

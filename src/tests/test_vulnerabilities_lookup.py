@@ -280,7 +280,6 @@ result2 = """
 }
 """
 
-
 class Test(unittest.TestCase):
     cpeCode = "cpe:2.3:o:microsoft:windows_10:1607"
     first_page = json.loads(result1)

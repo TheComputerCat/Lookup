@@ -17,7 +17,6 @@ from src.common.model import (
     Host,
 )
 
-
 ADDRESS_DATA_DIR_PATH = None
 
 def setAddressDataDirPath(path):
@@ -56,7 +55,6 @@ def getSearchableHostServiceDict(host_service_dict):
           'port': host_service_dict['port'],
           }
 
-   
 def getSearchableHostServiceDict(host_service_dict):
     return {
           'address': host_service_dict['address'],

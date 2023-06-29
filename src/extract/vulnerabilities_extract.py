@@ -1,6 +1,5 @@
 import json
 import sys
-import src.common.query_manager
 
 from src.common.query_manager import (
     getDBSession,
