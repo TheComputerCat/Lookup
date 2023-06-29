@@ -16,12 +16,6 @@ from src.common.model import (
     Service,
     Host,
 )
-
-ADDRESS_DATA_DIR_PATH = None
-
-def setAddressDataDirPath(path):
-    global ADDRESS_DATA_DIR_PATH
-    ADDRESS_DATA_DIR_PATH = path
     
 def getHostElementFromXML(xml_path: str):
 
@@ -194,7 +188,6 @@ if __name__ == "__main__":
     dataDirPath = formatDirPath(args[1])
 
     query_manager.setConfigFile(configFile)
-    setAddressDataDirPath(dataDirPath)
 
-    completeTablesWithFilesFromPath(ADDRESS_DATA_DIR_PATH)
+    completeTablesWithFilesFromPath(dataDirPath)
     
