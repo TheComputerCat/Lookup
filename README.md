@@ -1,6 +1,9 @@
 # Lookup
 
-En este repositorio se encuentran los scripts que se usaron para la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
+En este repositorio se encuentran los scripts que se usaron para la investigación [Descripción de vulnerabilidades presentes en la
+infraestructura digital de Organizaciones de
+Sociedad Civil de la Comunidad Andina de
+Naciones] la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
 
 ## Requisitos de servicios
 
@@ -9,13 +12,15 @@ Para utilizar los scripts existen los siguientes requisitos:
 
 1. Ejecutarlos en una distribución GNU/Linux.
 
-2. Instalar los requerimientos para los scripts (con `pip install -r requirements.txt`).
+2. Tener instalado Python y pip.
 
-3. Instalar [Nmap](https://nmap.org/).
+3. Instalar los requerimientos para los scripts (con `pip install -r requirements.txt`).
+
+4. Instalar [Nmap](https://nmap.org/).
 
 Adicionalmente se utilizaron las API de [Shodan](https://help.shodan.io/the-basics/what-is-shodan) que requieren de una cuenta para su uso, la cuenta debe tener membresía o membresía académica. La opción de membresía académica es gratuita para personas pertenecientes a instituciones educativas.
 
-## ¿Cómo se almacenan la información?
+## ¿Cómo se almacena la información?
 
 Para almacenar la información se usa una base de datos [postgreSQL](https://www.postgresql.org/), cuyo esquema se encuentra en ```src/common/model.py```. Para la interacción con la base de datos se uso [SQLAlchemy](https://www.sqlalchemy.org/). En la recolección realizada se usaron solo instancias locales.
 
@@ -145,16 +150,28 @@ Estando en la raíz del repositorio, y con ,
     $ cp [dominios.cvs] [ubicaciónRepositorio]/data
     $ make build
 
-La base de datos sera creada y los archivos recolectados serán guardados en `data/`. Si desea guardar los datos o especificar 
+La base de datos sera creada y los archivos recolectados serán guardados en `data/`. Si desea guardar los datos o especificar las siguientes variables: 
 
 
-DATA_DIR
+ - DATA_DIR: ruta al directorio donde están guardados todos los datos recolectados.
 
-DOMAIN_LIST_PATH
+ - DOMAIN_LIST_PATH: ruta al directorio donde está guardada la lista de dominios recolectados.
 
-SHODAN_API_KEY
+ - SHODAN_API_KEY: ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
 
-DB_CONFIG_FILE_PATH
+ - DB_CONFIG_FILE_PATH: ruta al archivo de configuración .ini de la base de datos.
+
+Para poder asignar estas variables se puede:
+
+Asignar directamente en la construcción:
+
+    $ make build DATA_DIR=valor_de_data_dir SHODAN_API_KEY=valor_de_shodan_api_key
+
+Exportar la variable:
+
+    $ export DB_CONFIG_FILE_PATH=path/to/dbconfig/file
+
+O añadir la linea anterior al archivo .profilerc
 
 ## Ejecutar en Docker
 
