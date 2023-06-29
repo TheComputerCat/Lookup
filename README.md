@@ -7,22 +7,21 @@ Naciones](url), específicamente en la recolección de datos públicos de la inf
 
 ## Requisitos de servicios
 
-
 Para utilizar los scripts existen los siguientes requisitos:
 
 1. Ejecutarlos en una distribución GNU/Linux.
 
 2. Tener instalado Python y pip.
 
-3. Instalar los requerimientos para los scripts (con `pip install -r requirements.txt`).
+3. Tener instalados los requerimientos para los scripts (con `pip install -r requirements.txt`).
 
-4. Instalar [Nmap](https://nmap.org/).
+4. Tener instalado [Nmap](https://nmap.org/).
 
 Adicionalmente se utilizaron las API de [Shodan](https://help.shodan.io/the-basics/what-is-shodan) que requieren de una cuenta para su uso, la cuenta debe tener membresía o membresía académica. La opción de membresía académica es gratuita para personas pertenecientes a instituciones educativas.
 
 ## ¿Cómo se almacena la información?
 
-Para almacenar la información se usa una base de datos [postgreSQL](https://www.postgresql.org/), cuyo esquema se encuentra en ```src/common/model.py```. Para la interacción con la base de datos se uso [SQLAlchemy](https://www.sqlalchemy.org/). En la recolección realizada se usaron solo instancias locales.
+Para almacenar la información se usa una base de datos [PostgreSQL](https://www.postgresql.org/), cuyo esquema se encuentra en `src/common/model.py`. Para la interacción con la base de datos se usó [SQLAlchemy](https://www.sqlalchemy.org/). En la recolección realizada se usaron sólo instancias locales.
 
 ## Recolección y procesamiento de los datos
 
@@ -40,7 +39,7 @@ Cada paso tiene dos etapas:
 
 2. Los datos sin procesar son leídos para llenar la base de datos.
 
-Estos procesos se explicaran con más detalle en la siguiente sección.
+Estos procesos se explicarán con más detalle en la siguiente sección.
 
 ## ¿Cómo replicar el proceso?
 
@@ -50,9 +49,9 @@ Para crear la base de datos es necesario tener una instancia de PostgreSQL y ten
 
 Para construir la base de datos se requiere ejecutar el siguiente comando:
 
-    python query_manager.py {credentials-file}
+    python src/common/query_manager.py {credentials-file}
 
-`credentials-file` es la ruta al archivo con las credenciales en el formato esperado (que es como se muestra en `data_base_config.ini`).
+`credentials-file` es la ruta al archivo con las credenciales en el formato esperado (que es como se muestra en `data_base_config_example.ini`).
 
 Si no cuenta con una instancia, puede desplegar una rápidamente por medio de [Docker](https://www.docker.com/) de la siguiente manera:
 
@@ -65,16 +64,18 @@ Si no cuenta con una instancia, puede desplegar una rápidamente por medio de [D
         -c listen_addresses='*'
 
 Los campos `usuario` y `contraseña` deben coincidir con los que se encuentran en el archivo de configuración.
-### Shodan API key
 
-Para la recolección de los datos es necesaria la API key de Shodan en texto plano. El archivo donde esté guardado puede estar ubicado en la raíz del proyecto.
+### Llave para la API de Shodan
+
+Para la recolección de los datos es necesaria una llave para la API de Shodan en texto plano.
+
 ### Escaneo de dominios
 
 Los datos con los que se comienza el proceso son dominios de los que se desea obtener información. Para cada uno hacemos una consulta a Shodan, donde se obtiene información general del dominio y sus subdominios. El script `domain_lookup.py` realiza esta tarea. Este script va a guardar todos los datos obtenidos como texto, y luego `domain_extract.py` llenará la base de datos con estos.
 
 Los comandos a ejecutar serían (en el directorio raíz del repositorio):
 
-    python domain_lookup.py lookup {data-dir} {shodan-key} {domain-list}`
+    python src/lookup/domain_lookup.py lookup {data-dir} {shodan-key} {domain-list}`
 
 1. `data-dir` es la ruta al directorio del sistema donde se desea guardar los datos obtenidos.
 
@@ -84,8 +85,7 @@ Los comandos a ejecutar serían (en el directorio raíz del repositorio):
 
 Para extraer los datos,
 
-    python domain_extract.py {db-credentials} {data-dir}
-
+    python src/extract/domain_extract.py {db-credentials} {data-dir}
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -93,11 +93,9 @@ Para extraer los datos,
 
 ### Escaneo de direcciones IP
 
-El flujo es el mismo para la obtención de información de dominios, pero con algunos pasos adicionales. Se necesita una lista de direcciones IP para escanear, y esta puede obtenerse de los datos de dominios sin procesar ejecutando el siguiente comando:
+El proceso es el mismo para la obtención de información de dominios, pero con algunos pasos adicionales. Se necesita una lista de direcciones IP para escanear, y esta puede obtenerse de los datos de dominios sin procesar ejecutando el siguiente comando:
 
-```
-python domain_lookup.py get_addresses {data-dir} {ip-list}
-```
+    python src/lookup/domain_lookup.py get_addresses {data-dir} {ip-list}
 
 1. `data-dir` es la ruta al directorio donde se encuentran los pasos sin procesar de los dominios.
 
@@ -112,7 +110,7 @@ Cabe aclarar que puede usarse una lista cualquiera de direcciones IP, pues no ha
 El escaneo con Shodan se realiza con el comando
 
 ```
-python host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
+python src/lookup/host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
 ```
 
 1. `ip-list` es la ruta al archivo con las direcciones IP a escanear.
@@ -123,9 +121,8 @@ python host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
 
 Para incluir la información obtenida en la base de datos, se debe ejecutar el comando:
 
-```
-python host_extract.py {db-credentials} {data-dir}
-```
+
+    python src/extract/host_extract.py {db-credentials} {data-dir}
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -135,9 +132,7 @@ python host_extract.py {db-credentials} {data-dir}
 
 El escaneo con Nmap se realiza con el comando
 
-```
-python host_lookup.py nmap {ip-list} {data-dir} {shodan-key}
-```
+    python src/lookup/host_lookup.py nmap {ip-list} {data-dir} {shodan-key}
 
 1. `ip-list` es la ruta al archivo con las direcciones IP a escanear.
 
@@ -145,9 +140,8 @@ python host_lookup.py nmap {ip-list} {data-dir} {shodan-key}
 
 Para incluir la información obtenida en la base de datos, se debe ejecutar el comando:
 
-```
-python host_extract_nmap.py {db-credentials} {data-dir}
-```
+
+    python src/extract/host_extract_nmap.py {db-credentials} {data-dir}
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -159,9 +153,7 @@ Para la búsqueda de vulnerabilidades se requiere de una lista de códigos CPE s
 
 En este paso no implementamos una forma automática de obtener una lista - algunos códigos CPE se incluyen en la base de datos pero no hay un script para extraerlos y ponerlos en texto. Así, lo recomendable es completar la tabla `SERVICES` con los códigos CPE que faltan, y obtener la lista de ahí. Ya con la lista, para buscar las vulnerabilidades basta ejecutar el siguiente comando:
 
-```
-python vulnerabilities_lookup.py {cpe-file} {data-dir}
-```
+    python src/lookup/vulnerabilities_lookup.py {cpe-file} {data-dir}
 
 1. `{cpe-file}` es la ruta al archivo con códigos CPE separados por saltos de línea.
 
@@ -169,9 +161,8 @@ python vulnerabilities_lookup.py {cpe-file} {data-dir}
 
 Para incluir los datos obtenidos en la base de datos hay que ejecutar el siguiente comando:
 
-```
-python vulnerabilities_extract.py {db-credentials} {data-dir} cvssMetricV2
-```
+
+    python src/extract/vulnerabilities_extract.py {db-credentials} {data-dir} cvssMetricV2
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -186,22 +177,21 @@ El script puede recibir un tercer argumento distinto, `cvssMetricV31`, pero no h
 Los scripts mencionados anteriormente se pueden ejecutar de manera independiente y tener un control total sobre las ubicaciones de los archivos recolectados.
 Sin embargo, puede construir la base de datos unicamente partir de un `.csv` de la siguiente manera:
 
-Estando en la raíz del repositorio, y con ,
+Estando en el directorio raíz del repositorio, y con
 
     $ mkdir data
-    $ cp [dominios.cvs] [ubicaciónRepositorio]/data
+    $ cp {dominios.csv} {ubicación-repositorio}/data
     $ make build
 
-La base de datos sera creada y los archivos recolectados serán guardados en `data/`. Si desea guardar los datos o especificar las siguientes variables: 
+La base de datos será creada y los archivos recolectados serán guardados en `data/`. Si desea guardar los datos en otra ubicación, debe especificar las siguientes variables de entorno:
 
+- DATA_DIR: ruta al directorio donde están guardados todos los datos recolectados.
 
- - DATA_DIR: ruta al directorio donde están guardados todos los datos recolectados.
+- DOMAIN_LIST_PATH: ruta al directorio donde está guardada la lista de dominios recolectados.
 
- - DOMAIN_LIST_PATH: ruta al directorio donde está guardada la lista de dominios recolectados.
+- SHODAN_API_KEY: ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
 
- - SHODAN_API_KEY: ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
-
- - DB_CONFIG_FILE_PATH: ruta al archivo de configuración `.ini` de la base de datos.
+- DB_CONFIG_FILE_PATH: ruta al archivo de configuración `.ini` de la base de datos.
 
 Para poder asignar estas variables se puede:
 
@@ -213,11 +203,9 @@ Exportar la variable:
 
     $ export DB_CONFIG_FILE_PATH=path/to/dbconfig/file
 
-O añadir la linea anterior al archivo .profilerc
-
 ## Ejecutar en Docker
 
-Este código puede ser fácilmente ejecutado por medio de [Docker](https://www.docker.com/). Puede encontrar el código utilizado para esto en `dev/`.
+Este código puede ser fácilmente ejecutado por medio de [Docker](https://www.docker.com/). Puede encontrar el código utilizado para esto en el directorio `dev/`.
 
 Para construir la imagen se debe ejecutar:
 
@@ -227,10 +215,9 @@ Y para lanzar un container interactivo,
 
     $ make run
 
+## Corriendo las pruebas automáticas
 
-## Como testear los scripts
-
-Este código cuenta con test realizados con el framework de test en python [Unittest](https://docs.python.org/3/library/unittest.html). Estando en la raíz del proyecto, los test se pueden correr de la siguiente manera:
+Este código cuenta con pruebas realizadas con el framework [Unittest](https://docs.python.org/3/library/unittest.html). Estando en el directorio raíz del proyecto, las pruebas se pueden correr de la siguiente manera:
 
 Un único archivo de tests:
 
