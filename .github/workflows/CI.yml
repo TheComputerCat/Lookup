@@ -1,0 +1,20 @@
+name: Run automated tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: build image
+        run: make build-ci
+        working-directory: dev
+      - name: run test
+        run: make test
+        working-directory: dev
