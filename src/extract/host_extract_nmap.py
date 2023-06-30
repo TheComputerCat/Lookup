@@ -9,6 +9,7 @@ from src.common.common import (
     formatDirPath,
     formatFilePath,
     log,
+    getFilePathsInDirectory,
 )
 
 from src.common.model import (
@@ -34,9 +35,7 @@ def getAllHostServices(host_element, host_object):
             continue
         unique_service_object = getOrCreateService(service_element)
         services.append(getHostServiceDict(port_element, host_address, host_timestamp, host_object, unique_service_object))
-        
-    services = filter(lambda host_service_dict : not query_manager.searchInTable(HostService,getSearchableHostServiceDict(host_service_dict)),services)
-        
+                
     services = filter(lambda host_service_dict : not query_manager.searchInTable(HostService,getSearchableHostServiceDict(host_service_dict)),services)
     services = list(map(lambda service : HostService(**service),services))
     return services
@@ -145,30 +144,18 @@ def completeTables(xml_path: str):
             query_manager.insert(host_service)
             query_manager.insert(host_service)
 
-def setConfigFile(configFilePath):
-    global CONFIG_FILE_PATH
-    try:
-        if not os.path.exists(configFilePath):
-            raise Exception(f'{configFilePath} file do not exist')
-        CONFIG_FILE_PATH = configFilePath
-    except Exception as e:
-        log(e, debug=True, printing=True) 
-
 def getAddress(host_element):
     return host_element.find('address').attrib['addr']
 
-def getFilePathsInDirectory(directoryPath):
-    fixedDirPath = formatDirPath(directoryPath)
-    return [
-        fixedDirPath+fileName for fileName in os.listdir(fixedDirPath)
-        if isInfoFile(fixedDirPath+fileName,fileName)
-    ]
-
-def isInfoFile(file_path,file_name):
+def isInfoFile(file_path):
+    file_name = file_path.split("/").pop()
     return os.path.isfile(file_path) and file_name.find('std') == -1 and (file_name.find('-udp-') != -1 or file_name.find('-tcp-') != -1)
 
+def getCorrectFilePathsInDirectory(path):
+    return list(filter( lambda file_path: isInfoFile(file_path) ,getFilePathsInDirectory(path)))
+
 def completeTablesWithFilesFromPath(path):
-    for file_path in getFilePathsInDirectory(path):
+    for file_path in getCorrectFilePathsInDirectory(path):
         completeTables(file_path)
 
 if __name__ == "__main__":
