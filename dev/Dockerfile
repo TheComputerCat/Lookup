@@ -7,3 +7,4 @@ RUN pip install shodan
 RUN pip install testcontainers-postgres
 RUN pip install psycopg2-binary 
 ADD bash_as_current_user.sh /root/bash_as_current_user.sh
+ADD run_tests.sh /root/run_tests.sh
