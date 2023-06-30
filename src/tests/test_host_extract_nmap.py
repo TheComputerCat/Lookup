@@ -63,10 +63,8 @@ class TestHelpers(unittest.TestCase):
             self.assertEqual(host_service_dict['source'],expected_dict['source'])
             self.assertEqual(host_service_dict['protocol'],expected_dict['protocol'])
 
-    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=postgresContainer)
-    def test_getHostServiceDict_with_service(self, mockCreateEngine):
+    def test_getHostServiceDict_with_service(self):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_object = Host(**{'address': '8.8.8.8'})
         for port_element in host_element.iter('port'):
@@ -106,7 +104,7 @@ class TestHelpers(unittest.TestCase):
           'cpe_code': 'cpe:/a:apache:http_server'
         },{
           'name': 'https',
-          'version': '7.80',
+          'version': '7.90',
           'cpe_code': None
         }]
         for index, port_element in enumerate(host_element.iter('port')):
@@ -115,33 +113,19 @@ class TestHelpers(unittest.TestCase):
 
     @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withATextFile(pathToTextFile='./data/host2', content=XMLContentWithCPEExample)
     @withTestDataBase(postgres=postgresContainer)
-    def test_insertNewServiceInDB(self, mockCreateEngine):
-        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-        for port_element in host_element.iter('port'):
-            service_dict = host_extract_nmap.getUniqueServiceDict(port_element.find('service'))
-            host_extract_nmap.insertNewServiceInDB(service_dict)
-        self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
-
-    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
-    @withATextFile(pathToTextFile='./data/host1', content=XMLContentWithCPEExample)
-    @withTestDataBase(postgres=postgresContainer)
-    def test_insertNewServiceWithCPEInDBWhenServiceExist(self, mockCreateEngine):
-        query_manager.insert(Service(**{'name' : 'nginx', 'version': '1.9.4' ,}))
-        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-        for port_element in host_element.iter('port'):
-            host_extract_nmap.getOrCreateService(port_element.find('service'))
-        self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
-
-    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
-    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=postgresContainer)
-    def test_insertNewServiceInDB_when_service_exist(self, mockCreateEngine):
+    def test_insertNewServiceInDB_when_service_exist_withAndWithoutCPE(self, mockCreateEngine):
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None ,}))
-        host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
-        for port_element in host_element.iter('port'):
+        host_element1 = host_extract_nmap.getHostElementFromXML('./data/host1')
+        for port_element in host_element1.iter('port'):
             host_extract_nmap.getOrCreateService(port_element.find('service'))
-        self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
+        self.assertEqual(len(query_manager.getAllFromClass(Service)), 3)
+        query_manager.insert(Service(**{'name' : 'nginx', 'version': '1.9.4' ,}))
+        host_element2 = host_extract_nmap.getHostElementFromXML('./data/host2')
+        for port_element in host_element2.iter('port'):
+            host_extract_nmap.getOrCreateService(port_element.find('service'))
+        self.assertEqual(len(query_manager.getAllFromClass(Service)), 6)
     
     @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
@@ -152,13 +136,13 @@ class TestHelpers(unittest.TestCase):
         host_object = Host(**{'address': '012.345.678.901'})
         host_services = host_extract_nmap.getAllHostServices(host_element, host_object)
         query_manager.insertMany(host_services)
-        self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
-        self.assertEqual(len(query_manager.getAllFromClass((HostService))),3)
+        self.assertEqual(len(query_manager.getAllFromClass(Service)), 3)
+        self.assertEqual(len(query_manager.getAllFromClass((HostService))), 3)
     
-    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    @withTestDataBase(postgres=postgresContainer)
-    def test_getAllHostServices(self, mockCreateEngine):
+    @patch('src.common.query_manager.searchInTable', new_callable=Mock, return_value=False)
+    @patch('src.common.query_manager.insert', new_callable=Mock)
+    def test_getAllHostServices(self, _, __):
         host_element = host_extract_nmap.getHostElementFromXML('./data/host1')
         host_object = Host(**{'address': '012.345.678.901'})
         host_services = host_extract_nmap.getAllHostServices(host_element, host_object)
@@ -178,8 +162,13 @@ class TestHelpers(unittest.TestCase):
     @withATextFile(pathToTextFile='./data1/12345abc-tcp-2023:05:25', content=XMLContentExample)
     @withATextFile(pathToTextFile='./data1/12345abc-tcp-std-2023:05:30', content='fooled')
     def test_isInfoFile(self):
-        self.assertTrue(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-2023:05:25','12345abc-tcp-2023:05:25'))
-        self.assertFalse(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-std-2023:05:30','12345abc-tcp-std-2023:05:30'))
+        self.assertTrue(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-2023:05:25'))
+        self.assertFalse(host_extract_nmap.isInfoFile('./data1/12345abc-tcp-std-2023:05:30'))
+
+    @withATextFile(pathToTextFile='./data1/12345abc-tcp-2023:05:25', content=XMLContentExample)
+    @withATextFile(pathToTextFile='./data1/12345abc-tcp-std-2023:05:30', content='fooled')
+    def test_getCorrectFilePathsInDirectory(self):
+        self.assertEqual(host_extract_nmap.getCorrectFilePathsInDirectory('./data1'), ['./data1/12345abc-tcp-2023:05:25'])
 
 class TestAcceptance(unittest.TestCase):
     postgresContainer = PostgresContainer("postgres:latest")
@@ -200,22 +189,11 @@ class TestAcceptance(unittest.TestCase):
     @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
     @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
     @withTestDataBase(postgres=postgresContainer)
-    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
-    def test_completeTables_whenServiceExist(self,getHostDictFromXMLHost, mockCreateEngine):
-        query_manager.insert(Service(**{'name' : 'ftp', 'version': None}))
-        host_extract_nmap.completeTables('./data/host1')
-        self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
-        self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
-        self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
-
-    @patch('src.common.query_manager.getDBEngine', new_callable=Mock, side_effect=getDBEngineStub(postgresContainer))
-    @patch('src.extract.host_extract_nmap.getHostDictFromXMLHost', new_callable=Mock, return_value= hostDictExample )
-    @withTestDataBase(postgres=postgresContainer)
-    @withATextFile(pathToTextFile='./data/host1', content=XMLContentExample)
+    @withATextFile(pathToTextFile='./data/12345abc-tcp-2023:05:25', content=XMLContentExample)
     def test_completeTables_whenHostAndServiceExist(self,getHostDictFromXMLHost, mockCreateEngine):
         query_manager.insert(Service(**{'name' : 'ftp', 'version': None}))
         query_manager.insert(Host(**{'address' : '012.345.678.901'}))
-        host_extract_nmap.completeTables('./data/host1')
+        host_extract_nmap.completeTablesWithFilesFromPath('./data/')
         self.assertEqual(len(query_manager.getAllFromClass(Host)),1)
         self.assertEqual(len(query_manager.getAllFromClass(HostService)),3)
         self.assertEqual(len(query_manager.getAllFromClass(Service)),3)
