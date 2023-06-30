@@ -5,7 +5,23 @@ infraestructura digital de Organizaciones de
 Sociedad Civil de la Comunidad Andina de
 Naciones](url), específicamente en la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
 
-## Requisitos de servicios
+## Tabla de contenido
+1. [Requisitos](#requisitos)
+2. [¿Cómo se almacena la información?](#¿cómo-se-almacena-la-información)
+3. [Recolección y procesamiento de los datos](#recolección-y-procesamiento-de-los-datos)
+4. [¿Cómo replicar el proceso?](#¿cómo-replicar-el-proceso)
+    1. [Creación de la base de datos](#creación-de-la-base-de-datos)
+    2. [Llave para la API de Shodan](#llave-para-la-api-de-shodan)
+    3. [Escaneo de dominios](#escaneo-de-dominios)
+    4. [Escaneo de direcciones IP](#escaneo-de-direcciones-ip)
+        1. [Escaneo con Shodan](#escaneo-con-shodan)
+        2. [Escaneo con Nmap](#escaneo-con-nmap)
+    5. [Búsqueda de vulnerabilidades](#búsqueda-de-vulnerabilidades)
+5. [Creación rápida de la base de datos](#creación-rápida-de-la-base-de-datos)
+6. [Ejecutar en Docker](#ejecutar-en-docker)
+7. [Corriendo las pruebas automáticas](#corriendo-las-pruebas-automáticas)
+
+## Requisitos
 
 Para utilizar los scripts existen los siguientes requisitos:
 
@@ -49,7 +65,7 @@ Para crear la base de datos es necesario tener una instancia de PostgreSQL y ten
 
 Para construir la base de datos se requiere ejecutar el siguiente comando:
 
-    python src/common/query_manager.py {credentials-file}
+    $ python src/common/query_manager.py {credentials-file}
 
 `credentials-file` es la ruta al archivo con las credenciales en el formato esperado (que es como se muestra en `data_base_config_example.ini`).
 
@@ -85,7 +101,7 @@ Los comandos a ejecutar serían (en el directorio raíz del repositorio):
 
 Para extraer los datos,
 
-    python src/extract/domain_extract.py {db-credentials} {data-dir}
+    $ python src/extract/domain_extract.py {db-credentials} {data-dir}
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -95,7 +111,7 @@ Para extraer los datos,
 
 El proceso es el mismo para la obtención de información de dominios, pero con algunos pasos adicionales. Se necesita una lista de direcciones IP para escanear, y esta puede obtenerse de los datos de dominios sin procesar ejecutando el siguiente comando:
 
-    python src/lookup/domain_lookup.py get_addresses {data-dir} {ip-list}
+    $ python src/lookup/domain_lookup.py get_addresses {data-dir} {ip-list}
 
 1. `data-dir` es la ruta al directorio donde se encuentran los pasos sin procesar de los dominios.
 
@@ -109,9 +125,9 @@ Cabe aclarar que puede usarse una lista cualquiera de direcciones IP, pues no ha
 
 El escaneo con Shodan se realiza con el comando
 
-```
-python src/lookup/host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
-```
+
+    $ python src/lookup/host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
+
 
 1. `ip-list` es la ruta al archivo con las direcciones IP a escanear.
 
@@ -122,7 +138,7 @@ python src/lookup/host_lookup.py shodan {ip-list} {data-dir} {shodan-key}
 Para incluir la información obtenida en la base de datos, se debe ejecutar el comando:
 
 
-    python src/extract/host_extract.py {db-credentials} {data-dir}
+    $ python src/extract/host_extract.py {db-credentials} {data-dir}
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -132,7 +148,7 @@ Para incluir la información obtenida en la base de datos, se debe ejecutar el c
 
 El escaneo con Nmap se realiza con el comando
 
-    python src/lookup/host_lookup.py nmap {ip-list} {data-dir} {shodan-key}
+    $ python src/lookup/host_lookup.py nmap {ip-list} {data-dir} {shodan-key}
 
 1. `ip-list` es la ruta al archivo con las direcciones IP a escanear.
 
@@ -141,7 +157,7 @@ El escaneo con Nmap se realiza con el comando
 Para incluir la información obtenida en la base de datos, se debe ejecutar el comando:
 
 
-    python src/extract/host_extract_nmap.py {db-credentials} {data-dir}
+    $ python src/extract/host_extract_nmap.py {db-credentials} {data-dir}
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -153,7 +169,7 @@ Para la búsqueda de vulnerabilidades se requiere de una lista de códigos CPE s
 
 En este paso no implementamos una forma automática de obtener una lista - algunos códigos CPE se incluyen en la base de datos pero no hay un script para extraerlos y ponerlos en texto. Así, lo recomendable es completar la tabla `SERVICES` con los códigos CPE que faltan, y obtener la lista de ahí. Ya con la lista, para buscar las vulnerabilidades basta ejecutar el siguiente comando:
 
-    python src/lookup/vulnerabilities_lookup.py {cpe-file} {data-dir}
+    $ python src/lookup/vulnerabilities_lookup.py {cpe-file} {data-dir}
 
 1. `{cpe-file}` es la ruta al archivo con códigos CPE separados por saltos de línea.
 
@@ -162,7 +178,7 @@ En este paso no implementamos una forma automática de obtener una lista - algun
 Para incluir los datos obtenidos en la base de datos hay que ejecutar el siguiente comando:
 
 
-    python src/extract/vulnerabilities_extract.py {db-credentials} {data-dir} cvssMetricV2
+    $ python src/extract/vulnerabilities_extract.py {db-credentials} {data-dir} cvssMetricV2
 
 1. `db-credentials` es la ruta al archivo donde se encuentran las credenciales para acceder a la base de datos.
 
@@ -175,23 +191,29 @@ El script puede recibir un tercer argumento distinto, `cvssMetricV31`, pero no h
 ## Creación rápida de la base de datos
 
 Los scripts mencionados anteriormente se pueden ejecutar de manera independiente y tener un control total sobre las ubicaciones de los archivos recolectados.
-Sin embargo, puede construir la base de datos unicamente partir de un `.csv` de la siguiente manera:
+Sin embargo, puede construir la base de datos, con los datos de los pasos [3](#escaneo-de-dominios) y [4](#escaneo-de-direcciones-ip), unicamente partir de un `.csv` de la siguiente manera:
 
-Estando en el directorio raíz del repositorio, y con
+Para esto se tiene que tener el archivo de la API de shodan en un archivo llamado `shodan_api_key` y las credenciales de la base de datos en `data_base_config.ini` como se describió anteriormente.
+
+Estando en el directorio raíz del repositorio, 
 
     $ mkdir data
     $ cp {dominios.csv} {ubicación-repositorio}/data
     $ make build
 
-La base de datos será creada y los archivos recolectados serán guardados en `data/`. Si desea guardar los datos en otra ubicación, debe especificar las siguientes variables de entorno:
+La base de datos será creada y los archivos recolectados serán guardados en `data/`.
 
-- DATA_DIR: ruta al directorio donde están guardados todos los datos recolectados.
+Luego de esto se puede proseguir con el paso [5](#búsqueda-de-vulnerabilidades).
 
-- DOMAIN_LIST_PATH: ruta al directorio donde está guardada la lista de dominios recolectados.
+Si desea guardar los datos en otra ubicación, debe especificar las siguientes variables de entorno:
 
-- SHODAN_API_KEY: ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
+- `DATA_DIR`: ruta al directorio donde están guardados todos los datos recolectados.
 
-- DB_CONFIG_FILE_PATH: ruta al archivo de configuración `.ini` de la base de datos.
+- `DOMAIN_LIST_PATH`: ruta al directorio donde está guardada la lista de dominios recolectados.
+
+- `SHODAN_API_KEY`: ruta al archivo donde se encuentra la llave de la API de Shodan, en texto plano.
+
+- `DB_CONFIG_FILE_PATH`: ruta al archivo de configuración `.ini` de la base de datos.
 
 Para poder asignar estas variables se puede:
 
@@ -203,9 +225,39 @@ Exportar la variable:
 
     $ export DB_CONFIG_FILE_PATH=path/to/dbconfig/file
 
+Tambien puede ejecutar los scripts de los pasos detallados anterior mente haciendo uso de el `Makefile` de la siguiente manera:
+
+    $ make {paso}
+
+Donde `paso` es,
+
+- `create-db`: para crear el esquema de la base de datos.
+
+- `domain-lookup`: [Escaneo de dominios](#escaneo-de-dominios)
+- `domain-extract`: Extracción de dominios
+- `get-ip-addresses`: [Escaneo de direcciones IP](#escaneo-de-direcciones-ip)
+
+Para el paso [4](#escaneo-de-direcciones-ip):
+
+- `host-lookup-shodan`: [Escaneo con Shodan](#escaneo-con-shodan)
+- `host-lookup-nmap`: [Escaneo con Nmap](#escaneo-con-nmap)
+- `host-extract-shodan`: Extracción datos del escaneo de Shodan
+- `host-extract-nmap`: Extracción datos del escaneo de Nmap
+
+
+Para ejecutar los scripts de paso [5](#búsqueda-de-vulnerabilidades) adicionalmente se tiene que definir la siguiente variable de entorno.
+
+- `CPE_FILE_PATH`: es la ruta al archivo con códigos CPE separados por saltos de línea.
+
+y usar los pasos:
+
+- `vulnerabilities-lookup`
+- `vulnerabilities-extract`
+
+
 ## Ejecutar en Docker
 
-Este código puede ser fácilmente ejecutado por medio de [Docker](https://www.docker.com/). Puede encontrar el código utilizado para esto en el directorio `dev/`.
+Este código puede ser fácilmente ejecutado por medio de [Docker](https://www.docker.com/). Puede encontrar el código utilizado para esto en el directorio `src/dev/`.
 
 Para construir la imagen se debe ejecutar:
 
