@@ -267,6 +267,21 @@ Y para lanzar un container interactivo,
 
     $ make run
 
+### sudo en Docker
+Es posible ejecutar comandos como sudo en esta imagen. Sin embargo tiene que habilitar la contraseña para el usuario del contenedor.
+
+Para esto, ejecute:
+
+    $ docker ps -a
+    CONTAINER ID   IMAGE          COMMAND  ...              
+    {Id}....      ...            ...
+
+y con el `CONTAINER ID` del contenedor,
+
+    $ docker exec docker exec -it {id} /bin/bash
+    $ passwd user
+
+Finalmente establezca una contraseña para el usuario según las instrucciones de la terminal.
 ## Corriendo las pruebas automáticas
 
 Este código cuenta con pruebas realizadas con el framework [Unittest](https://docs.python.org/3/library/unittest.html). Estando en el directorio raíz del proyecto, las pruebas se pueden correr de la siguiente manera:
