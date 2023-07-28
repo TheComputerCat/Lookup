@@ -1,9 +1,7 @@
 # Lookup
 
-En este repositorio se encuentran los scripts que se usaron para la investigación [Descripción de vulnerabilidades presentes en la
-infraestructura digital de Organizaciones de
-Sociedad Civil de la Comunidad Andina de
-Naciones](url), específicamente en la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones.
+En este repositorio se encuentran los scripts que se usaron para la investigación [Análisis de la infraestructura digital de Organizaciones de Sociedad Civil de la Comunidad Andina de Naciones](https://zenodo.org/record/8139430), específicamente en la recolección de datos públicos de la infraestructura digital de 43 organizaciones no gubernamentales de la Comunidad Andina de Naciones. El documento está disponible en [zenodo](https://zenodo.org/record/8139430) y recibimos comentarios en [PubPeer](https://pubpeer.com/publications/C6FA9855D3AC7F69D2461E2AEB7E4D#).
+
 
 ## Tabla de contenido
 1. [Requisitos](#requisitos)
